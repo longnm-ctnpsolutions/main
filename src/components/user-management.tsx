@@ -470,57 +470,50 @@ export function UserManagement() {
                 </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-between p-4">
-                <div className="flex-1 text-sm text-muted-foreground">
-                {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                {table.getFilteredRowModel().rows.length} row(s) selected.
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Rows per page:</span>
-                <Select
-                    value={`${table.getState().pagination.pageSize}`}
-                    onValueChange={(value) => {
-                    table.setPageSize(Number(value))
-                    }}
-                >
-                    <SelectTrigger className="h-8 w-[70px]">
-                    <SelectValue placeholder={table.getState().pagination.pageSize} />
-                    </SelectTrigger>
-                    <SelectContent side="top">
-                    {[5, 10, 20].map((pageSize) => (
-                        <SelectItem key={pageSize} value={`${pageSize}`}>
-                        {pageSize}
-                        </SelectItem>
-                    ))}
-                    </SelectContent>
-                </Select>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>
-                    Page {table.getState().pagination.pageIndex + 1} of{" "}
-                    {table.getPageCount()}
-                </span>
-                <div className="flex items-center gap-1">
+            <div className="flex items-center justify-between p-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                {[5, 10, 20].map((pageSize) => (
                     <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
+                    key={pageSize}
+                    variant={table.getState().pagination.pageSize === pageSize ? "default" : "ghost"}
+                    onClick={() => table.setPageSize(pageSize)}
+                    className="h-8 w-8 rounded-full p-0"
                     >
-                    <ChevronLeft className="h-4 w-4" />
+                    {pageSize}
+                    </Button>
+                ))}
+              </div>
+              <div className="flex items-center gap-4">
+                <div>
+                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({table.getFilteredRowModel().rows.length} items)
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                    >
+                        <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
+                        variant="default"
+                        className="h-8 w-8 rounded-full p-0"
                     >
-                    <ChevronRight className="h-4 w-4" />
+                       {table.getState().pagination.pageIndex + 1}
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                    >
+                        <ChevronRight className="h-4 w-4" />
                     </Button>
                 </div>
-                </div>
+              </div>
             </div>
         </CardContent>
       </Card>
