@@ -287,7 +287,7 @@ export function UserManagement() {
               />
             </div>
             <Select defaultValue="all">
-              <SelectTrigger className="w-auto gap-1 border-0 bg-transparent hover:bg-accent focus:ring-0">
+              <SelectTrigger className="w-auto gap-1 border-0 bg-transparent hover:bg-accent focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
