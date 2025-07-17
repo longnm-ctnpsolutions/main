@@ -272,52 +272,9 @@ export function UserManagement() {
   return (
     <div className="w-full space-y-4">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-4">
-          <div>
-            <CardTitle>Users</CardTitle>
-            <CardDescription>UI for admins to manage identities.</CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Sheet open={isAddUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
-              <SheetTrigger asChild>
-                  <Button>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Add User
-                  </Button>
-              </SheetTrigger>
-              <SheetContent>
-                  <SheetHeader>
-                  <SheetTitle>Add a new user</SheetTitle>
-                  <SheetDescription>
-                      Fill in the details below to add a new user to the system.
-                  </SheetDescription>
-                  </SheetHeader>
-                  <Form {...addUserForm}>
-                  <form onSubmit={addUserForm.handleSubmit(handleAddUser)} className="space-y-8 py-4">
-                      <FormField
-                      control={addUserForm.control}
-                      name="email"
-                      render={({ field }) => (
-                          <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                              <Input placeholder="john.doe@example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                          </FormItem>
-                      )}
-                      />
-                      <SheetFooter>
-                          <SheetClose asChild>
-                              <Button type="button" variant="ghost">Cancel</Button>
-                          </SheetClose>
-                          <Button type="submit">Add User</Button>
-                      </SheetFooter>
-                  </form>
-                  </Form>
-              </SheetContent>
-            </Sheet>
-          </div>
+        <CardHeader>
+          <CardTitle>Users</CardTitle>
+          <CardDescription>UI for admins to manage identities.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between gap-2">
@@ -393,110 +350,154 @@ export function UserManagement() {
                     </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
+                 <Sheet open={isAddUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
+                    <SheetTrigger asChild>
+                        <Button>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Add User
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent>
+                        <SheetHeader>
+                        <SheetTitle>Add a new user</SheetTitle>
+                        <SheetDescription>
+                            Fill in the details below to add a new user to the system.
+                        </SheetDescription>
+                        </SheetHeader>
+                        <Form {...addUserForm}>
+                        <form onSubmit={addUserForm.handleSubmit(handleAddUser)} className="space-y-8 py-4">
+                            <FormField
+                            control={addUserForm.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="john.doe@example.com" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <SheetFooter>
+                                <SheetClose asChild>
+                                    <Button type="button" variant="ghost">Cancel</Button>
+                                </SheetClose>
+                                <Button type="submit">Add User</Button>
+                            </SheetFooter>
+                        </form>
+                        </Form>
+                    </SheetContent>
+                </Sheet>
               </div>
           </div>
-          <div className="rounded-md border mt-4">
-              <Table>
-              <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => {
-                      return (
-                          <TableHead key={header.id}>
-                          {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                              )}
-                          </TableHead>
-                      )
-                      })}
-                  </TableRow>
-                  ))}
-              </TableHeader>
-              <TableBody>
-                  {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                      <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                      >
-                      {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                          {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                          )}
-                          </TableCell>
-                      ))}
-                      </TableRow>
-                  ))
-                  ) : (
-                  <TableRow>
-                      <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                      >
-                      No results.
-                      </TableCell>
-                  </TableRow>
-                  )}
-              </TableBody>
-              </Table>
-          </div>
-          <div className="flex items-center justify-between pt-4">
-            <div className="flex-1 text-sm text-muted-foreground">
-              {table.getFilteredSelectedRowModel().rows.length} of{" "}
-              {table.getFilteredRowModel().rows.length} row(s) selected.
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-0">
+            <div className="rounded-md border">
+                <Table>
+                <TableHeader>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => {
+                        return (
+                            <TableHead key={header.id}>
+                            {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext()
+                                )}
+                            </TableHead>
+                        )
+                        })}
+                    </TableRow>
+                    ))}
+                </TableHeader>
+                <TableBody>
+                    {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                        <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                        >
+                        {row.getVisibleCells().map((cell) => (
+                            <TableCell key={cell.id}>
+                            {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                            )}
+                            </TableCell>
+                        ))}
+                        </TableRow>
+                    ))
+                    ) : (
+                    <TableRow>
+                        <TableCell
+                        colSpan={columns.length}
+                        className="h-24 text-center"
+                        >
+                        No results.
+                        </TableCell>
+                    </TableRow>
+                    )}
+                </TableBody>
+                </Table>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Rows per page:</span>
-              <Select
-                value={`${table.getState().pagination.pageSize}`}
-                onValueChange={(value) => {
-                  table.setPageSize(Number(value))
-                }}
-              >
-                <SelectTrigger className="h-8 w-[70px]">
-                  <SelectValue placeholder={table.getState().pagination.pageSize} />
-                </SelectTrigger>
-                <SelectContent side="top">
-                  {[5, 10, 20].map((pageSize) => (
-                    <SelectItem key={pageSize} value={`${pageSize}`}>
-                      {pageSize}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>
-                 Page {table.getState().pagination.pageIndex + 1} of{" "}
-                 {table.getPageCount()}
-              </span>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
+            <div className="flex items-center justify-between p-4">
+                <div className="flex-1 text-sm text-muted-foreground">
+                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                {table.getFilteredRowModel().rows.length} row(s) selected.
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Rows per page:</span>
+                <Select
+                    value={`${table.getState().pagination.pageSize}`}
+                    onValueChange={(value) => {
+                    table.setPageSize(Number(value))
+                    }}
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+                    <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue placeholder={table.getState().pagination.pageSize} />
+                    </SelectTrigger>
+                    <SelectContent side="top">
+                    {[5, 10, 20].map((pageSize) => (
+                        <SelectItem key={pageSize} value={`${pageSize}`}>
+                        {pageSize}
+                        </SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span>
+                    Page {table.getState().pagination.pageIndex + 1} of{" "}
+                    {table.getPageCount()}
+                </span>
+                <div className="flex items-center gap-1">
+                    <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                    >
+                    <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                    >
+                    <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+                </div>
             </div>
-          </div>
         </CardContent>
       </Card>
     </div>
