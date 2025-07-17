@@ -474,28 +474,30 @@ export function UserManagement() {
       </Card>
 
       <div className="flex items-center justify-between p-2 text-sm">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          Rows per page:
+        <div className="flex items-center gap-4 text-muted-foreground">
           {[5, 10, 20].map((pageSize) => (
               <Button
-              key={pageSize}
-              variant={table.getState().pagination.pageSize === pageSize ? "default" : "ghost"}
-              onClick={() => table.setPageSize(pageSize)}
-              className="h-8 w-8 p-0"
+                key={pageSize}
+                variant={table.getState().pagination.pageSize === pageSize ? "default" : "ghost"}
+                onClick={() => table.setPageSize(pageSize)}
+                className={cn(
+                  "h-8 w-8 p-0",
+                  table.getState().pagination.pageSize === pageSize ? "rounded-full" : "text-muted-foreground"
+                )}
               >
-              {pageSize}
+                {pageSize}
               </Button>
           ))}
         </div>
         <div className="flex items-center gap-4">
-          <div>
+          <div className="text-muted-foreground">
               Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({table.getFilteredRowModel().rows.length} items)
           </div>
           <div className="flex items-center gap-2">
               <Button
-                  variant="outline"
+                  variant="default"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-8 w-8 rounded-full"
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
               >
@@ -503,14 +505,8 @@ export function UserManagement() {
               </Button>
               <Button
                   variant="default"
-                  className="h-8 w-8 p-0"
-              >
-                  {table.getState().pagination.pageIndex + 1}
-              </Button>
-              <Button
-                  variant="outline"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-8 w-8 rounded-full"
                   onClick={() => table.nextPage()}
                   disabled={!table.getCanNextPage()}
               >
