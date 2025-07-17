@@ -28,6 +28,7 @@ export default function Home() {
       <div className="flex min-h-screen w-full flex-col">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6">
           <div className="flex items-center gap-4">
+            <SidebarTrigger className="sm:hidden" />
             <div className="font-headline text-lg font-semibold text-primary">
                 CAuth2
             </div>
@@ -75,7 +76,7 @@ export default function Home() {
         <div className="flex flex-1">
           <Sidebar
             variant="sidebar"
-            collapsible="none"
+            collapsible="icon"
             className="hidden sm:flex z-10"
           >
             <SidebarContent className="p-2">
@@ -83,7 +84,7 @@ export default function Home() {
                 <Collapsible defaultOpen>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton>
+                      <SidebarMenuButton tooltip="Management">
                         <User />
                         <span className="w-full">Management</span>
                         <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200" />
@@ -112,7 +113,7 @@ export default function Home() {
                 </Collapsible>
 
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
+                  <SidebarMenuButton tooltip="Applications">
                     <Briefcase />
                     <span>Applications</span>
                   </SidebarMenuButton>
@@ -121,7 +122,7 @@ export default function Home() {
                 <Collapsible>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton>
+                      <SidebarMenuButton tooltip="Settings">
                         <Settings />
                         <span className="w-full">Setting</span>
                         <ChevronRight className="ml-auto h-4 w-4 shrink-0" />
