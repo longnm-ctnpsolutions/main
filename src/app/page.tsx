@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils"
 
 function Header() {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-4 sm:px-6">
+    <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-sidebar px-4 sm:px-6">
       <SidebarTrigger />
       <div className="font-headline text-lg font-semibold text-primary">
         AuthAdminLite
