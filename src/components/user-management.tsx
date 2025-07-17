@@ -71,7 +71,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import {
@@ -81,6 +80,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
 
 const addUserFormSchema = z.object({
@@ -271,88 +271,14 @@ export function UserManagement() {
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex items-center justify-between">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-4">
           <div>
-              <h1 className="text-2xl font-bold">Users</h1>
-              <p className="text-muted-foreground">UI for admins to manage identities.</p>
-          </div>
-      </div>
-
-      <div className="flex items-center justify-between gap-2">
-          <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-              placeholder="User Search"
-              value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-              onChange={(event) =>
-                table.getColumn("email")?.setFilterValue(event.target.value)
-              }
-              className="pl-9"
-              />
+            <CardTitle>Users</CardTitle>
+            <CardDescription>UI for admins to manage identities.</CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Select defaultValue="all">
-              <SelectTrigger className="w-[120px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="icon"><RefreshCw className="h-4 w-4" /></Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
-                      <Columns className="h-4 w-4" />
-                  </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => {
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(!!value)
-                        }
-                      >
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
-                    )
-                  })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0}>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the selected user(s).
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDeleteSelected} className="bg-red-600 hover:bg-red-700">Continue</AlertDialogAction>
-                </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-
-           <Sheet open={isAddUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
+            <Sheet open={isAddUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
               <SheetTrigger asChild>
                   <Button>
                   <UserPlus className="mr-2 h-4 w-4" />
@@ -392,107 +318,187 @@ export function UserManagement() {
               </SheetContent>
             </Sheet>
           </div>
-      </div>
-      <div className="rounded-md border bg-card">
-          <Table>
-          <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                  return (
-                      <TableHead key={header.id} className="py-2">
-                      {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                          )}
-                      </TableHead>
-                  )
-                  })}
-              </TableRow>
-              ))}
-          </TableHeader>
-          <TableBody>
-              {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                  <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  >
-                  {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-2">
-                      {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                      )}
-                      </TableCell>
-                  ))}
-                  </TableRow>
-              ))
-              ) : (
-              <TableRow>
-                  <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                  >
-                  No results.
-                  </TableCell>
-              </TableRow>
-              )}
-          </TableBody>
-          </Table>
-      </div>
-      <div className="flex items-center justify-between py-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>Rows per page:</span>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value))
-            }}
-          >
-            <SelectTrigger className="h-8 w-[70px]">
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {[5, 10, 20].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span>
-             Page {table.getState().pagination.pageIndex + 1} of{" "}
-             {table.getPageCount()} ({table.getFilteredRowModel().rows.length} items)
-          </span>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between gap-2">
+              <div className="relative flex-1 max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                  placeholder="User Search"
+                  value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+                  onChange={(event) =>
+                    table.getColumn("email")?.setFilterValue(event.target.value)
+                  }
+                  className="pl-9"
+                  />
+              </div>
+              <div className="flex items-center gap-2">
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-auto gap-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="icon"><RefreshCw className="h-4 w-4" /></Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon">
+                          <Columns className="h-4 w-4" />
+                      </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {table
+                      .getAllColumns()
+                      .filter((column) => column.getCanHide())
+                      .map((column) => {
+                        return (
+                          <DropdownMenuCheckboxItem
+                            key={column.id}
+                            className="capitalize"
+                            checked={column.getIsVisible()}
+                            onCheckedChange={(value) =>
+                              column.toggleVisibility(!!value)
+                            }
+                          >
+                            {column.id}
+                          </DropdownMenuCheckboxItem>
+                        )
+                      })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the selected user(s).
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteSelected} className="bg-red-600 hover:bg-red-700">Continue</AlertDialogAction>
+                    </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+              </div>
           </div>
-        </div>
-      </div>
+          <div className="rounded-md border mt-4">
+              <Table>
+              <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => {
+                      return (
+                          <TableHead key={header.id}>
+                          {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                              )}
+                          </TableHead>
+                      )
+                      })}
+                  </TableRow>
+                  ))}
+              </TableHeader>
+              <TableBody>
+                  {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                      <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      >
+                      {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                          {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                          )}
+                          </TableCell>
+                      ))}
+                      </TableRow>
+                  ))
+                  ) : (
+                  <TableRow>
+                      <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                      >
+                      No results.
+                      </TableCell>
+                  </TableRow>
+                  )}
+              </TableBody>
+              </Table>
+          </div>
+          <div className="flex items-center justify-between pt-4">
+            <div className="flex-1 text-sm text-muted-foreground">
+              {table.getFilteredSelectedRowModel().rows.length} of{" "}
+              {table.getFilteredRowModel().rows.length} row(s) selected.
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Rows per page:</span>
+              <Select
+                value={`${table.getState().pagination.pageSize}`}
+                onValueChange={(value) => {
+                  table.setPageSize(Number(value))
+                }}
+              >
+                <SelectTrigger className="h-8 w-[70px]">
+                  <SelectValue placeholder={table.getState().pagination.pageSize} />
+                </SelectTrigger>
+                <SelectContent side="top">
+                  {[5, 10, 20].map((pageSize) => (
+                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span>
+                 Page {table.getState().pagination.pageIndex + 1} of{" "}
+                 {table.getPageCount()}
+              </span>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
-
-    
