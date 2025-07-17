@@ -327,6 +327,38 @@ export function UserManagement() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Columns className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuItem key={column.id} onSelect={(e) => e.preventDefault()} className="gap-2">
+                        <Checkbox
+                          id={`col-toggle-${column.id}`}
+                          checked={column.getIsVisible()}
+                          onCheckedChange={(value) =>
+                            column.toggleVisibility(!!value)
+                          }
+                        />
+                        <Label htmlFor={`col-toggle-${column.id}`} className="capitalize cursor-pointer w-full">{column.id}</Label>
+                      </DropdownMenuItem>
+                    )
+                  })}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Button variant="ghost" className="w-full justify-center">Cancel</Button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0}>
@@ -442,40 +474,6 @@ export function UserManagement() {
                 </TableBody>
                 </Table>
             </div>
-             <div className="flex justify-end p-2">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon">
-                        <Columns className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-48">
-                        <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {table
-                        .getAllColumns()
-                        .filter((column) => column.getCanHide())
-                        .map((column) => {
-                            return (
-                            <DropdownMenuItem key={column.id} onSelect={(e) => e.preventDefault()} className="gap-2">
-                                <Checkbox
-                                id={`col-toggle-${column.id}`}
-                                checked={column.getIsVisible()}
-                                onCheckedChange={(value) =>
-                                    column.toggleVisibility(!!value)
-                                }
-                                />
-                                <Label htmlFor={`col-toggle-${column.id}`} className="capitalize cursor-pointer w-full">{column.id}</Label>
-                            </DropdownMenuItem>
-                            )
-                        })}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                        <Button variant="ghost" className="w-full justify-center">Cancel</Button>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
         </CardContent>
       </Card>
 
@@ -484,11 +482,10 @@ export function UserManagement() {
           {[5, 10, 20].map((pageSize) => (
               <Button
                 key={pageSize}
-                variant="ghost"
+                variant={table.getState().pagination.pageSize === pageSize ? "default" : "ghost"}
                 onClick={() => table.setPageSize(pageSize)}
                 className={cn(
-                  "h-8 w-8 p-0",
-                  table.getState().pagination.pageSize === pageSize && "bg-primary text-primary-foreground rounded-full hover:bg-primary hover:text-primary-foreground"
+                  "h-8 w-8 p-0 rounded-full",
                 )}
               >
                 {pageSize}
