@@ -26,9 +26,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useSidebar } from "@/components/ui/sidebar"
 
 function PageContent() {
-  const { state } = useSidebar()
+  const { state, setOpen } = useSidebar()
   const [isManagementOpen, setManagementOpen] = React.useState(true)
   const [isSettingsOpen, setSettingsOpen] = React.useState(false)
+
+  const handleMenuClick = () => {
+    if (state === 'collapsed') {
+      setOpen(true);
+    }
+  };
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -82,7 +88,11 @@ function PageContent() {
               <Collapsible open={isManagementOpen} onOpenChange={setManagementOpen}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="Management" className={state === 'collapsed' ? 'justify-center' : ''}>
+                    <SidebarMenuButton 
+                      tooltip="Management" 
+                      className={state === 'collapsed' ? 'justify-center' : ''}
+                      onClick={handleMenuClick}
+                    >
                       <Users className="h-4 w-4" strokeWidth={1.5} />
                       <span className={state === 'collapsed' ? 'hidden' : ''}>Management</span>
                       {state !== 'collapsed' && (isManagementOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-500" />)}
@@ -104,7 +114,11 @@ function PageContent() {
                 </CollapsibleContent>
               </Collapsible>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Applications" className={state === 'collapsed' ? 'justify-center' : ''}>
+                <SidebarMenuButton 
+                  tooltip="Applications" 
+                  className={state === 'collapsed' ? 'justify-center' : ''}
+                  onClick={handleMenuClick}
+                >
                   <Briefcase className="h-4 w-4" strokeWidth={1.5} />
                   <span className={state === 'collapsed' ? 'hidden' : ''}>Applications</span>
                 </SidebarMenuButton>
@@ -112,7 +126,11 @@ function PageContent() {
               <Collapsible open={isSettingsOpen} onOpenChange={setSettingsOpen}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="Settings" className={state === 'collapsed' ? 'justify-center' : ''}>
+                    <SidebarMenuButton 
+                      tooltip="Settings" 
+                      className={state === 'collapsed' ? 'justify-center' : ''}
+                      onClick={handleMenuClick}
+                    >
                       <Settings className="h-4 w-4" strokeWidth={1.5} />
                       <span className={state === 'collapsed' ? 'hidden' : ''}>Setting</span>
                       {state !== 'collapsed' && (isSettingsOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-500" />)}
