@@ -331,8 +331,9 @@ export function UserManagement() {
             </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
+                 <Button variant="outline" className="h-10">
                   <FileUp className="h-4 w-4" />
+                  <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -356,8 +357,9 @@ export function UserManagement() {
             </DropdownMenu>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="icon" disabled={table.getFilteredSelectedRowModel().rows.length === 0}>
-                  <Trash2 className="h-4 w-4" />
+                <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
