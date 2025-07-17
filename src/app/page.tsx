@@ -26,7 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 export default function Home() {
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full flex-col">
+      <div className="flex h-screen flex-col">
         <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-4 sm:px-6">
           <SidebarTrigger />
           <div className="font-headline text-lg font-semibold text-primary">
