@@ -101,9 +101,9 @@ function PageContent() {
                       onClick={handleMenuClick}
                     >
                       <Users className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                      <span className={cn("flex-1 whitespace-nowrap ml-3 transition-opacity duration-300", state === 'collapsed' && 'opacity-0')}>Management</span>
-                      <div className={cn("transition-opacity duration-300", state === 'collapsed' && 'opacity-0')}>
-                        {isManagementOpen ? <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-500" />}
+                      <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
+                        <span className="whitespace-nowrap">Management</span>
+                        {isManagementOpen ? <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-500" />}
                       </div>
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
@@ -122,6 +122,7 @@ function PageContent() {
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </Collapsible>
+
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Applications"
@@ -129,9 +130,12 @@ function PageContent() {
                   onClick={handleMenuClick}
                 >
                   <Briefcase className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                  <span className={cn("flex-1 whitespace-nowrap ml-3 transition-opacity duration-300", state === 'collapsed' && 'opacity-0')}>Applications</span>
+                  <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
+                     <span className="whitespace-nowrap">Applications</span>
+                  </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
               <Collapsible open={isSettingsOpen} onOpenChange={setSettingsOpen}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
@@ -141,9 +145,9 @@ function PageContent() {
                       onClick={handleMenuClick}
                     >
                       <Settings className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                      <span className={cn("flex-1 whitespace-nowrap ml-3 transition-opacity duration-300", state === 'collapsed' && 'opacity-0')}>Setting</span>
-                      <div className={cn("transition-opacity duration-300", state === 'collapsed' && 'opacity-0')}>
-                        {isSettingsOpen ? <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-500" />}
+                      <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
+                        <span className="whitespace-nowrap">Setting</span>
+                        {isSettingsOpen ? <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-500" />}
                       </div>
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
