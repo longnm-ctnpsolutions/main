@@ -168,21 +168,33 @@ export function UserManagement() {
       enableHiding: false,
     },
     {
-      accessorKey: "email",
+      accessorKey: "name",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Email
+            User
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         )
       },
-      cell: ({ row }) => (
-        <div>{row.getValue("email")}</div>
-      ),
+      cell: ({ row }) => {
+        const user = row.original
+        return (
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user.avatar} alt={user.name} data-ai-hint="user avatar" />
+              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="font-medium">{user.name}</span>
+              <span className="text-xs text-muted-foreground">{user.email}</span>
+            </div>
+          </div>
+        )
+      },
     },
     {
       accessorKey: "status",
@@ -191,8 +203,8 @@ export function UserManagement() {
         const status = row.getValue("status") as string;
         const isActive = status === 'active';
         return (
-          <Badge variant="outline" className={cn(isActive ? "bg-green-100 text-green-800 border-green-200" : "bg-gray-100 text-gray-800 border-gray-200")}>
-             <span className={cn("mr-1 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
+          <Badge variant={isActive ? "default" : "secondary"} className={cn(isActive ? "bg-green-100 text-green-700 hover:bg-green-100/80" : "bg-gray-100 text-gray-700 hover:bg-gray-100/80")}>
+             <span className={cn("mr-2 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
              {status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>
         )
@@ -288,7 +300,7 @@ export function UserManagement() {
       <div className="flex items-start justify-between">
           <div className="flex-1">
               <h1 className="font-headline text-2xl font-semibold">Users</h1>
-              <p className="text-muted-foreground">UI for admins to manage identities.</p>
+              <p className="text-muted-foreground">Manage your application users with ease.</p>
           </div>
           <div className="flex items-center gap-2">
             <AlertDialog>
@@ -370,10 +382,10 @@ export function UserManagement() {
           <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-              placeholder="User Search"
-              value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+              placeholder="Search by email..."
+              value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
               onChange={(event) =>
-                table.getColumn("email")?.setFilterValue(event.target.value)
+                table.getColumn("name")?.setFilterValue(event.target.value)
               }
               className="pl-9"
               />
@@ -410,7 +422,7 @@ export function UserManagement() {
                           column.toggleVisibility(!!value)
                         }
                       >
-                        {column.id}
+                        {column.id === 'name' ? 'User' : column.id}
                       </DropdownMenuCheckboxItem>
                     )
                   })}

@@ -1,6 +1,7 @@
 
 "use client"
 
+import * as React from "react"
 import {
   Collapsible,
   CollapsibleContent,
@@ -25,13 +26,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function Home() {
+  const [isManagementOpen, setManagementOpen] = React.useState(true)
+  const [isSettingsOpen, setSettingsOpen] = React.useState(false)
+
   return (
     <SidebarProvider>
       <div className="flex h-screen flex-col">
         <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-4 sm:px-6">
           <SidebarTrigger />
           <div className="font-headline text-lg font-semibold text-primary">
-            CAuth2
+            AuthAdminLite
           </div>
           <div className="ml-auto flex items-center gap-4">
             <Button variant="ghost" size="icon">
@@ -75,13 +79,13 @@ export default function Home() {
           <Sidebar collapsible="icon">
             <SidebarContent className="p-2">
               <SidebarMenu>
-                <Collapsible defaultOpen={true}>
+                <Collapsible open={isManagementOpen} onOpenChange={setManagementOpen}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton tooltip="Management">
                         <Users />
                         <span className="w-full">Management</span>
-                        <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200" />
+                        {isManagementOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0" />}
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                   </SidebarMenuItem>
@@ -105,13 +109,13 @@ export default function Home() {
                     <span>Applications</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <Collapsible>
+                <Collapsible open={isSettingsOpen} onOpenChange={setSettingsOpen}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton tooltip="Setting">
                         <Settings />
                         <span className="w-full">Setting</span>
-                        <ChevronRight className="ml-auto h-4 w-4 shrink-0" />
+                        {isSettingsOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0" />}
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                   </SidebarMenuItem>
