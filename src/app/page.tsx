@@ -27,7 +27,7 @@ import {
 import { UserManagement } from "@/components/user-management"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Briefcase, User, Settings, Menu } from "lucide-react"
+import { ChevronDown, Briefcase, User, Settings } from "lucide-react"
 
 export default function Home() {
   return (
@@ -92,7 +92,7 @@ export default function Home() {
                 <Collapsible defaultOpen>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton>
+                      <SidebarMenuButton tooltip="Management">
                         <User />
                         <span>Management</span>
                         <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200" />
@@ -130,7 +130,7 @@ export default function Home() {
                 <Collapsible>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton>
+                      <SidebarMenuButton tooltip="Setting">
                         <Settings />
                         <span>Setting</span>
                         <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200" />
