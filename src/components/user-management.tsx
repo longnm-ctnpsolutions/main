@@ -81,6 +81,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 
 
 const addUserFormSchema = z.object({
@@ -307,26 +308,30 @@ export function UserManagement() {
                   <Columns className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {table
                   .getAllColumns()
                   .filter((column) => column.getCanHide())
                   .map((column) => {
                     return (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(!!value)
-                        }
-                      >
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuItem key={column.id} onSelect={(e) => e.preventDefault()} className="gap-2">
+                        <Checkbox
+                          id={`col-toggle-${column.id}`}
+                          checked={column.getIsVisible()}
+                          onCheckedChange={(value) =>
+                            column.toggleVisibility(!!value)
+                          }
+                        />
+                        <Label htmlFor={`col-toggle-${column.id}`} className="capitalize cursor-pointer w-full">{column.id}</Label>
+                      </DropdownMenuItem>
                     )
                   })}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                   <Button variant="ghost" className="w-full justify-center">Cancel</Button>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <DropdownMenu>
@@ -482,7 +487,7 @@ export function UserManagement() {
                 onClick={() => table.setPageSize(pageSize)}
                 className={cn(
                   "h-8 w-8 p-0",
-                  table.getState().pagination.pageSize === pageSize ? "rounded-full" : "text-muted-foreground"
+                  table.getState().pagination.pageSize === pageSize && "rounded-full"
                 )}
               >
                 {pageSize}
