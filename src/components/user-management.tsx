@@ -31,7 +31,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
@@ -308,7 +307,7 @@ export function UserManagement() {
                   <Columns className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {table
