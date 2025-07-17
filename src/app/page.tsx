@@ -19,7 +19,7 @@ import {
 import { UserManagement } from "@/components/user-management"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Briefcase, ChevronDown, Moon, Settings, User } from "lucide-react"
+import { LayoutGrid, ChevronDown, Moon, Settings, User } from "lucide-react"
 
 export default function Home() {
   return (
@@ -27,7 +27,6 @@ export default function Home() {
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <SidebarTrigger className="sm:hidden" />
             <div className="font-headline text-lg font-semibold text-primary">
               CAuth2
             </div>
@@ -80,17 +79,14 @@ export default function Home() {
             collapsible="icon"
             className="hidden sm:flex"
           >
-            <SidebarHeader className="p-0" />
+            <SidebarHeader>
+              <SidebarTrigger />
+            </SidebarHeader>
             <SidebarContent className="p-2">
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton tooltip="Users" isActive>
-                    <User />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton tooltip="Roles">
-                    <Briefcase />
+                    <LayoutGrid />
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
