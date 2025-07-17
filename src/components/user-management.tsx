@@ -289,7 +289,6 @@ export function UserManagement() {
             <Select defaultValue="all">
               <SelectTrigger className="w-auto gap-1 border-0 hover:bg-accent focus:ring-0">
                 <SelectValue />
-                <ChevronDown className="ml-2 h-4 w-4" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
