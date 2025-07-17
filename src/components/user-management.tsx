@@ -495,18 +495,24 @@ export function UserManagement() {
           </div>
           <div className="flex items-center gap-2">
               <Button
-                  variant="default"
+                  variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full"
+                  className="h-8 w-8"
                   onClick={() => table.previousPage()}
                   disabled={!table.getCanPreviousPage()}
               >
                   <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button
-                  variant="default"
+                variant="default"
+                className="h-8 w-8 rounded-full p-0"
+              >
+                {table.getState().pagination.pageIndex + 1}
+              </Button>
+              <Button
+                  variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full"
+                  className="h-8 w-8"
                   onClick={() => table.nextPage()}
                   disabled={!table.getCanNextPage()}
               >
