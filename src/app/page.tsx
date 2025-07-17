@@ -31,7 +31,7 @@ function PageContent() {
   const [isSettingsOpen, setSettingsOpen] = React.useState(false)
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-screen flex-col bg-background">
       <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-4 sm:px-6">
         <SidebarTrigger />
         <div className="font-headline text-lg font-semibold text-primary">
@@ -76,16 +76,16 @@ function PageContent() {
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar collapsible="icon">
+        <Sidebar>
           <SidebarContent className="p-2">
             <SidebarMenu>
               <Collapsible open={isManagementOpen} onOpenChange={setManagementOpen}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="Management">
-                      <Users />
+                    <SidebarMenuButton tooltip="Management" className={state === 'collapsed' ? 'justify-center' : ''}>
+                      <Users className="h-4 w-4" strokeWidth={1.5} />
                       <span className={state === 'collapsed' ? 'hidden' : ''}>Management</span>
-                      {state !== 'collapsed' && (isManagementOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0" />)}
+                      {state !== 'collapsed' && (isManagementOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-500" />)}
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                 </SidebarMenuItem>
@@ -104,18 +104,18 @@ function PageContent() {
                 </CollapsibleContent>
               </Collapsible>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Applications">
-                  <Briefcase />
+                <SidebarMenuButton tooltip="Applications" className={state === 'collapsed' ? 'justify-center' : ''}>
+                  <Briefcase className="h-4 w-4" strokeWidth={1.5} />
                   <span className={state === 'collapsed' ? 'hidden' : ''}>Applications</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <Collapsible open={isSettingsOpen} onOpenChange={setSettingsOpen}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="Settings">
-                      <Settings />
+                    <SidebarMenuButton tooltip="Settings" className={state === 'collapsed' ? 'justify-center' : ''}>
+                      <Settings className="h-4 w-4" strokeWidth={1.5} />
                       <span className={state === 'collapsed' ? 'hidden' : ''}>Setting</span>
-                      {state !== 'collapsed' && (isSettingsOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0" />)}
+                      {state !== 'collapsed' && (isSettingsOpen ? <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-500" />)}
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                 </SidebarMenuItem>

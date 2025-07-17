@@ -173,7 +173,7 @@ const Sidebar = React.forwardRef<
         data-sidebar="sidebar"
         data-state={state}
         className={cn(
-          "hidden md:flex flex-col h-full bg-sidebar text-sidebar-foreground border-r transition-all duration-300 ease-in-out",
+          "hidden md:flex flex-col h-full bg-sidebar text-sidebar-foreground border-r transition-all duration-500 ease-in-out",
           state === 'expanded' ? 'w-[16rem]' : 'w-[3.5rem]',
           className
         )}
@@ -304,7 +304,6 @@ const SidebarMenuButton = React.forwardRef<
         className={cn(
           "flex w-full items-center gap-3 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50",
           "data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground",
-          state === 'collapsed' && "justify-center",
           className
         )}
         {...props}
