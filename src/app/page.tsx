@@ -70,8 +70,8 @@ export default function Home() {
             </DropdownMenu>
           </div>
         </header>
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar collapsible="icon" className="hidden sm:flex z-10">
+        <div className="flex flex-1">
+          <Sidebar collapsible="icon" className="hidden sm:flex">
             <SidebarContent className="p-2">
               <SidebarMenu>
                 <Collapsible defaultOpen={true}>
