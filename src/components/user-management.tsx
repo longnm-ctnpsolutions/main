@@ -47,9 +47,9 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
   SheetFooter,
   SheetClose,
+  SheetTrigger,
 } from "@/components/ui/sheet"
 import {
   AlertDialog,
@@ -287,7 +287,7 @@ export function UserManagement() {
               />
             </div>
             <Select defaultValue="all">
-              <SelectTrigger className="w-auto gap-1">
+              <SelectTrigger className="w-auto gap-1 border-0 hover:bg-accent focus:ring-0">
                 <Filter className="h-4 w-4" />
                 <SelectValue />
               </SelectTrigger>
@@ -297,10 +297,10 @@ export function UserManagement() {
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="icon"><RefreshCw className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                 <Button variant="outline" className="h-10">
+                 <Button variant="ghost" className="h-10">
                   <FileUp className="h-4 w-4" />
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
@@ -326,7 +326,7 @@ export function UserManagement() {
             </DropdownMenu>
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button variant="ghost" size="icon">
                   <Columns className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
