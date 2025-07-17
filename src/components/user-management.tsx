@@ -1,8 +1,9 @@
+
 "use client"
 
 import * as React from "react"
 import {
-  ArrowUpDown, MoreHorizontal, Search, Trash2, UserPlus, FileText, Download, Upload, RefreshCw, Columns
+  ArrowUpDown, MoreHorizontal, Search, Trash2, UserPlus, FileText, Download, Upload, RefreshCw, Columns, Filter
 } from "lucide-react"
 import {
   ColumnDef,
@@ -93,9 +94,7 @@ export function UserManagement() {
   const [users, setUsers] = React.useState<User[]>(defaultUsers)
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
-    id: false,
-  })
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [isAddUserSheetOpen, setAddUserSheetOpen] = React.useState(false)
 
@@ -169,21 +168,21 @@ export function UserManagement() {
       enableHiding: false,
     },
     {
-        accessorKey: "email",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Email
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        },
-        cell: ({ row }) => (
-            <div>{row.getValue("email")}</div>
-        ),
+      accessorKey: "email",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Email
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
+      cell: ({ row }) => (
+        <div>{row.getValue("email")}</div>
+      ),
     },
     {
       accessorKey: "status",
@@ -192,9 +191,9 @@ export function UserManagement() {
         const status = row.getValue("status") as string;
         const isActive = status === 'active';
         return (
-          <Badge variant={isActive ? "default" : "outline"} className={isActive ? "bg-green-100 text-green-800" : ""}>
+          <Badge variant="outline" className={cn(isActive ? "bg-green-100 text-green-800 border-green-200" : "bg-gray-100 text-gray-800 border-gray-200")}>
              <span className={cn("mr-1 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
-             {status}
+             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>
         )
       }
@@ -427,7 +426,7 @@ export function UserManagement() {
               <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                   return (
-                      <TableHead key={header.id} className="p-2">
+                      <TableHead key={header.id}>
                       {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -448,7 +447,7 @@ export function UserManagement() {
                   data-state={row.getIsSelected() && "selected"}
                   >
                   {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="p-2">
+                      <TableCell key={cell.id}>
                       {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
