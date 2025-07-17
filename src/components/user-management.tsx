@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import {
-  ArrowUpDown, MoreHorizontal, Search, Trash2, UserPlus, RefreshCw, Columns, ChevronLeft, ChevronRight, Filter
+  ArrowUpDown, MoreHorizontal, Search, Trash2, UserPlus, RefreshCw, Columns, ChevronLeft, ChevronRight, Filter, FileUp, FileSpreadsheet, FileText
 } from "lucide-react"
 import {
   ColumnDef,
@@ -291,6 +291,7 @@ export function UserManagement() {
             </div>
             <Select defaultValue="all">
               <SelectTrigger className="w-auto gap-1">
+                <Filter className="h-4 w-4" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -326,6 +327,32 @@ export function UserManagement() {
                       </DropdownMenuCheckboxItem>
                     )
                   })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-1">
+                  <FileUp className="h-4 w-4" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                  <span>Export all data to Excel</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                  <span>Export selected rows to Excel</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>Export all data to PDF</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>Export selected rows to PDF</span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <AlertDialog>
@@ -392,7 +419,7 @@ export function UserManagement() {
       
       <Card>
         <CardContent className="p-0">
-            <div className="rounded-md border">
+            <div className="rounded-md border-b">
                 <Table>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
@@ -499,5 +526,7 @@ export function UserManagement() {
     </div>
   )
 }
+
+    
 
     
