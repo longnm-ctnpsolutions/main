@@ -90,8 +90,8 @@ function PageContent() {
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar>
-          <SidebarContent className="p-2">
-            <SidebarMenu>
+          <SidebarContent>
+            <SidebarMenu className="p-2">
               <Collapsible open={isManagementOpen} onOpenChange={setManagementOpen}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
