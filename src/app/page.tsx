@@ -90,8 +90,8 @@ function PageContent() {
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar>
-          <SidebarContent>
-            <SidebarMenu className="p-2">
+          <SidebarContent className="p-2">
+            <SidebarMenu>
               <Collapsible open={isManagementOpen} onOpenChange={setManagementOpen}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
@@ -122,9 +122,11 @@ function PageContent() {
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </Collapsible>
+            </SidebarMenu>
               
-              <div className="my-1 h-px w-full bg-sidebar-border" />
+            <div className="my-1 h-px w-full bg-sidebar-border" />
 
+            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Applications"
@@ -137,9 +139,11 @@ function PageContent() {
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              
-              <div className="my-1 h-px w-full bg-sidebar-border" />
+            </SidebarMenu>
 
+            <div className="my-1 h-px w-full bg-sidebar-border" />
+
+            <SidebarMenu>
               <Collapsible open={isSettingsOpen} onOpenChange={setSettingsOpen}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
