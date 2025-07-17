@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import {
-  ArrowUpDown, MoreVertical, Search, Trash2, UserPlus, RefreshCw, Columns, ChevronLeft, ChevronRight, Filter, FileUp, FileSpreadsheet, FileText, ChevronDown
+  ArrowUpDown, MoreVertical, Search, Trash2, UserPlus, RefreshCw, Columns, ChevronLeft, ChevronRight, FileUp, FileSpreadsheet, FileText, ChevronDown
 } from "lucide-react"
 import {
   ColumnDef,
