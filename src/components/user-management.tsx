@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import {
-  ArrowUpDown, MoreHorizontal, Search, Trash2, UserPlus, RefreshCw, Columns, ChevronLeft, ChevronRight, Filter, FileUp, FileSpreadsheet, FileText, ChevronDown
+  ArrowUpDown, MoreVertical, Search, Trash2, UserPlus, RefreshCw, Columns, ChevronLeft, ChevronRight, Filter, FileUp, FileSpreadsheet, FileText, ChevronDown
 } from "lucide-react"
 import {
   ColumnDef,
@@ -215,19 +215,16 @@ export function UserManagement() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
                   <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user.email)}>
-                  Copy email
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>View details</DropdownMenuItem>
+                <DropdownMenuItem>Details</DropdownMenuItem>
+                <DropdownMenuItem>Change Password</DropdownMenuItem>
+                <DropdownMenuItem>Deactivate</DropdownMenuItem>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50">Delete user</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50">Delete</DropdownMenuItem>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
@@ -485,7 +482,8 @@ export function UserManagement() {
                 variant={table.getState().pagination.pageSize === pageSize ? "default" : "ghost"}
                 onClick={() => table.setPageSize(pageSize)}
                 className={cn(
-                  "h-8 w-8 p-0 rounded-full",
+                  "h-8 w-8 p-0",
+                   table.getState().pagination.pageSize === pageSize ? "rounded-full" : ""
                 )}
               >
                 {pageSize}
