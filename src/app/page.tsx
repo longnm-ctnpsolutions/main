@@ -18,7 +18,7 @@ import {
   SidebarMenuSubButton,
 } from "@/components/ui/sidebar"
 import { UserManagement } from "@/components/user-management"
-import { ChevronDown, ChevronRight, Briefcase, User, Settings, Moon, Users } from "lucide-react"
+import { ChevronDown, ChevronRight, Briefcase, Settings, Moon, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -27,12 +27,12 @@ export default function Home() {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
+        <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-4 sm:px-6">
           <SidebarTrigger />
           <div className="font-headline text-lg font-semibold text-primary">
             CAuth2
           </div>
-          <div className="flex flex-1 items-center justify-end gap-4">
+          <div className="ml-auto flex items-center gap-4">
             <Button variant="ghost" size="icon">
               <Moon className="h-5 w-5" />
               <span className="sr-only">Toggle theme</span>
@@ -70,7 +70,7 @@ export default function Home() {
             </DropdownMenu>
           </div>
         </header>
-        <div className="flex flex-1">
+        <div className="flex flex-1 overflow-hidden">
           <Sidebar collapsible="icon" className="hidden sm:flex">
             <SidebarContent className="p-2">
               <SidebarMenu>
