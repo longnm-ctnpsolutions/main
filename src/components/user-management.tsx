@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import {
-  ArrowUpDown, MoreHorizontal, Search, Trash2, UserPlus, FileText, Download, Upload, RefreshCw, Columns, Filter
+  ArrowUpDown, MoreHorizontal, Search, Trash2, UserPlus, RefreshCw, Columns, ChevronLeft, ChevronRight, Filter
 } from "lucide-react"
 import {
   ColumnDef,
@@ -71,7 +71,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -85,7 +84,6 @@ import {
 
 
 const addUserFormSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email." }),
 })
 
@@ -100,25 +98,22 @@ export function UserManagement() {
 
   const addUserForm = useForm<z.infer<typeof addUserFormSchema>>({
     resolver: zodResolver(addUserFormSchema),
-    defaultValues: { name: "", email: "" },
+    defaultValues: { email: "" },
   })
 
   const handleAddUser = (values: z.infer<typeof addUserFormSchema>) => {
     const newUser: User = {
       id: `user-${Date.now()}`,
-      name: values.name,
       email: values.email,
-      avatar: `https://placehold.co/40x40`,
       status: "active",
-      connection: "Email",
-      lastSeen: "Just now",
+      connection: "Database",
     }
     setUsers((prev) => [newUser, ...prev])
     setAddUserSheetOpen(false)
     addUserForm.reset()
     toast({
       title: "User added",
-      description: `${values.name} has been added to the user list.`,
+      description: `${values.email} has been added to the user list.`,
     })
   }
   
@@ -153,7 +148,6 @@ export function UserManagement() {
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
-          className="translate-y-[2px]"
         />
       ),
       cell: ({ row }) => (
@@ -161,40 +155,25 @@ export function UserManagement() {
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
-          className="translate-y-[2px]"
         />
       ),
       enableSorting: false,
       enableHiding: false,
     },
     {
-      accessorKey: "name",
+      accessorKey: "email",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            User
+            Email
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         )
       },
-      cell: ({ row }) => {
-        const user = row.original
-        return (
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user.avatar} alt={user.name} data-ai-hint="user avatar" />
-              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-medium">{user.name}</span>
-              <span className="text-xs text-muted-foreground">{user.email}</span>
-            </div>
-          </div>
-        )
-      },
+      cell: ({ row }) => <div>{row.getValue("email")}</div>,
     },
     {
       accessorKey: "status",
@@ -203,10 +182,10 @@ export function UserManagement() {
         const status = row.getValue("status") as string;
         const isActive = status === 'active';
         return (
-          <Badge variant={isActive ? "default" : "secondary"} className={cn(isActive ? "bg-green-100 text-green-700 hover:bg-green-100/80" : "bg-gray-100 text-gray-700 hover:bg-gray-100/80")}>
+          <div className="flex items-center">
              <span className={cn("mr-2 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
-             {status.charAt(0).toUpperCase() + status.slice(1)}
-          </Badge>
+             <span className="capitalize">{status}</span>
+          </div>
         )
       }
     },
@@ -224,11 +203,6 @@ export function UserManagement() {
         )
       },
       cell: ({ row }) => <div>{row.getValue("connection")}</div>,
-    },
-     {
-      accessorKey: "lastSeen",
-      header: "Last seen",
-      cell: ({ row }) => <div>{row.getValue("lastSeen")}</div>,
     },
     {
       id: "actions",
@@ -296,13 +270,67 @@ export function UserManagement() {
   })
 
   return (
-    <div className="w-full">
-      <div className="flex items-start justify-between">
-          <div className="flex-1">
-              <h1 className="font-headline text-2xl font-semibold">Users</h1>
-              <p className="text-muted-foreground">Manage your application users with ease.</p>
+    <div className="w-full space-y-4">
+      <div className="flex items-center justify-between">
+          <div>
+              <h1 className="text-2xl font-bold">Users</h1>
+              <p className="text-muted-foreground">UI for admins to manage identities.</p>
+          </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-2">
+          <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+              placeholder="User Search"
+              value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+              onChange={(event) =>
+                table.getColumn("email")?.setFilterValue(event.target.value)
+              }
+              className="pl-9"
+              />
           </div>
           <div className="flex items-center gap-2">
+            <Select defaultValue="all">
+              <SelectTrigger className="w-[120px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="icon"><RefreshCw className="h-4 w-4" /></Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                      <Columns className="h-4 w-4" />
+                  </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    )
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0}>
@@ -323,6 +351,7 @@ export function UserManagement() {
                 </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
            <Sheet open={isAddUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
               <SheetTrigger asChild>
                   <Button>
@@ -339,19 +368,6 @@ export function UserManagement() {
                   </SheetHeader>
                   <Form {...addUserForm}>
                   <form onSubmit={addUserForm.handleSubmit(handleAddUser)} className="space-y-8 py-4">
-                      <FormField
-                      control={addUserForm.control}
-                      name="name"
-                      render={({ field }) => (
-                          <FormItem>
-                          <FormLabel>Full Name</FormLabel>
-                          <FormControl>
-                              <Input placeholder="John Doe" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                          </FormItem>
-                      )}
-                      />
                       <FormField
                       control={addUserForm.control}
                       name="email"
@@ -377,60 +393,6 @@ export function UserManagement() {
             </Sheet>
           </div>
       </div>
-
-      <div className="flex items-center justify-between gap-4 py-4">
-          <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-              placeholder="Search by email..."
-              value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-              onChange={(event) =>
-                table.getColumn("name")?.setFilterValue(event.target.value)
-              }
-              className="pl-9"
-              />
-          </div>
-          <div className="flex items-center gap-2">
-            <Select>
-              <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="icon"><RefreshCw className="h-4 w-4" /></Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon"><Columns className="h-4 w-4" /></Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => {
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(!!value)
-                        }
-                      >
-                        {column.id === 'name' ? 'User' : column.id}
-                      </DropdownMenuCheckboxItem>
-                    )
-                  })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button variant="outline" size="icon"><Download className="h-4 w-4" /></Button>
-          </div>
-      </div>
       <div className="rounded-md border bg-card">
           <Table>
           <TableHeader>
@@ -438,7 +400,7 @@ export function UserManagement() {
               <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                   return (
-                      <TableHead key={header.id}>
+                      <TableHead key={header.id} className="py-2">
                       {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -459,7 +421,7 @@ export function UserManagement() {
                   data-state={row.getIsSelected() && "selected"}
                   >
                   {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="py-2">
                       {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -481,30 +443,56 @@ export function UserManagement() {
           </TableBody>
           </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-          </div>
-          <div className="space-x-2">
-          <Button
+      <div className="flex items-center justify-between py-4">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>Rows per page:</span>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => {
+              table.setPageSize(Number(value))
+            }}
+          >
+            <SelectTrigger className="h-8 w-[70px]">
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {[5, 10, 20].map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
+                  {pageSize}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span>
+             Page {table.getState().pagination.pageIndex + 1} of{" "}
+             {table.getPageCount()} ({table.getFilteredRowModel().rows.length} items)
+          </span>
+          <div className="flex items-center gap-1">
+            <Button
               variant="outline"
-              size="sm"
+              size="icon"
+              className="h-8 w-8"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-          >
-              Previous
-          </Button>
-          <Button
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
               variant="outline"
-              size="sm"
+              size="icon"
+              className="h-8 w-8"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-          >
-              Next
-          </Button>
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
+        </div>
       </div>
     </div>
   )
 }
+
+    
