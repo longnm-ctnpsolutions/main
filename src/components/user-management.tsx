@@ -169,29 +169,20 @@ export function UserManagement() {
       enableHiding: false,
     },
     {
-        accessorKey: "name",
+        accessorKey: "email",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    User
+                    Email
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
         },
         cell: ({ row }) => (
-            <div className="flex items-center gap-3">
-                <Avatar>
-                    <AvatarImage src={row.original.avatar} alt={row.original.name} />
-                    <AvatarFallback>{row.original.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div>
-                    <div className="font-medium">{row.original.name}</div>
-                    <div className="text-sm text-muted-foreground">{row.original.email}</div>
-                </div>
-            </div>
+            <div>{row.getValue("email")}</div>
         ),
     },
     {
@@ -381,9 +372,9 @@ export function UserManagement() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
               placeholder="User Search"
-              value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+              value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
               onChange={(event) =>
-                table.getColumn("name")?.setFilterValue(event.target.value)
+                table.getColumn("email")?.setFilterValue(event.target.value)
               }
               className="pl-9"
               />
@@ -436,7 +427,7 @@ export function UserManagement() {
               <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                   return (
-                      <TableHead key={header.id}>
+                      <TableHead key={header.id} className="p-2">
                       {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -457,7 +448,7 @@ export function UserManagement() {
                   data-state={row.getIsSelected() && "selected"}
                   >
                   {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="p-2">
                       {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

@@ -10,6 +10,15 @@ export type User = {
 
 export const users: User[] = [
   {
+    id: "user-haunt",
+    name: "Hau NT",
+    email: "haunt@ctnpsolutions.com",
+    avatar: "https://placehold.co/40x40?text=HN",
+    status: "active",
+    connection: "Database",
+    lastSeen: "Just now",
+  },
+  {
     id: "user-1",
     name: "Olivia Martin",
     email: "olivia.martin@email.com",
@@ -53,14 +62,5 @@ export const users: User[] = [
     status: "active",
     connection: "Google",
     lastSeen: "10 minutes ago",
-  },
-  {
-    id: "user-haunt",
-    name: "Hau NT",
-    email: "haunt@ctnpsolutions.com",
-    avatar: "https://placehold.co/40x40?text=HN",
-    status: "active",
-    connection: "Database",
-    lastSeen: "Just now",
   },
 ];
