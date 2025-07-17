@@ -28,7 +28,7 @@ export default function Home() {
       <div className="flex min-h-screen w-full flex-col">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6">
           <div className="flex items-center gap-4">
-            <SidebarTrigger className="sm:hidden" />
+            <SidebarTrigger />
             <div className="font-headline text-lg font-semibold text-primary">
                 CAuth2
             </div>
