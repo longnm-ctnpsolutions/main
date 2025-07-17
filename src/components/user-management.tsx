@@ -85,7 +85,7 @@ export function UserManagement() {
   const [users, setUsers] = React.useState<User[]>(defaultUsers)
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({ email: false })
   const [rowSelection, setRowSelection] = React.useState({})
   const [isAddUserSheetOpen, setAddUserSheetOpen] = React.useState(false)
 
@@ -173,6 +173,10 @@ export function UserManagement() {
           </div>
         )
       },
+    },
+    {
+        accessorKey: "email",
+        header: "Email",
     },
     {
       accessorKey: "status",
@@ -273,10 +277,9 @@ export function UserManagement() {
                     <Input
                     placeholder="Search by email..."
                     value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) => {
-                        // This filters by email, but the email is nested in the 'name' column's cell render. We should filter by the top-level email field.
-                         table.getColumn("name")?.setFilterValue(event.target.value)
-                    }}
+                    onChange={(event) =>
+                      table.getColumn("email")?.setFilterValue(event.target.value)
+                    }
                     className="pl-9"
                     />
                 </div>
