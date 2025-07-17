@@ -9,6 +9,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
