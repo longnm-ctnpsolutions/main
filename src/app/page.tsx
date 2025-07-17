@@ -9,7 +9,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -19,7 +18,7 @@ import {
   SidebarMenuSubButton,
 } from "@/components/ui/sidebar"
 import { UserManagement } from "@/components/user-management"
-import { ChevronDown, ChevronRight, Briefcase, User, Settings, Moon, PanelLeft, LayoutDashboard, Users, CreditCard } from "lucide-react"
+import { ChevronDown, ChevronRight, Briefcase, User, Settings, Moon, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -75,72 +74,63 @@ export default function Home() {
               </div>
           </header>
           <div className="flex flex-1">
-              <Sidebar
-                variant="sidebar"
-                collapsible="icon"
-                className="hidden sm:flex z-10"
-              >
-                  <SidebarHeader>
-                    <div className="flex h-14 items-center justify-between gap-4 px-4">
-                        <div className="font-headline text-lg font-semibold text-primary group-data-[collapsible=icon]:hidden">
-                            CAuth2
-                        </div>
-                        <SidebarTrigger />
-                    </div>
-                  </SidebarHeader>
-                <SidebarContent className="p-2">
-                  <SidebarMenu>
-                    <Collapsible defaultOpen={true}>
-                        <SidebarMenuItem>
-                            <CollapsibleTrigger asChild>
-                                <SidebarMenuButton tooltip="Management">
-                                  <Users />
-                                  <span className="w-full">Management</span>
-                                  <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200" />
-                                </SidebarMenuButton>
-                              </CollapsibleTrigger>
-                        </SidebarMenuItem>
-                        <CollapsibleContent>
-                            <SidebarMenuSub>
-                                <SidebarMenuItem>
-                                    <SidebarMenuSubButton isActive>Users</SidebarMenuSubButton>
-                                </SidebarMenuItem>
-                                 <SidebarMenuItem>
-                                    <SidebarMenuSubButton>Clients</SidebarMenuSubButton>
-                                </SidebarMenuItem>
-                                <SidebarMenuItem>
-                                    <SidebarMenuSubButton>Roles</SidebarMenuSubButton>
-                                </SidebarMenuItem>
-                            </SidebarMenuSub>
-                        </CollapsibleContent>
-                    </Collapsible>
-                     <SidebarMenuItem>
-                       <SidebarMenuButton tooltip="Applications">
-                         <Briefcase />
-                         <span>Applications</span>
-                       </SidebarMenuButton>
-                     </SidebarMenuItem>
-                    <Collapsible>
-                        <SidebarMenuItem>
-                           <CollapsibleTrigger asChild>
-                                <SidebarMenuButton tooltip="Setting">
-                                  <Settings />
-                                  <span className="w-full">Setting</span>
-                                  <ChevronRight className="ml-auto h-4 w-4 shrink-0" />
-                                </SidebarMenuButton>
-                            </CollapsibleTrigger>
-                        </SidebarMenuItem>
-                        <CollapsibleContent>
-                           <SidebarMenuSub>
-                                <SidebarMenuItem>
-                                    <SidebarMenuSubButton>User Profile</SidebarMenuSubButton>
-                                </SidebarMenuItem>
-                            </SidebarMenuSub>
-                        </CollapsibleContent>
-                    </Collapsible>
-                  </SidebarMenu>
-                </SidebarContent>
-              </Sidebar>
+          <Sidebar
+            collapsible="icon"
+            className="hidden sm:flex z-10"
+          >
+            <SidebarContent className="p-2">
+              <SidebarMenu>
+                <Collapsible defaultOpen={true}>
+                    <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                            <SidebarMenuButton tooltip="Management">
+                              <Users />
+                              <span className="w-full">Management</span>
+                              <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200" />
+                            </SidebarMenuButton>
+                          </CollapsibleTrigger>
+                    </SidebarMenuItem>
+                    <CollapsibleContent>
+                        <SidebarMenuSub>
+                            <SidebarMenuItem>
+                                <SidebarMenuSubButton isActive>Users</SidebarMenuSubButton>
+                            </SidebarMenuItem>
+                              <SidebarMenuItem>
+                                <SidebarMenuSubButton>Clients</SidebarMenuSubButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuSubButton>Roles</SidebarMenuSubButton>
+                            </SidebarMenuItem>
+                        </SidebarMenuSub>
+                    </CollapsibleContent>
+                </Collapsible>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton tooltip="Applications">
+                      <Briefcase />
+                      <span>Applications</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                <Collapsible>
+                    <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                            <SidebarMenuButton tooltip="Setting">
+                              <Settings />
+                              <span className="w-full">Setting</span>
+                              <ChevronRight className="ml-auto h-4 w-4 shrink-0" />
+                            </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                    </SidebarMenuItem>
+                    <CollapsibleContent>
+                        <SidebarMenuSub>
+                            <SidebarMenuItem>
+                                <SidebarMenuSubButton>User Profile</SidebarMenuSubButton>
+                            </SidebarMenuItem>
+                        </SidebarMenuSub>
+                    </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenu>
+            </SidebarContent>
+          </Sidebar>
               <main className="flex-1 overflow-auto bg-muted/40 p-4 sm:p-6 lg:p-8">
                   <UserManagement />
               </main>
