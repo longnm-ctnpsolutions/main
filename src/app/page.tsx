@@ -82,7 +82,7 @@ export default function Home() {
           <Sidebar
             variant="sidebar"
             collapsible="icon"
-            className="hidden sm:flex"
+            className="hidden sm:flex z-30"
           >
             <SidebarHeader>
               <SidebarTrigger />
