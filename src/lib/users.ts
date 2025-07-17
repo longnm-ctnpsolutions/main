@@ -4,7 +4,8 @@ export type User = {
   email: string;
   avatar: string;
   status: 'active' | 'inactive';
-  connection: 'Email' | 'Google' | 'SAML';
+  connection: 'Email' | 'Google' | 'SAML' | 'Database';
+  lastSeen: string;
 };
 
 export const users: User[] = [
@@ -15,6 +16,7 @@ export const users: User[] = [
     avatar: "https://placehold.co/40x40?text=OM",
     status: "active",
     connection: "Google",
+    lastSeen: "2 hours ago",
   },
   {
     id: "user-2",
@@ -23,6 +25,7 @@ export const users: User[] = [
     avatar: "https://placehold.co/40x40?text=JL",
     status: "active",
     connection: "Email",
+    lastSeen: "5 hours ago",
   },
   {
     id: "user-3",
@@ -31,6 +34,7 @@ export const users: User[] = [
     avatar: "https://placehold.co/40x40?text=IN",
     status: "inactive",
     connection: "SAML",
+    lastSeen: "3 days ago",
   },
   {
     id: "user-4",
@@ -39,6 +43,7 @@ export const users: User[] = [
     avatar: "https://placehold.co/40x40?text=WK",
     status: "active",
     connection: "Email",
+    lastSeen: "1 hour ago",
   },
   {
     id: "user-5",
@@ -47,45 +52,15 @@ export const users: User[] = [
     avatar: "https://placehold.co/40x40?text=SD",
     status: "active",
     connection: "Google",
+    lastSeen: "10 minutes ago",
   },
   {
-    id: "user-6",
-    name: "Liam Garcia",
-    email: "liam.garcia@email.com",
-    avatar: "https://placehold.co/40x40?text=LG",
-    status: "inactive",
-    connection: "Email",
-  },
-   {
-    id: "user-7",
-    name: "Ava Rodriguez",
-    email: "ava.rodriguez@email.com",
-    avatar: "https://placehold.co/40x40?text=AR",
+    id: "user-haunt",
+    name: "Hau NT",
+    email: "haunt@ctnpsolutions.com",
+    avatar: "https://placehold.co/40x40?text=HN",
     status: "active",
-    connection: "SAML",
-  },
-  {
-    id: "user-8",
-    name: "Noah Martinez",
-    email: "noah.martinez@email.com",
-    avatar: "https://placehold.co/40x40?text=NM",
-    status: "active",
-    connection: "Google",
-  },
-  {
-    id: "user-9",
-    name: "Emma Brown",
-    email: "emma.brown@email.com",
-    avatar: "https://placehold.co/40x40?text=EB",
-    status: "inactive",
-    connection: "Email",
-  },
-   {
-    id: "user-10",
-    name: "James Wilson",
-    email: "james.wilson@email.com",
-    avatar: "https://placehold.co/40x40?text=JW",
-    status: "active",
-    connection: "Email",
+    connection: "Database",
+    lastSeen: "Just now",
   },
 ];

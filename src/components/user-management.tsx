@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import {
-  ArrowUpDown
+  ArrowUpDown, MoreHorizontal, Search, Trash2, UserPlus, FileText, Download, Upload, RefreshCw, Columns
 } from "lucide-react"
 import {
   ColumnDef,
@@ -16,7 +16,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { MoreHorizontal, Search, Trash2, UserPlus } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -31,6 +30,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
@@ -73,8 +73,15 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { cn } from "@/lib/utils"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 
 const addUserFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -86,7 +93,9 @@ export function UserManagement() {
   const [users, setUsers] = React.useState<User[]>(defaultUsers)
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
+    id: false,
+  })
   const [rowSelection, setRowSelection] = React.useState({})
   const [isAddUserSheetOpen, setAddUserSheetOpen] = React.useState(false)
 
@@ -103,6 +112,7 @@ export function UserManagement() {
       avatar: `https://placehold.co/40x40`,
       status: "active",
       connection: "Email",
+      lastSeen: "Just now",
     }
     setUsers((prev) => [newUser, ...prev])
     setAddUserSheetOpen(false)
@@ -144,6 +154,7 @@ export function UserManagement() {
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
+          className="translate-y-[2px]"
         />
       ),
       cell: ({ row }) => (
@@ -151,25 +162,37 @@ export function UserManagement() {
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
+          className="translate-y-[2px]"
         />
       ),
       enableSorting: false,
       enableHiding: false,
     },
     {
-      accessorKey: "email",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Email
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
-      cell: ({ row }) => <div>{row.getValue("email")}</div>,
+        accessorKey: "name",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    User
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+        cell: ({ row }) => (
+            <div className="flex items-center gap-3">
+                <Avatar>
+                    <AvatarImage src={row.original.avatar} alt={row.original.name} />
+                    <AvatarFallback>{row.original.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div>
+                    <div className="font-medium">{row.original.name}</div>
+                    <div className="text-sm text-muted-foreground">{row.original.email}</div>
+                </div>
+            </div>
+        ),
     },
     {
       accessorKey: "status",
@@ -178,10 +201,10 @@ export function UserManagement() {
         const status = row.getValue("status") as string;
         const isActive = status === 'active';
         return (
-          <div className="flex items-center gap-2">
-            <span className={cn("h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
-            <span className="capitalize">{status}</span>
-          </div>
+          <Badge variant={isActive ? "default" : "outline"} className={isActive ? "bg-green-100 text-green-800" : ""}>
+             <span className={cn("mr-1 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
+             {status}
+          </Badge>
         )
       }
     },
@@ -199,6 +222,11 @@ export function UserManagement() {
         )
       },
       cell: ({ row }) => <div>{row.getValue("connection")}</div>,
+    },
+     {
+      accessorKey: "lastSeen",
+      header: "Last seen",
+      cell: ({ row }) => <div>{row.getValue("lastSeen")}</div>,
     },
     {
       id: "actions",
@@ -267,11 +295,32 @@ export function UserManagement() {
 
   return (
     <div className="w-full">
-      <div className="flex items-start">
+      <div className="flex items-start justify-between">
           <div className="flex-1">
               <h1 className="font-headline text-2xl font-semibold">Users</h1>
               <p className="text-muted-foreground">UI for admins to manage identities.</p>
           </div>
+          <div className="flex items-center gap-2">
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the selected user(s).
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteSelected} className="bg-red-600 hover:bg-red-700">Continue</AlertDialogAction>
+                </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
            <Sheet open={isAddUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
               <SheetTrigger asChild>
                   <Button>
@@ -324,43 +373,60 @@ export function UserManagement() {
                   </Form>
               </SheetContent>
             </Sheet>
+          </div>
       </div>
 
       <div className="flex items-center justify-between gap-4 py-4">
-          <div className="relative w-full max-w-sm">
+          <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
               placeholder="User Search"
-              value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+              value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
               onChange={(event) =>
-                table.getColumn("email")?.setFilterValue(event.target.value)
+                table.getColumn("name")?.setFilterValue(event.target.value)
               }
               className="pl-9"
               />
           </div>
-          <div className="ml-auto flex items-center gap-2">
-              {table.getFilteredSelectedRowModel().rows.length > 0 && (
-              <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                  <Button variant="outline">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete ({table.getFilteredSelectedRowModel().rows.length})
-                  </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                  <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete the selected user(s).
-                      </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeleteSelected} className="bg-red-600 hover:bg-red-700">Continue</AlertDialogAction>
-                  </AlertDialogFooter>
-                  </AlertDialogContent>
-              </AlertDialog>
-              )}
+          <div className="flex items-center gap-2">
+            <Select>
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="icon"><RefreshCw className="h-4 w-4" /></Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon"><Columns className="h-4 w-4" /></Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    )
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button variant="outline" size="icon"><Download className="h-4 w-4" /></Button>
           </div>
       </div>
       <div className="rounded-md border bg-card">
