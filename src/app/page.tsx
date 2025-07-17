@@ -122,6 +122,8 @@ function PageContent() {
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </Collapsible>
+              
+              <div className="my-1 h-px w-full bg-sidebar-border" />
 
               <SidebarMenuItem>
                 <SidebarMenuButton
@@ -135,6 +137,8 @@ function PageContent() {
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              
+              <div className="my-1 h-px w-full bg-sidebar-border" />
 
               <Collapsible open={isSettingsOpen} onOpenChange={setSettingsOpen}>
                 <SidebarMenuItem>
