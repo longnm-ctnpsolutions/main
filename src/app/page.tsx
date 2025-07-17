@@ -72,7 +72,7 @@ export default function Home() {
           </div>
         </header>
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar collapsible="icon" className="hidden sm:flex">
+          <Sidebar collapsible="icon">
             <SidebarContent className="p-2">
               <SidebarMenu>
                 <Collapsible defaultOpen={true}>
