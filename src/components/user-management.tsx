@@ -272,126 +272,122 @@ export function UserManagement() {
   return (
     <div className="w-full space-y-4">
       <Card>
-        <CardHeader>
-          <CardTitle>Users</CardTitle>
-          <CardDescription>UI for admins to manage identities.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between gap-2">
-              <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                  placeholder="User Search"
-                  value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-                  onChange={(event) =>
-                    table.getColumn("email")?.setFilterValue(event.target.value)
-                  }
-                  className="pl-9"
-                  />
-              </div>
-              <div className="flex items-center gap-2">
-                <Select defaultValue="all">
-                  <SelectTrigger className="w-auto gap-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" size="icon"><RefreshCw className="h-4 w-4" /></Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="icon">
-                          <Columns className="h-4 w-4" />
-                      </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {table
-                      .getAllColumns()
-                      .filter((column) => column.getCanHide())
-                      .map((column) => {
-                        return (
-                          <DropdownMenuCheckboxItem
-                            key={column.id}
-                            className="capitalize"
-                            checked={column.getIsVisible()}
-                            onCheckedChange={(value) =>
-                              column.toggleVisibility(!!value)
-                            }
-                          >
-                            {column.id}
-                          </DropdownMenuCheckboxItem>
-                        )
-                      })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0}>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the selected user(s).
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteSelected} className="bg-red-600 hover:bg-red-700">Continue</AlertDialogAction>
-                    </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-                 <Sheet open={isAddUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
-                    <SheetTrigger asChild>
-                        <Button>
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Add User
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent>
-                        <SheetHeader>
-                        <SheetTitle>Add a new user</SheetTitle>
-                        <SheetDescription>
-                            Fill in the details below to add a new user to the system.
-                        </SheetDescription>
-                        </SheetHeader>
-                        <Form {...addUserForm}>
-                        <form onSubmit={addUserForm.handleSubmit(handleAddUser)} className="space-y-8 py-4">
-                            <FormField
-                            control={addUserForm.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="john.doe@example.com" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                            <SheetFooter>
-                                <SheetClose asChild>
-                                    <Button type="button" variant="ghost">Cancel</Button>
-                                </SheetClose>
-                                <Button type="submit">Add User</Button>
-                            </SheetFooter>
-                        </form>
-                        </Form>
-                    </SheetContent>
-                </Sheet>
-              </div>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Users</CardTitle>
+            <CardDescription>UI for admins to manage identities.</CardDescription>
           </div>
-        </CardContent>
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="User Search"
+                value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+                onChange={(event) =>
+                  table.getColumn("email")?.setFilterValue(event.target.value)
+                }
+                className="pl-9"
+              />
+            </div>
+            <Select defaultValue="all">
+              <SelectTrigger className="w-auto gap-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="icon"><RefreshCw className="h-4 w-4" /></Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Columns className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    )
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="icon" disabled={table.getFilteredSelectedRowModel().rows.length === 0}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the selected user(s).
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteSelected} className="bg-red-600 hover:bg-red-700">Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <Sheet open={isAddUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
+              <SheetTrigger asChild>
+                <Button>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add User
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Add a new user</SheetTitle>
+                  <SheetDescription>
+                    Fill in the details below to add a new user to the system.
+                  </SheetDescription>
+                </SheetHeader>
+                <Form {...addUserForm}>
+                  <form onSubmit={addUserForm.handleSubmit(handleAddUser)} className="space-y-8 py-4">
+                    <FormField
+                      control={addUserForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input placeholder="john.doe@example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <SheetFooter>
+                      <SheetClose asChild>
+                        <Button type="button" variant="ghost">Cancel</Button>
+                      </SheetClose>
+                      <Button type="submit">Add User</Button>
+                    </SheetFooter>
+                  </form>
+                </Form>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </CardHeader>
       </Card>
       
       <Card>
@@ -503,3 +499,5 @@ export function UserManagement() {
     </div>
   )
 }
+
+    
