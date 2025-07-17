@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import {
-  ArrowUpDown, MoreHorizontal, Search, Trash2, UserPlus, RefreshCw, Columns, ChevronLeft, ChevronRight, Filter, FileUp, FileSpreadsheet, FileText
+  ArrowUpDown, MoreHorizontal, Search, Trash2, UserPlus, RefreshCw, Columns, ChevronLeft, ChevronRight, Filter, FileUp, FileSpreadsheet, FileText, ChevronDown
 } from "lucide-react"
 import {
   ColumnDef,
@@ -331,9 +331,8 @@ export function UserManagement() {
             </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-1">
+                <Button variant="outline" size="icon">
                   <FileUp className="h-4 w-4" />
-                  Export
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -419,7 +418,7 @@ export function UserManagement() {
       
       <Card>
         <CardContent className="p-0">
-            <div className="rounded-md border-b">
+            <div className="overflow-auto">
                 <Table>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
@@ -526,7 +525,3 @@ export function UserManagement() {
     </div>
   )
 }
-
-    
-
-    
