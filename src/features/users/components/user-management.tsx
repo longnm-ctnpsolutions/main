@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import {
-  ArrowUpDown, MoreVertical, Search, Trash2, UserPlus, RefreshCw, Columns, ChevronLeft, ChevronRight, FileUp, FileSpreadsheet, FileText, ChevronDown
+  ArrowUpDown, MoreVertical, Search, Trash2, UserPlus, RefreshCw, Columns, ChevronLeft, ChevronRight, FileUp, FileSpreadsheet, FileText, ChevronDown, Filter
 } from "lucide-react"
 import {
   ColumnDef,
@@ -21,9 +21,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
-import { users as defaultUsers, type User } from "@/lib/users"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { users as defaultUsers, type User } from "@/shared/lib/users"
+import { Button } from "@/shared/components/ui/button"
+import { Checkbox } from "@/shared/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,8 +31,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+} from "@/shared/components/ui/dropdown-menu"
+import { Input } from "@/shared/components/ui/input"
 import {
   Table,
   TableBody,
@@ -40,7 +40,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/shared/components/ui/table"
 import {
   Sheet,
   SheetContent,
@@ -50,7 +50,7 @@ import {
   SheetFooter,
   SheetClose,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/shared/components/ui/sheet"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,7 +61,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/shared/components/ui/alert-dialog"
 import {
   Form,
   FormControl,
@@ -69,18 +69,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { useToast } from "@/hooks/use-toast"
-import { cn } from "@/lib/utils"
+} from "@/shared/components/ui/form"
+import { useToast } from "@/shared/hooks/use-toast"
+import { cn } from "@/shared/lib/utils"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
+} from "@/shared/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card"
+import { Label } from "@/shared/components/ui/label"
 
 
 const addUserFormSchema = z.object({
