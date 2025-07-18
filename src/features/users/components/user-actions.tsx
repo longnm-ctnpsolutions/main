@@ -244,20 +244,20 @@ export function UserActions({
 
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
             
-            <div className={cn("hidden items-center gap-2 md-lg:flex", isSidebarExpanded && "md-lg:hidden")}>
-              {ColumnChooser}
-              {ExportMenu}
+            <div className={cn("hidden items-center gap-2 xl:flex", isSidebarExpanded && "hidden")}>
+                {AddUserSheet}
             </div>
-            
-            <div className={cn("hidden items-center gap-2 lg:flex", isSidebarExpanded && "lg:hidden")}>
+
+            <div className={cn("hidden items-center gap-2 lg:flex", isSidebarExpanded && "hidden")}>
               {DeleteDialog}
             </div>
 
-            <div className={cn("hidden items-center gap-2 xl:flex", isSidebarExpanded && "xl:hidden")}>
-                <div onClick={() => setAddUserSheetOpen(true)}>{AddUserSheet}</div>
+            <div className={cn("hidden items-center gap-2 md-lg:flex", isSidebarExpanded && "hidden")}>
+              {ExportMenu}
+              {ColumnChooser}
             </div>
 
-            <div className="flex sm:hidden md-lg:hidden lg:hidden xl:hidden">
+            <div className={cn("flex xl:hidden", isSidebarExpanded && "flex")}>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
@@ -265,30 +265,86 @@ export function UserActions({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <div className="xl:hidden"><DropdownMenuItem onSelect={() => setAddUserSheetOpen(true)}>Add User</DropdownMenuItem></div>
-                        <div className="lg:hidden">{DeleteDialog}</div>
-                        <div className="md-lg:hidden">{ColumnChooser}</div>
-                        <div className="md-lg:hidden">{ExportMenu}</div>
-                        <div className="sm:hidden">
-                            <DropdownMenuSeparator />
-                            <UserFilters table={table} />
-                        </div>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-            <div className={cn("hidden", isSidebarExpanded && "flex")}>
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => setAddUserSheetOpen(true)}>Add User</DropdownMenuItem>
-                        <DropdownMenuItem>{DeleteDialog}</DropdownMenuItem>
-                        <DropdownMenuItem>{ExportMenu}</DropdownMenuItem>
-                        <DropdownMenuItem>{ColumnChooser}</DropdownMenuItem>
-                        <div className="sm:hidden">
+                        <DropdownMenuItem onSelect={(e) => setAddUserSheetOpen(true)} className={cn(isSidebarExpanded ? 'flex' : 'xl:hidden')}>
+                           <UserPlus className="mr-2 h-4 w-4" /> Add User
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className={cn(isSidebarExpanded ? 'flex' : 'lg:hidden')}>
+                          <div onClick={(e) => {
+                            e.stopPropagation();
+                            const trigger = document.getElementById('delete-dialog-trigger');
+                            if(trigger) trigger.click();
+                          }}>
+                           <AlertDialog>
+                              <AlertDialogTrigger asChild id="delete-dialog-trigger">
+                                  <div className="flex items-center">
+                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                  </div>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                      This action cannot be undone. This will permanently delete the selected user(s).
+                                  </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={onDeleteSelected} className="bg-red-600 hover:bg-red-700">Continue</AlertDialogAction>
+                                  </AlertDialogFooter>
+                              </AlertDialogContent>
+                          </AlertDialog>
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'md-lg:hidden')}>
+                            <DropdownMenuSubTrigger>
+                                <FileUp className="mr-2 h-4 w-4" />
+                                <span>Export</span>
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                                <DropdownMenuItem>
+                                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                <span>Export all data to Excel</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                <span>Export selected rows to Excel</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                <FileText className="mr-2 h-4 w-4" />
+                                <span>Export all data to PDF</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                <FileText className="mr-2 h-4 w-4" />
+                                <span>Export selected rows to PDF</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'md-lg:hidden')}>
+                            <DropdownMenuSubTrigger>
+                                <Columns className="mr-2 h-4 w-4" />
+                                <span>Column Chooser</span>
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                                {table
+                                .getAllColumns()
+                                .filter((column) => column.getCanHide())
+                                .map((column) => {
+                                    return (
+                                    <DropdownMenuItem key={column.id} onSelect={(e) => e.preventDefault()} className="gap-2">
+                                        <Checkbox
+                                        id={`col-toggle-${column.id}-sm`}
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={(value) =>
+                                            column.toggleVisibility(!!value)
+                                        }
+                                        />
+                                        <Label htmlFor={`col-toggle-${column.id}-sm`} className="capitalize cursor-pointer w-full">{column.id}</Label>
+                                    </DropdownMenuItem>
+                                    )
+                                })}
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <div className="flex sm:hidden">
                             <DropdownMenuSeparator />
                             <UserFilters table={table} />
                         </div>
@@ -303,3 +359,5 @@ export function UserActions({
     </Card>
   )
 }
+
+    
