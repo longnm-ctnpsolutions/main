@@ -94,6 +94,7 @@ export function UserDashboard() {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    autoResetPageIndex: false, // Prevent auto page index reset
     state: {
       sorting,
       columnFilters,
@@ -101,6 +102,13 @@ export function UserDashboard() {
       rowSelection,
     },
   })
+
+  React.useEffect(() => {
+    if (table.getState().columnFilters.length > 0) {
+      table.setPageIndex(0);
+    }
+  }, [table, columnFilters]);
+
 
   return (
     <div className="w-full space-y-4">
