@@ -118,17 +118,17 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuItem>
-                      <Link href={`/${locale}/users`} passHref>
+                      <Link href={`/${locale}/users`} passHref legacyBehavior>
                         <SidebarMenuSubButton isActive={pathname.includes('/users')}>Users</SidebarMenuSubButton>
                       </Link>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <Link href={`/${locale}/clients`} passHref>
+                      <Link href={`/${locale}/clients`} passHref legacyBehavior>
                         <SidebarMenuSubButton isActive={pathname.includes('/clients')}>Clients</SidebarMenuSubButton>
                       </Link>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <Link href={`/${locale}/roles`} passHref>
+                      <Link href={`/${locale}/roles`} passHref legacyBehavior>
                         <SidebarMenuSubButton isActive={pathname.includes('/roles')}>Roles</SidebarMenuSubButton>
                       </Link>
                     </SidebarMenuItem>
@@ -141,7 +141,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
             <SidebarMenu className="p-2">
               <SidebarMenuItem>
-                <Link href={`/${locale}/applications`} passHref>
+                <Link href={`/${locale}/applications`} passHref legacyBehavior>
                   <SidebarMenuButton
                     tooltip="Applications"
                     className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}
@@ -179,7 +179,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuItem>
-                      <Link href={`/${locale}/user-profile`} passHref>
+                      <Link href={`/${locale}/user-profile`} passHref legacyBehavior>
                         <SidebarMenuSubButton isActive={pathname.includes('/user-profile')}>User Profile</SidebarMenuSubButton>
                       </Link>
                     </SidebarMenuItem>
