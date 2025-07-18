@@ -298,7 +298,6 @@ export function UserActions({
                         <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'md-lg:hidden')}>
                             <DropdownMenuSubTrigger>
                                 <FileUp className="mr-2 h-4 w-4" />
-                                <span>Export</span>
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent>
                                 <DropdownMenuItem>
