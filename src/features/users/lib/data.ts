@@ -1,10 +1,5 @@
 
-export type User = {
-  id: string;
-  email: string;
-  status: 'active' | 'inactive';
-  connection: 'Email' | 'Google' | 'SAML' | 'Database';
-};
+import type { User } from "@/features/users/types/user.types";
 
 export const users: User[] = [
   { id: 'user-1', email: 'olivia.martin@email.com', status: 'active', connection: 'Database' },
