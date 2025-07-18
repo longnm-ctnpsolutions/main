@@ -257,21 +257,25 @@ export function UserActions({
                 {AddUserSheet}
             </div>
 
-            <div className={cn("flex", isSidebarExpanded ? "sm:flex" : "sm:flex md-lg:hidden")}>
+            <div className={cn("flex", isSidebarExpanded ? "sm:flex" : "flex")}>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className={cn(
+                    "sm:hidden",
+                    (isSidebarExpanded) ? 'flex' : 'hidden',
+                    !isSidebarExpanded && 'md-lg:hidden lg:hidden xl:hidden'
+                  )}>
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <div className={cn(isSidebarExpanded ? 'block' : 'xl:hidden')}>
+                    <div className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'xl:hidden')}>
                         <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
                     </div>
-                     <div className={cn(isSidebarExpanded ? 'block' : 'lg:hidden')}>
+                     <div className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'lg:hidden')}>
                          <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
                     </div>
-                   <div className={cn(isSidebarExpanded ? 'block' : 'md-lg:hidden')}>
+                   <div className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'md-lg:hidden')}>
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
                                 <FileUp className="mr-2 h-4 w-4" />
@@ -298,7 +302,7 @@ export function UserActions({
                         </DropdownMenuSub>
                          <DropdownMenuItem onSelect={e => e.preventDefault()}>{ColumnChooser}</DropdownMenuItem>
                    </div>
-                   <div className={cn("sm:hidden", isSidebarExpanded && "hidden sm:flex")}>
+                   <div className={cn("sm:hidden", isSidebarExpanded && "flex")}>
                         <DropdownMenuSeparator />
                         <UserFilters table={table} />
                    </div>
@@ -311,3 +315,5 @@ export function UserActions({
     </Card>
   )
 }
+
+  
