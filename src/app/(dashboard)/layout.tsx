@@ -17,12 +17,12 @@ import {
   SidebarTrigger,
   SidebarMenuSub,
   SidebarMenuSubButton,
+  useSidebar,
 } from "@/shared/components/ui/sidebar"
 import { ChevronDown, ChevronRight, Briefcase, Settings, Moon, Users } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/shared/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar"
-import { useSidebar } from "@/shared/components/ui/sidebar"
 import { cn } from "@/shared/lib/utils"
 
 function Header({ children }: { children: React.ReactNode }) {
@@ -74,11 +74,7 @@ function Header({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+function DashboardContent({ children }: { children: React.ReactNode }) {
   const { state, setOpen } = useSidebar()
   const [isManagementOpen, setManagementOpen] = React.useState(true)
   const [isSettingsOpen, setSettingsOpen] = React.useState(false)
@@ -90,99 +86,110 @@ export default function DashboardLayout({
   };
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen flex-col bg-background">
-        <Header>
-          <div />
-        </Header>
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar>
-            <SidebarContent>
-              <SidebarMenu className="p-2">
-                <Collapsible open={isManagementOpen} onOpenChange={setManagementOpen}>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        tooltip="Management"
-                        className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}
-                        onClick={handleMenuClick}
-                      >
-                        <Users className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                        <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
-                          <span className="whitespace-nowrap">Management</span>
-                          {isManagementOpen ? <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-500" />}
-                        </div>
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                  </SidebarMenuItem>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuItem>
-                        <SidebarMenuSubButton isActive>Users</SidebarMenuSubButton>
-                      </SidebarMenuItem>
-                      <SidebarMenuItem>
-                        <SidebarMenuSubButton>Clients</SidebarMenuSubButton>
-                      </SidebarMenuItem>
-                      <SidebarMenuItem>
-                        <SidebarMenuSubButton>Roles</SidebarMenuSubButton>
-                      </SidebarMenuItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenu>
-                
-              <div className="my-1 h-px w-full bg-sidebar-border" />
-
-              <SidebarMenu className="p-2">
+    <div className="flex h-screen flex-col bg-background">
+      <Header>
+        <div />
+      </Header>
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar>
+          <SidebarContent>
+            <SidebarMenu className="p-2">
+              <Collapsible open={isManagementOpen} onOpenChange={setManagementOpen}>
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    tooltip="Applications"
-                    className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}
-                    onClick={handleMenuClick}
-                  >
-                    <Briefcase className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                    <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
-                       <span className="whitespace-nowrap">Applications</span>
-                    </div>
-                  </SidebarMenuButton>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      tooltip="Management"
+                      className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}
+                      onClick={handleMenuClick}
+                    >
+                      <Users className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                      <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
+                        <span className="whitespace-nowrap">Management</span>
+                        {isManagementOpen ? <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-500" />}
+                      </div>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
                 </SidebarMenuItem>
-              </SidebarMenu>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuItem>
+                      <SidebarMenuSubButton isActive>Users</SidebarMenuSubButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuSubButton>Clients</SidebarMenuSubButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuSubButton>Roles</SidebarMenuSubButton>
+                    </SidebarMenuItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </Collapsible>
+            </SidebarMenu>
+              
+            <div className="my-1 h-px w-full bg-sidebar-border" />
 
-              <div className="my-1 h-px w-full bg-sidebar-border" />
+            <SidebarMenu className="p-2">
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Applications"
+                  className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}
+                  onClick={handleMenuClick}
+                >
+                  <Briefcase className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                  <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
+                     <span className="whitespace-nowrap">Applications</span>
+                  </div>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
 
-              <SidebarMenu className="p-2">
-                <Collapsible open={isSettingsOpen} onOpenChange={setSettingsOpen}>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        tooltip="Settings"
-                        className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}
-                        onClick={handleMenuClick}
-                      >
-                        <Settings className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                        <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
-                          <span className="whitespace-nowrap">Setting</span>
-                          {isSettingsOpen ? <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-500" />}
-                        </div>
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                  </SidebarMenuItem>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuItem>
-                        <SidebarMenuSubButton>User Profile</SidebarMenuSubButton>
-                      </SidebarMenuItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenu>
-            </SidebarContent>
-          </Sidebar>
-          <main className="flex-1 overflow-auto bg-muted/40 p-4 sm:p-6 lg:p-8">
-            {children}
-          </main>
-        </div>
+            <div className="my-1 h-px w-full bg-sidebar-border" />
+
+            <SidebarMenu className="p-2">
+              <Collapsible open={isSettingsOpen} onOpenChange={setSettingsOpen}>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      tooltip="Settings"
+                      className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}
+                      onClick={handleMenuClick}
+                    >
+                      <Settings className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                      <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
+                        <span className="whitespace-nowrap">Setting</span>
+                        {isSettingsOpen ? <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-500" />}
+                      </div>
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                </SidebarMenuItem>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuItem>
+                      <SidebarMenuSubButton>User Profile</SidebarMenuSubButton>
+                    </SidebarMenuItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </Collapsible>
+            </SidebarMenu>
+          </SidebarContent>
+        </Sidebar>
+        <main className="flex-1 overflow-auto bg-muted/40 p-4 sm:p-6 lg:p-8">
+          {children}
+        </main>
       </div>
+    </div>
+  )
+}
+
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <SidebarProvider>
+      <DashboardContent>{children}</DashboardContent>
     </SidebarProvider>
   )
 }
