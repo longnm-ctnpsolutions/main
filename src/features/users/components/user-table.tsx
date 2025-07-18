@@ -53,7 +53,10 @@ export function UserTable({ table, columns }: UserTableProps) {
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className={cn({
+                    'hidden md:table-cell': header.id === 'connection',
+                    'hidden sm:table-cell': header.id === 'status'
+                  })}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -74,7 +77,10 @@ export function UserTable({ table, columns }: UserTableProps) {
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className={cn({
+                    'hidden md:table-cell': cell.column.id === 'connection',
+                    'hidden sm:table-cell': cell.column.id === 'status'
+                  })}>
                     {flexRender(
                       cell.column.columnDef.cell,
                       cell.getContext()

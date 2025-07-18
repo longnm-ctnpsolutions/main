@@ -94,7 +94,7 @@ export function UserDashboard() {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    autoResetPageIndex: false, // Prevent auto page index reset
+    autoResetPageIndex: false,
     state: {
       sorting,
       columnFilters,
