@@ -87,7 +87,6 @@ export function UserActions({
   onAddUser,
   onDeleteSelected,
 }: UserActionsProps) {
-  const isFiltered = table.getState().columnFilters.length > 0;
   
   const AddUserSheet = (
     <Sheet open={isAddUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
@@ -131,15 +130,17 @@ export function UserActions({
     </Sheet>
   );
 
-  const DeleteDialog = (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
+  const DeleteDialogTrigger = (
+     <AlertDialogTrigger asChild>
         <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0} className="w-full justify-start md:w-auto">
           <Trash2 className="mr-2 h-4 w-4" />
           Delete
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+  )
+
+  const DeleteDialogContent = (
+    <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -151,8 +152,7 @@ export function UserActions({
           <AlertDialogAction onClick={onDeleteSelected} className="bg-red-600 hover:bg-red-700">Continue</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
-    </AlertDialog>
-  );
+  )
 
   const ExportMenu = (
     <DropdownMenuSub>
@@ -294,9 +294,12 @@ export function UserActions({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <div className="hidden md:flex items-center gap-2">
-                {DeleteDialog}
-            </div>
+            <AlertDialog>
+                <div className="hidden md:flex items-center gap-2">
+                    {DeleteDialogTrigger}
+                </div>
+                {DeleteDialogContent}
+            </AlertDialog>
             <div className="hidden sm:flex items-center gap-2">
                 {AddUserSheet}
             </div>
@@ -309,9 +312,20 @@ export function UserActions({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
+                    <AlertDialog>
+                        <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                            {DeleteDialogTrigger}
+                        </DropdownMenuItem>
+                        {DeleteDialogContent}
+                    </AlertDialog>
                    <div className="md:hidden">
-                        <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                             <AlertDialog>
+                                {DeleteDialogTrigger}
+                                {DeleteDialogContent}
+                            </AlertDialog>
+                        </DropdownMenuItem>
                    </div>
                    <DropdownMenuSeparator className="md:hidden" />
                    <div className="sm:hidden">
