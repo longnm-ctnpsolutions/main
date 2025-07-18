@@ -2,6 +2,8 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   Collapsible,
   CollapsibleContent,
@@ -76,6 +78,7 @@ function Header({ children }: { children: React.ReactNode }) {
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { state, setOpen } = useSidebar()
+  const pathname = usePathname();
   const [isManagementOpen, setManagementOpen] = React.useState(true)
   const [isSettingsOpen, setSettingsOpen] = React.useState(false)
 
@@ -84,6 +87,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       setOpen(true);
     }
   };
+
+  const locale = pathname.split('/')[1] || 'en';
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -113,13 +118,19 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuItem>
-                      <SidebarMenuSubButton isActive>Users</SidebarMenuSubButton>
+                      <Link href={`/${locale}/users`} passHref>
+                        <SidebarMenuSubButton isActive={pathname.includes('/users')}>Users</SidebarMenuSubButton>
+                      </Link>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <SidebarMenuSubButton>Clients</SidebarMenuSubButton>
+                      <Link href={`/${locale}/clients`} passHref>
+                        <SidebarMenuSubButton isActive={pathname.includes('/clients')}>Clients</SidebarMenuSubButton>
+                      </Link>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <SidebarMenuSubButton>Roles</SidebarMenuSubButton>
+                      <Link href={`/${locale}/roles`} passHref>
+                        <SidebarMenuSubButton isActive={pathname.includes('/roles')}>Roles</SidebarMenuSubButton>
+                      </Link>
                     </SidebarMenuItem>
                   </SidebarMenuSub>
                 </CollapsibleContent>
@@ -130,16 +141,19 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
             <SidebarMenu className="p-2">
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Applications"
-                  className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}
-                  onClick={handleMenuClick}
-                >
-                  <Briefcase className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                  <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
-                     <span className="whitespace-nowrap">Applications</span>
-                  </div>
-                </SidebarMenuButton>
+                <Link href={`/${locale}/applications`} passHref>
+                  <SidebarMenuButton
+                    tooltip="Applications"
+                    className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}
+                    onClick={handleMenuClick}
+                    isActive={pathname.includes('/applications')}
+                  >
+                    <Briefcase className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                    <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
+                       <span className="whitespace-nowrap">Applications</span>
+                    </div>
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             </SidebarMenu>
 
@@ -165,7 +179,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuItem>
-                      <SidebarMenuSubButton>User Profile</SidebarMenuSubButton>
+                      <Link href={`/${locale}/user-profile`} passHref>
+                        <SidebarMenuSubButton isActive={pathname.includes('/user-profile')}>User Profile</SidebarMenuSubButton>
+                      </Link>
                     </SidebarMenuItem>
                   </SidebarMenuSub>
                 </CollapsibleContent>
