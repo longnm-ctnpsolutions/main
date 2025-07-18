@@ -130,85 +130,88 @@ export function UserActions({
     </Sheet>
   );
 
-  const DeleteDialogTrigger = (
-     <AlertDialogTrigger asChild>
-        <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0} className="w-full justify-start md:w-auto">
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete
-        </Button>
-      </AlertDialogTrigger>
-  )
-
-  const DeleteDialogContent = (
-    <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the selected user(s).
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onDeleteSelected} className="bg-red-600 hover:bg-red-700">Continue</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+  const DeleteDialog = (
+     <AlertDialog>
+        <AlertDialogTrigger asChild>
+            <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0} className="w-full justify-start md:w-auto">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+            </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the selected user(s).
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onDeleteSelected} className="bg-red-600 hover:bg-red-700">Continue</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
   )
 
   const ExportMenu = (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger>
-        <FileUp className="mr-2 h-4 w-4" />
-        Export
-      </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent>
-        <DropdownMenuItem>
-          <FileSpreadsheet className="mr-2 h-4 w-4" />
-          <span>Export all to Excel</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <FileSpreadsheet className="mr-2 h-4 w-4" />
-          <span>Export selected to Excel</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <FileText className="mr-2 h-4 w-4" />
-          <span>Export all to PDF</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <FileText className="mr-2 h-4 w-4" />
-          <span>Export selected to PDF</span>
-        </DropdownMenuItem>
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
+    <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-10">
+            <FileUp className="h-4 w-4" />
+            <span className="hidden lg:inline-flex">Export</span>
+            <ChevronDown className="ml-2 h-4 w-4 hidden lg:inline-flex" />
+            </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+            <DropdownMenuItem>
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            <span>Export all data to Excel</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            <span>Export selected rows to Excel</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+            <FileText className="mr-2 h-4 w-4" />
+            <span>Export all data to PDF</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+            <FileText className="mr-2 h-4 w-4" />
+            <span>Export selected rows to PDF</span>
+            </DropdownMenuItem>
+        </DropdownMenuContent>
+    </DropdownMenu>
   );
 
   const ColumnChooser = (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger>
-        <Columns className="mr-2 h-4 w-4" />
-        View
-      </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className="w-48">
-        <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {table
-          .getAllColumns()
-          .filter((column) => column.getCanHide())
-          .map((column) => {
-            return (
-              <DropdownMenuItem key={column.id} onSelect={(e) => e.preventDefault()} className="gap-2">
-                <Checkbox
-                  id={`col-toggle-${column.id}`}
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) =>
-                    column.toggleVisibility(!!value)
-                  }
-                />
-                <Label htmlFor={`col-toggle-${column.id}`} className="capitalize cursor-pointer w-full">{column.id}</Label>
-              </DropdownMenuItem>
-            )
-          })}
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
+     <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+            <Columns className="h-4 w-4" />
+            </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {table
+            .getAllColumns()
+            .filter((column) => column.getCanHide())
+            .map((column) => {
+                return (
+                <DropdownMenuItem key={column.id} onSelect={(e) => e.preventDefault()} className="gap-2">
+                    <Checkbox
+                    id={`col-toggle-${column.id}-lg`}
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                    }
+                    />
+                    <Label htmlFor={`col-toggle-${column.id}-lg`} className="capitalize cursor-pointer w-full">{column.id}</Label>
+                </DropdownMenuItem>
+                )
+            })}
+        </DropdownMenuContent>
+    </DropdownMenu>
   );
 
   return (
@@ -231,80 +234,27 @@ export function UserActions({
                   className="pl-9 w-full md:w-[150px] lg:w-[250px]"
                 />
             </div>
+            
             <div className="hidden sm:flex items-center gap-2">
                  <UserFilters table={table} />
             </div>
+
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
 
-            <div className="hidden xl:flex items-center gap-2">
-               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                   <Button variant="ghost" className="h-10">
-                    <FileUp className="h-4 w-4" />
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <FileSpreadsheet className="mr-2 h-4 w-4" />
-                    <span>Export all data to Excel</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <FileSpreadsheet className="mr-2 h-4 w-4" />
-                    <span>Export selected rows to Excel</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <FileText className="mr-2 h-4 w-4" />
-                    <span>Export all data to PDF</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <FileText className="mr-2 h-4 w-4" />
-                    <span>Export selected rows to PDF</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="hidden md:flex items-center gap-2">
+               {ColumnChooser}
+               {ExportMenu}
             </div>
+            
             <div className="hidden lg:flex items-center gap-2">
-               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Columns className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {table
-                    .getAllColumns()
-                    .filter((column) => column.getCanHide())
-                    .map((column) => {
-                      return (
-                        <DropdownMenuItem key={column.id} onSelect={(e) => e.preventDefault()} className="gap-2">
-                          <Checkbox
-                            id={`col-toggle-${column.id}-lg`}
-                            checked={column.getIsVisible()}
-                            onCheckedChange={(value) =>
-                              column.toggleVisibility(!!value)
-                            }
-                          />
-                          <Label htmlFor={`col-toggle-${column.id}-lg`} className="capitalize cursor-pointer w-full">{column.id}</Label>
-                        </DropdownMenuItem>
-                      )
-                    })}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                {DeleteDialog}
             </div>
-            <AlertDialog>
-                <div className="hidden md:flex items-center gap-2">
-                    {DeleteDialogTrigger}
-                </div>
-                {DeleteDialogContent}
-            </AlertDialog>
-            <div className="hidden sm:flex items-center gap-2">
+
+            <div className="hidden xl:flex items-center gap-2">
                 {AddUserSheet}
             </div>
 
-            <div className="sm:hidden">
+            <div className="xl:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -312,31 +262,20 @@ export function UserActions({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
-                    <AlertDialog>
-                        <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                            {DeleteDialogTrigger}
-                        </DropdownMenuItem>
-                        {DeleteDialogContent}
-                    </AlertDialog>
+                    <div className="xl:hidden">
+                        <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
+                    </div>
+                    <div className="lg:hidden">
+                         <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
+                    </div>
                    <div className="md:hidden">
-                        <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                             <AlertDialog>
-                                {DeleteDialogTrigger}
-                                {DeleteDialogContent}
-                            </AlertDialog>
-                        </DropdownMenuItem>
+                         <DropdownMenuItem onSelect={e => e.preventDefault()}>{ExportMenu}</DropdownMenuItem>
+                         <DropdownMenuItem onSelect={e => e.preventDefault()}>{ColumnChooser}</DropdownMenuItem>
                    </div>
-                   <DropdownMenuSeparator className="md:hidden" />
+                   <DropdownMenuSeparator className="sm:hidden" />
                    <div className="sm:hidden">
                         <UserFilters table={table} />
                    </div>
-                  <div className="lg:hidden">
-                    {ColumnChooser}
-                  </div>
-                   <div className="xl:hidden">
-                    {ExportMenu}
-                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -346,3 +285,5 @@ export function UserActions({
     </Card>
   )
 }
+
+    
