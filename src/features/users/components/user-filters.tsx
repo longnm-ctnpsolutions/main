@@ -3,10 +3,9 @@
 
 import * as React from "react"
 import { Table } from "@tanstack/react-table"
-import { Search, RefreshCw } from "lucide-react"
+import { RefreshCw } from "lucide-react"
 
 import type { User } from "@/features/users/types/user.types"
-import { Input } from "@/shared/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -23,17 +22,6 @@ interface UserFiltersProps {
 export function UserFilters({ table }: UserFiltersProps) {
   return (
     <>
-      <div className="relative flex-1 max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="User Search"
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="pl-9"
-        />
-      </div>
       <Select 
         defaultValue="all"
         onValueChange={(value) => {

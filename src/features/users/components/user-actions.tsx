@@ -13,7 +13,9 @@ import {
   FileSpreadsheet, 
   FileText, 
   ChevronDown,
-  MoreVertical
+  MoreVertical,
+  Search,
+  RefreshCw
 } from "lucide-react"
 
 import type { User } from "@/features/users/types/user.types"
@@ -90,7 +92,7 @@ export function UserActions({
   const AddUserSheet = (
     <Sheet open={isAddUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
       <SheetTrigger asChild>
-        <Button className="w-full justify-start">
+        <Button className="w-full justify-start md:w-auto">
           <UserPlus className="mr-2 h-4 w-4" />
           Add User
         </Button>
@@ -132,7 +134,7 @@ export function UserActions({
   const DeleteDialog = (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0} className="w-full justify-start">
+        <Button variant="outline" disabled={table.getFilteredSelectedRowModel().rows.length === 0} className="w-full justify-start md:w-auto">
           <Trash2 className="mr-2 h-4 w-4" />
           Delete
         </Button>
@@ -215,90 +217,111 @@ export function UserActions({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Users</CardTitle>
-          <CardDescription>UI for admins to manage identities.</CardDescription>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden lg:flex items-center gap-2">
-            <UserFilters table={table} />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                 <Button variant="ghost" className="h-10">
-                  <FileUp className="h-4 w-4" />
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <FileSpreadsheet className="mr-2 h-4 w-4" />
-                  <span>Export all data to Excel</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <FileSpreadsheet className="mr-2 h-4 w-4" />
-                  <span>Export selected rows to Excel</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <FileText className="mr-2 h-4 w-4" />
-                  <span>Export all data to PDF</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <FileText className="mr-2 h-4 w-4" />
-                  <span>Export selected rows to PDF</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Columns className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => {
-                    return (
-                      <DropdownMenuItem key={column.id} onSelect={(e) => e.preventDefault()} className="gap-2">
-                        <Checkbox
-                          id={`col-toggle-${column.id}-lg`}
-                          checked={column.getIsVisible()}
-                          onCheckedChange={(value) =>
-                            column.toggleVisibility(!!value)
-                          }
-                        />
-                        <Label htmlFor={`col-toggle-${column.id}-lg`} className="capitalize cursor-pointer w-full">{column.id}</Label>
-                      </DropdownMenuItem>
-                    )
-                  })}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Button variant="ghost" className="w-full justify-center">Cancel</Button>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {DeleteDialog}
-            {AddUserSheet}
+      <CardHeader>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <CardTitle>Users</CardTitle>
+            <CardDescription>UI for admins to manage identities.</CardDescription>
           </div>
-          <div className="lg:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
-                <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {ExportMenu}
-                {ColumnChooser}
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 md:grow-0">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="User Search"
+                  value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+                  onChange={(event) =>
+                    table.getColumn("email")?.setFilterValue(event.target.value)
+                  }
+                  className="pl-9 w-full md:w-[200px] lg:w-[250px]"
+                />
+            </div>
+            <UserFilters table={table} />
+            <div className="hidden xl:flex items-center gap-2">
+               <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                   <Button variant="ghost" className="h-10">
+                    <FileUp className="h-4 w-4" />
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <FileSpreadsheet className="mr-2 h-4 w-4" />
+                    <span>Export all data to Excel</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <FileSpreadsheet className="mr-2 h-4 w-4" />
+                    <span>Export selected rows to Excel</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Export all data to PDF</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Export selected rows to PDF</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="hidden lg:flex items-center gap-2">
+               <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Columns className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {table
+                    .getAllColumns()
+                    .filter((column) => column.getCanHide())
+                    .map((column) => {
+                      return (
+                        <DropdownMenuItem key={column.id} onSelect={(e) => e.preventDefault()} className="gap-2">
+                          <Checkbox
+                            id={`col-toggle-${column.id}-lg`}
+                            checked={column.getIsVisible()}
+                            onCheckedChange={(value) =>
+                              column.toggleVisibility(!!value)
+                            }
+                          />
+                          <Label htmlFor={`col-toggle-${column.id}-lg`} className="capitalize cursor-pointer w-full">{column.id}</Label>
+                        </DropdownMenuItem>
+                      )
+                    })}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Button variant="ghost" className="w-full justify-center">Cancel</Button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="hidden md:flex items-center gap-2">
+                {DeleteDialog}
+                {AddUserSheet}
+            </div>
+            <div className="md:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <div className="lg:hidden">
+                    {ColumnChooser}
+                  </div>
+                   <div className="xl:hidden">
+                    {ExportMenu}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </CardHeader>
