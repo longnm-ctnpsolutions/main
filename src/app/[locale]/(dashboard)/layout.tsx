@@ -118,17 +118,17 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuItem>
-                      <Link href={`/${locale}/users`} passHref legacyBehavior>
+                      <Link href={`/${locale}/users`}>
                         <SidebarMenuSubButton isActive={pathname.includes('/users')}>Users</SidebarMenuSubButton>
                       </Link>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <Link href={`/${locale}/clients`} passHref legacyBehavior>
+                      <Link href={`/${locale}/clients`}>
                         <SidebarMenuSubButton isActive={pathname.includes('/clients')}>Clients</SidebarMenuSubButton>
                       </Link>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <Link href={`/${locale}/roles`} passHref legacyBehavior>
+                      <Link href={`/${locale}/roles`}>
                         <SidebarMenuSubButton isActive={pathname.includes('/roles')}>Roles</SidebarMenuSubButton>
                       </Link>
                     </SidebarMenuItem>
@@ -179,7 +179,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuItem>
-                      <Link href={`/${locale}/user-profile`} passHref legacyBehavior>
+                      <Link href={`/${locale}/user-profile`}>
                         <SidebarMenuSubButton isActive={pathname.includes('/user-profile')}>User Profile</SidebarMenuSubButton>
                       </Link>
                     </SidebarMenuItem>
