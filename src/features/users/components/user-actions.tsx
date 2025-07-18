@@ -244,16 +244,16 @@ export function UserActions({
 
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
 
-            <div className={cn("items-center gap-2 hidden", !isSidebarExpanded && "md-lg:flex")}>
+            <div className={cn("items-center gap-2 hidden", !isSidebarExpanded ? "md-lg:flex" : "hidden")}>
                {ColumnChooser}
                {ExportMenu}
             </div>
             
-            <div className={cn("items-center gap-2 hidden", !isSidebarExpanded && "lg:flex")}>
+            <div className={cn("items-center gap-2 hidden", !isSidebarExpanded ? "lg:flex" : "hidden")}>
                 {DeleteDialog}
             </div>
 
-            <div className={cn("items-center gap-2 hidden", !isSidebarExpanded && "xl:flex")}>
+            <div className={cn("items-center gap-2 hidden", !isSidebarExpanded ? "xl:flex" : "hidden")}>
                 {AddUserSheet}
             </div>
 
@@ -265,13 +265,13 @@ export function UserActions({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <div className={cn("xl:hidden", isSidebarExpanded && "hidden xl:flex")}>
+                    <div className={cn("hidden", isSidebarExpanded ? 'block' : 'xl:hidden')}>
                         <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
                     </div>
-                     <div className={cn("lg:hidden", isSidebarExpanded && "hidden lg:flex")}>
+                     <div className={cn("hidden", isSidebarExpanded ? 'block' : 'lg:hidden')}>
                          <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
                     </div>
-                   <div className={cn("md-lg:hidden", isSidebarExpanded && "hidden md-lg:flex")}>
+                   <div className={cn("hidden", isSidebarExpanded ? 'block' : 'md-lg:hidden')}>
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
                                 <FileUp className="mr-2 h-4 w-4" />
@@ -311,3 +311,4 @@ export function UserActions({
     </Card>
   )
 }
+
