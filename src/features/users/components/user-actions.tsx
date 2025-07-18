@@ -238,26 +238,26 @@ export function UserActions({
                 />
             </div>
             
-            <div className={cn("items-center gap-2 hidden", isSidebarExpanded ? "sm:hidden" : "sm:flex")}>
+            <div className={cn("items-center gap-2 hidden", !isSidebarExpanded && "sm:flex")}>
                  <UserFilters table={table} />
             </div>
 
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
 
-            <div className={cn("items-center gap-2 hidden", isSidebarExpanded ? "md-lg:hidden" : "md-lg:flex")}>
+            <div className={cn("items-center gap-2 hidden", !isSidebarExpanded && "md-lg:flex")}>
                {ColumnChooser}
                {ExportMenu}
             </div>
             
-            <div className={cn("items-center gap-2 hidden", isSidebarExpanded ? "lg:hidden" : "lg:flex")}>
+            <div className={cn("items-center gap-2 hidden", !isSidebarExpanded && "lg:flex")}>
                 {DeleteDialog}
             </div>
 
-            <div className={cn("items-center gap-2 hidden", isSidebarExpanded ? "xl:hidden" : "xl:flex")}>
+            <div className={cn("items-center gap-2 hidden", !isSidebarExpanded && "xl:flex")}>
                 {AddUserSheet}
             </div>
 
-            <div className={cn("flex xl:hidden", isSidebarExpanded && "flex")}>
+            <div className={cn("flex", !isSidebarExpanded ? "xl:hidden" : "sm:flex")}>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -265,13 +265,13 @@ export function UserActions({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <div className={cn("hidden", isSidebarExpanded ? "xl:flex" : "xl:hidden")}>
+                    <div className={cn("xl:hidden", isSidebarExpanded && "hidden xl:flex")}>
                         <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
                     </div>
-                     <div className={cn("hidden", isSidebarExpanded ? "lg:flex" : "lg:hidden")}>
+                     <div className={cn("lg:hidden", isSidebarExpanded && "hidden lg:flex")}>
                          <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
                     </div>
-                   <div className={cn("hidden", isSidebarExpanded ? "md-lg:flex" : "md-lg:hidden")}>
+                   <div className={cn("md-lg:hidden", isSidebarExpanded && "hidden md-lg:flex")}>
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
                                 <FileUp className="mr-2 h-4 w-4" />
@@ -298,7 +298,7 @@ export function UserActions({
                         </DropdownMenuSub>
                          <DropdownMenuItem onSelect={e => e.preventDefault()}>{ColumnChooser}</DropdownMenuItem>
                    </div>
-                   <div className={cn("hidden", isSidebarExpanded ? "sm:flex" : "sm:hidden")}>
+                   <div className={cn("sm:hidden", isSidebarExpanded && "hidden sm:flex")}>
                         <DropdownMenuSeparator />
                         <UserFilters table={table} />
                    </div>
