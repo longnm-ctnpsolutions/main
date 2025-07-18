@@ -31,7 +31,7 @@ function Header() {
     <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-sidebar px-4 sm:px-6">
       <SidebarTrigger />
       <div className="font-headline text-lg font-semibold text-primary">
-        AuthAdminLite
+        CAuth2
       </div>
       <div className="ml-auto flex items-center gap-4">
         <Button variant="ghost" size="icon">

@@ -181,10 +181,13 @@ export function UserManagement() {
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
         const isActive = status === 'active';
+        // Wrap the content in a div with classes for creating a rounded "pill" shape.
         return (
-          <div className="flex items-center">
-             <span className={cn("mr-2 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
-             <span className="capitalize">{status}</span>
+          <div className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold",
+            isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800" // Apply colors based on status
+          )}>
+             <span className={cn("mr-1 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} /> {/* Status dot */}
+             <span className="capitalize">{status}</span> {/* Status text */}
           </div>
         )
       }
