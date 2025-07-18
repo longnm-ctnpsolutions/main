@@ -1,7 +1,5 @@
 import { UserManagement } from "@/features/users/components/user-management";
 
-export default function Home() {
-  return (
-    <UserManagement />
-  );
+export default function UsersPage() {
+  return <UserManagement />;
 }
