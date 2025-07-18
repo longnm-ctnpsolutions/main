@@ -244,76 +244,76 @@ export function UserActions({
 
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
             
-            <div className={cn("items-center gap-2", isSidebarExpanded ? "hidden" : "hidden md-lg:flex")}>
+            <div className={cn("hidden items-center gap-2", isSidebarExpanded ? "" : "md-lg:flex")}>
                {ColumnChooser}
                {ExportMenu}
             </div>
             
-            <div className={cn("items-center gap-2", isSidebarExpanded ? "hidden" : "hidden lg:flex")}>
+            <div className={cn("hidden items-center gap-2", isSidebarExpanded ? "" : "lg:flex")}>
                 {DeleteDialog}
             </div>
 
-            <div className={cn("items-center gap-2", isSidebarExpanded ? "hidden" : "hidden xl:flex")}>
+            <div className={cn("hidden items-center gap-2", isSidebarExpanded ? "" : "xl:flex")}>
                 {AddUserSheet}
             </div>
 
-            <div className={cn("flex", isSidebarExpanded ? "sm:flex" : "flex")}>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className={cn(
-                    "sm:hidden",
-                    (isSidebarExpanded) ? 'flex' : 'hidden',
-                    !isSidebarExpanded && 'md-lg:hidden lg:hidden xl:hidden'
-                  )}>
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <div className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'xl:hidden')}>
-                        <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
-                    </div>
-                     <div className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'lg:hidden')}>
-                         <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
-                    </div>
-                   <div className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'md-lg:hidden')}>
-                        <DropdownMenuSub>
-                            <DropdownMenuSubTrigger>
-                                <FileUp className="mr-2 h-4 w-4" />
-                                <span>Export</span>
-                            </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent>
-                                <DropdownMenuItem>
-                                    <FileSpreadsheet className="mr-2 h-4 w-4" />
-                                    <span>Export all to Excel</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <FileSpreadsheet className="mr-2 h-4 w-4" />
-                                    <span>Export selected to Excel</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <FileText className="mr-2 h-4 w-4" />
-                                    <span>Export all to PDF</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <FileText className="mr-2 h-4 w-4" />
-                                    <span>Export selected to PDF</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuSubContent>
-                        </DropdownMenuSub>
-                         <DropdownMenuItem onSelect={e => e.preventDefault()}>{ColumnChooser}</DropdownMenuItem>
-                   </div>
-                   <div className={cn("sm:hidden", isSidebarExpanded && "flex")}>
-                        <DropdownMenuSeparator />
-                        <UserFilters table={table} />
-                   </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className={cn(
+                    "flex",
+                    isSidebarExpanded ? "flex" : "sm:hidden md-lg:hidden lg:hidden xl:hidden"
+                )}>
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                  <div className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'xl:hidden')}>
+                      <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
+                  </div>
+                   <div className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'lg:hidden')}>
+                       <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
+                  </div>
+                 <div className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'md-lg:hidden')}>
+                      <DropdownMenuSub>
+                          <DropdownMenuSubTrigger>
+                              <FileUp className="mr-2 h-4 w-4" />
+                              <span>Export</span>
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent>
+                              <DropdownMenuItem>
+                                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                  <span>Export all to Excel</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                  <span>Export selected to Excel</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  <span>Export all to PDF</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  <span>Export selected to PDF</span>
+                              </DropdownMenuItem>
+                          </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                       <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                        <div className="flex items-center">
+                          <Columns className="mr-2 h-4 w-4" />
+                          <span>Column Chooser</span>
+                        </div>
+                       </DropdownMenuItem>
+                 </div>
+                 <div className={cn("sm:hidden", isSidebarExpanded && "flex flex-col")}>
+                      <DropdownMenuSeparator />
+                      <UserFilters table={table} />
+                 </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </CardHeader>
     </Card>
   )
 }
-
-  
