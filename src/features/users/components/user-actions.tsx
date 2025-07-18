@@ -163,19 +163,19 @@ export function UserActions({
       <DropdownMenuSubContent>
         <DropdownMenuItem>
           <FileSpreadsheet className="mr-2 h-4 w-4" />
-          <span>Export all data to Excel</span>
+          <span>Export all to Excel</span>
         </DropdownMenuItem>
         <DropdownMenuItem>
           <FileSpreadsheet className="mr-2 h-4 w-4" />
-          <span>Export selected rows to Excel</span>
+          <span>Export selected to Excel</span>
         </DropdownMenuItem>
         <DropdownMenuItem>
           <FileText className="mr-2 h-4 w-4" />
-          <span>Export all data to PDF</span>
+          <span>Export all to PDF</span>
         </DropdownMenuItem>
         <DropdownMenuItem>
           <FileText className="mr-2 h-4 w-4" />
-          <span>Export selected rows to PDF</span>
+          <span>Export selected to PDF</span>
         </DropdownMenuItem>
       </DropdownMenuSubContent>
     </DropdownMenuSub>
@@ -207,10 +207,6 @@ export function UserActions({
               </DropdownMenuItem>
             )
           })}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Button variant="ghost" className="w-full justify-center">Cancel</Button>
-        </DropdownMenuItem>
       </DropdownMenuSubContent>
     </DropdownMenuSub>
   );
@@ -232,10 +228,14 @@ export function UserActions({
                   onChange={(event) =>
                     table.getColumn("email")?.setFilterValue(event.target.value)
                   }
-                  className="pl-9 w-full md:w-[200px] lg:w-[250px]"
+                  className="pl-9 w-full md:w-[150px] lg:w-[250px]"
                 />
             </div>
-            <UserFilters table={table} />
+            <div className="hidden sm:flex items-center gap-2">
+                 <UserFilters table={table} />
+            </div>
+            <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
+
             <div className="hidden xl:flex items-center gap-2">
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -291,18 +291,17 @@ export function UserActions({
                         </DropdownMenuItem>
                       )
                     })}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Button variant="ghost" className="w-full justify-center">Cancel</Button>
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
             <div className="hidden md:flex items-center gap-2">
                 {DeleteDialog}
+            </div>
+            <div className="hidden sm:flex items-center gap-2">
                 {AddUserSheet}
             </div>
-            <div className="md:hidden">
+
+            <div className="sm:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -311,8 +310,13 @@ export function UserActions({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onSelect={e => e.preventDefault()}>{AddUserSheet}</DropdownMenuItem>
-                  <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
-                  <DropdownMenuSeparator />
+                   <div className="md:hidden">
+                        <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
+                   </div>
+                   <DropdownMenuSeparator className="md:hidden" />
+                   <div className="sm:hidden">
+                        <UserFilters table={table} />
+                   </div>
                   <div className="lg:hidden">
                     {ColumnChooser}
                   </div>
