@@ -11,6 +11,9 @@ export default {
   ],
   theme: {
     extend: {
+       screens: {
+        'md-lg': '800px',
+      },
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Poppins', 'sans-serif'],

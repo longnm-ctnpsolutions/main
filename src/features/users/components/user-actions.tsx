@@ -241,7 +241,7 @@ export function UserActions({
 
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
 
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md-lg:flex items-center gap-2">
                {ColumnChooser}
                {ExportMenu}
             </div>
@@ -268,8 +268,31 @@ export function UserActions({
                     <div className="lg:hidden">
                          <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
                     </div>
-                   <div className="md:hidden">
-                         <DropdownMenuItem onSelect={e => e.preventDefault()}>{ExportMenu}</DropdownMenuItem>
+                   <div className="hidden md-lg:hidden">
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                                <FileUp className="mr-2 h-4 w-4" />
+                                <span>Export</span>
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                                <DropdownMenuItem>
+                                    <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                    <span>Export all to Excel</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <FileSpreadsheet className="mr-2 h-4 w-4" />
+                                    <span>Export selected to Excel</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    <span>Export all to PDF</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    <span>Export selected to PDF</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
                          <DropdownMenuItem onSelect={e => e.preventDefault()}>{ColumnChooser}</DropdownMenuItem>
                    </div>
                    <DropdownMenuSeparator className="sm:hidden" />
