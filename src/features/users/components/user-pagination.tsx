@@ -31,7 +31,7 @@ export function UserPagination({ table }: UserPaginationProps) {
         ))}
       </div>
       <div className="flex items-center gap-4">
-        <div className="text-muted-foreground">
+        <div className="text-muted-foreground hidden sm:block">
             Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} ({table.getFilteredRowModel().rows.length} items)
         </div>
         <div className="flex items-center gap-2">
