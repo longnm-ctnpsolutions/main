@@ -24,6 +24,7 @@ import { Card, CardContent } from "@/shared/components/ui/card"
 import { UserTable } from "./user-table"
 import { UserPagination } from "./user-pagination"
 import { UserActions } from "./user-actions"
+import { useSidebar } from "@/shared/components/ui/sidebar"
 
 const addUserFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -31,12 +32,15 @@ const addUserFormSchema = z.object({
 
 export function UserDashboard() {
   const { toast } = useToast()
+  const { state: sidebarState } = useSidebar()
   const [users, setUsers] = React.useState<User[]>(defaultUsers)
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [isAddUserSheetOpen, setAddUserSheetOpen] = React.useState(false)
+
+  const isSidebarExpanded = sidebarState === 'expanded';
 
   const addUserForm = useForm<z.infer<typeof addUserFormSchema>>({
     resolver: zodResolver(addUserFormSchema),
@@ -119,6 +123,7 @@ export function UserDashboard() {
         addUserForm={addUserForm}
         onAddUser={handleAddUser}
         onDeleteSelected={handleDeleteSelected}
+        isSidebarExpanded={isSidebarExpanded}
       />
       
       <Card>

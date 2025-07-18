@@ -17,6 +17,7 @@ import {
   Search,
   RefreshCw
 } from "lucide-react"
+import { cn } from "@/shared/lib/utils"
 
 import type { User } from "@/features/users/types/user.types"
 import { Button } from "@/shared/components/ui/button"
@@ -73,6 +74,7 @@ const addUserFormSchema = z.object({
 interface UserActionsProps {
   table: Table<User>
   isAddUserSheetOpen: boolean
+  isSidebarExpanded: boolean
   setAddUserSheetOpen: (isOpen: boolean) => void
   addUserForm: UseFormReturn<z.infer<typeof addUserFormSchema>>
   onAddUser: (values: z.infer<typeof addUserFormSchema>) => void
@@ -82,6 +84,7 @@ interface UserActionsProps {
 export function UserActions({ 
   table,
   isAddUserSheetOpen,
+  isSidebarExpanded,
   setAddUserSheetOpen,
   addUserForm,
   onAddUser,
@@ -235,26 +238,26 @@ export function UserActions({
                 />
             </div>
             
-            <div className="hidden sm:flex items-center gap-2">
+            <div className={cn("items-center gap-2", isSidebarExpanded ? "hidden" : "hidden sm:flex")}>
                  <UserFilters table={table} />
             </div>
 
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
 
-            <div className="hidden md-lg:flex items-center gap-2">
+            <div className={cn("items-center gap-2", isSidebarExpanded ? "hidden" : "hidden md-lg:flex")}>
                {ColumnChooser}
                {ExportMenu}
             </div>
             
-            <div className="hidden lg:flex items-center gap-2">
+            <div className={cn("items-center gap-2", isSidebarExpanded ? "hidden lg:flex" : "hidden lg:flex")}>
                 {DeleteDialog}
             </div>
 
-            <div className="hidden xl:flex items-center gap-2">
+            <div className={cn("items-center gap-2", isSidebarExpanded ? "hidden xl:flex" : "hidden xl:flex")}>
                 {AddUserSheet}
             </div>
 
-            <div className="xl:hidden">
+            <div className={cn("xl:hidden", isSidebarExpanded ? "flex" : "hidden")}>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -268,7 +271,7 @@ export function UserActions({
                     <div className="lg:hidden">
                          <DropdownMenuItem onSelect={e => e.preventDefault()}>{DeleteDialog}</DropdownMenuItem>
                     </div>
-                   <div className="hidden md-lg:hidden">
+                   <div className="md-lg:hidden">
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
                                 <FileUp className="mr-2 h-4 w-4" />
@@ -308,5 +311,3 @@ export function UserActions({
     </Card>
   )
 }
-
-    
