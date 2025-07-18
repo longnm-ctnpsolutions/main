@@ -141,7 +141,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
             <SidebarMenu className="p-2">
               <SidebarMenuItem>
-                <Link href={`/${locale}/applications`} passHref legacyBehavior>
+                <Link href={`/${locale}/applications`}>
                   <SidebarMenuButton
                     tooltip="Applications"
                     className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}
