@@ -12,7 +12,7 @@ export default {
   theme: {
     extend: {
        screens: {
-        'md-lg': '800px',
+        'md-lg': '820px',
       },
       fontFamily: {
         body: ['Inter', 'sans-serif'],
