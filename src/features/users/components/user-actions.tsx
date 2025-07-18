@@ -161,7 +161,7 @@ export function UserActions({
         <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-10">
             <FileUp className="h-4 w-4" />
-            <span className="hidden lg:inline-flex">Export</span>
+            <span>Export</span>
             <ChevronDown className="ml-2 h-4 w-4 hidden lg:inline-flex" />
             </Button>
         </DropdownMenuTrigger>
