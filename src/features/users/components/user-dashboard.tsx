@@ -38,7 +38,7 @@ export function UserDashboard() {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
-  const [isAddUserSheetOpen, setAddUserSheetOpen] = React.useState(false)
+  const [isAddUserDialogOpen, setAddUserDialogOpen] = React.useState(false)
 
   const isSidebarExpanded = sidebarState === 'expanded';
 
@@ -55,7 +55,7 @@ export function UserDashboard() {
       connection: "Database",
     }
     setUsers((prev) => [newUser, ...prev])
-    setAddUserSheetOpen(false)
+    setAddUserDialogOpen(false)
     addUserForm.reset()
     toast({
       title: "User added",
@@ -118,8 +118,8 @@ export function UserDashboard() {
     <div className="w-full space-y-4">
       <UserActions 
         table={table}
-        isAddUserSheetOpen={isAddUserSheetOpen}
-        setAddUserSheetOpen={setAddUserSheetOpen}
+        isAddUserDialogOpen={isAddUserDialogOpen}
+        setAddUserDialogOpen={setAddUserDialogOpen}
         addUserForm={addUserForm}
         onAddUser={handleAddUser}
         onDeleteSelected={handleDeleteSelected}

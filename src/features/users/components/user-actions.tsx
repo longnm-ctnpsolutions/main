@@ -34,15 +34,15 @@ import {
   DropdownMenuSubContent
 } from "@/shared/components/ui/dropdown-menu"
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-  SheetClose,
-  SheetTrigger,
-} from "@/shared/components/ui/sheet"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+  DialogTrigger,
+} from "@/shared/components/ui/dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,9 +73,9 @@ const addUserFormSchema = z.object({
 
 interface UserActionsProps {
   table: Table<User>
-  isAddUserSheetOpen: boolean
+  isAddUserDialogOpen: boolean
   isSidebarExpanded: boolean
-  setAddUserSheetOpen: (isOpen: boolean) => void
+  setAddUserDialogOpen: (isOpen: boolean) => void
   addUserForm: UseFormReturn<z.infer<typeof addUserFormSchema>>
   onAddUser: (values: z.infer<typeof addUserFormSchema>) => void
   onDeleteSelected: () => void
@@ -83,29 +83,29 @@ interface UserActionsProps {
 
 export function UserActions({ 
   table,
-  isAddUserSheetOpen,
+  isAddUserDialogOpen,
   isSidebarExpanded,
-  setAddUserSheetOpen,
+  setAddUserDialogOpen,
   addUserForm,
   onAddUser,
   onDeleteSelected,
 }: UserActionsProps) {
   
-  const AddUserSheet = (
-    <Sheet open={isAddUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
-      <SheetTrigger asChild>
+  const AddUserDialog = (
+    <Dialog open={isAddUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
+      <DialogTrigger asChild>
         <Button>
           <UserPlus className="mr-2 h-4 w-4" />
           Add User
         </Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Add a new user</SheetTitle>
-          <SheetDescription>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add a new user</DialogTitle>
+          <DialogDescription>
             Fill in the details below to add a new user to the system.
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
         <Form {...addUserForm}>
           <form onSubmit={addUserForm.handleSubmit(onAddUser)} className="space-y-8 py-4">
             <FormField
@@ -121,16 +121,16 @@ export function UserActions({
                 </FormItem>
               )}
             />
-            <SheetFooter>
-              <SheetClose asChild>
+            <DialogFooter>
+              <DialogClose asChild>
                 <Button type="button" variant="ghost">Cancel</Button>
-              </SheetClose>
+              </DialogClose>
               <Button type="submit">Add User</Button>
-            </SheetFooter>
+            </DialogFooter>
           </form>
         </Form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 
   const DeleteDialog = (
@@ -245,7 +245,7 @@ export function UserActions({
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
             
             <div className={cn("hidden items-center gap-2 xl:flex", isSidebarExpanded && "hidden")}>
-                {AddUserSheet}
+                {AddUserDialog}
             </div>
 
             <div className={cn("hidden items-center gap-2 lg:flex", isSidebarExpanded && "hidden")}>
@@ -265,7 +265,7 @@ export function UserActions({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={(e) => setAddUserSheetOpen(true)} className={cn(isSidebarExpanded ? 'flex' : 'xl:hidden')}>
+                        <DropdownMenuItem onSelect={() => setAddUserDialogOpen(true)} className={cn(isSidebarExpanded ? 'flex' : 'xl:hidden')}>
                            <UserPlus className="mr-2 h-4 w-4" /> Add User
                         </DropdownMenuItem>
                         <DropdownMenuItem onSelect={(e) => e.preventDefault()} className={cn(isSidebarExpanded ? 'flex' : 'lg:hidden')}>
@@ -358,5 +358,3 @@ export function UserActions({
     </Card>
   )
 }
-
-    
