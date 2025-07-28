@@ -18,14 +18,14 @@ import {
   SidebarMenuSubButton,
   useSidebar,
 } from "@/shared/components/ui/sidebar"
-import { ChevronDown, ChevronRight, Briefcase, Settings, Users } from "lucide-react"
+import { ChevronDown, ChevronRight, Briefcase, Settings, User } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
 export function SidebarNav() {
   const { state, setOpen } = useSidebar()
   const pathname = usePathname();
-  const [isManagementOpen, setManagementOpen] = React.useState(true)
-  const [isSettingsOpen, setSettingsOpen] = React.useState(false)
+  const [isIdentityManagerOpen, setIdentityManagerOpen] = React.useState(true)
+  const [isSettingsOpen, setSettingsOpen] = React.useState(true)
 
   const handleMenuClick = () => {
     if (state === 'collapsed') {
@@ -38,18 +38,18 @@ export function SidebarNav() {
   return (
     <SidebarContent>
       <SidebarMenu className="p-2">
-        <Collapsible open={isManagementOpen} onOpenChange={setManagementOpen}>
+        <Collapsible open={isIdentityManagerOpen} onOpenChange={setIdentityManagerOpen}>
           <SidebarMenuItem>
             <CollapsibleTrigger asChild>
               <SidebarMenuButton
-                tooltip="Management"
+                tooltip="Identity Manager"
                 className={cn("w-full justify-start", state === 'collapsed' && 'justify-center')}
                 onClick={handleMenuClick}
               >
-                <Users className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                <User className="h-4 w-4 shrink-0" strokeWidth={1.5} />
                 <div className={cn("flex flex-1 items-center justify-between overflow-hidden transition-all duration-500", state === 'collapsed' ? 'w-0' : 'w-full ml-3')}>
-                  <span className="whitespace-nowrap">Management</span>
-                  {isManagementOpen ? <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-500" />}
+                  <span className="whitespace-nowrap">Identity Manager</span>
+                  {isIdentityManagerOpen ? <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-500" /> : <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-500" />}
                 </div>
               </SidebarMenuButton>
             </CollapsibleTrigger>
