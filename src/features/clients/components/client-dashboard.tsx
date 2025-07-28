@@ -28,6 +28,9 @@ import { useSidebar } from "@/shared/components/ui/sidebar"
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
+  identifier: z.string().min(1, { message: "Please enter a client identifier." }),
+  description: z.string(),
+  homepageurl: z.string(),
 })
 
 export function ClientDashboard() {
@@ -44,14 +47,19 @@ export function ClientDashboard() {
 
   const addClientForm = useForm<z.infer<typeof addClientFormSchema>>({
     resolver: zodResolver(addClientFormSchema),
-    defaultValues: { name: "" },
+    defaultValues: { 
+      name: "",
+      identifier: "",
+      description: "",
+      homepageurl: "",
+     },
   })
 
   const handleAddClient = (values: z.infer<typeof addClientFormSchema>) => {
     const newClient: Client = {
       id: `client-${Date.now()}`,
       name: values.name,
-      clientId: `client-id-${Date.now()}`,
+      clientId: values.identifier,
       status: "active",
     }
     setClients((prev) => [newClient, ...prev])
@@ -136,3 +144,5 @@ export function ClientDashboard() {
     </div>
   )
 }
+
+    

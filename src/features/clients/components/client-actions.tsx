@@ -69,6 +69,9 @@ import { ClientFilters } from "./client-filters"
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
+  identifier: z.string().min(1, { message: "Please enter a client identifier." }),
+  description: z.string(),
+  homepageurl: z.string(),
 })
 
 interface ClientActionsProps {
@@ -107,7 +110,7 @@ export function ClientActions({
           </DialogDescription>
         </DialogHeader>
         <Form {...addClientForm}>
-          <form onSubmit={addClientForm.handleSubmit(onAddClient)} className="space-y-4 py-4">
+          <form onSubmit={addClientForm.handleSubmit(onAddClient)} className="space-y-4 py-2">
             <FormField
               control={addClientForm.control}
               name="name"
@@ -115,7 +118,46 @@ export function ClientActions({
                 <FormItem>
                   <FormLabel>Client Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter the client name" {...field} />
+                    <Input placeholder="Enter client name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={addClientForm.control}
+              name="identifier"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Identifier</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter client identifier" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={addClientForm.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter description" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={addClientForm.control}
+              name="homepageurl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Homepage URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Homepage URL" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
