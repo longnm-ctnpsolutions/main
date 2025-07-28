@@ -1,8 +1,6 @@
+
+import { ClientDashboard } from "@/features/clients/components/client-dashboard";
+
 export default function ClientsPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold">Clients</h1>
-      <p></p>
-    </div>
-  );
+  return <ClientDashboard />;
 }

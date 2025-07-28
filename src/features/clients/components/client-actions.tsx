@@ -19,7 +19,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
-import type { User } from "@/features/users/types/user.types"
+import type { Client } from "@/features/clients/types/client.types"
 import { Button } from "@/shared/components/ui/button"
 import { Checkbox } from "@/shared/components/ui/checkbox"
 import {
@@ -65,113 +65,67 @@ import {
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card"
-import { UserFilters } from "./user-filters"
+import { ClientFilters } from "./client-filters"
 
-const addUserFormSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email." }),
+const addClientFormSchema = z.object({
+  name: z.string().min(1, { message: "Please enter a client name." }),
 })
 
-interface UserActionsProps {
-  table: Table<User>
-  isAddUserDialogOpen: boolean
+interface ClientActionsProps {
+  table: Table<Client>
+  isAddClientDialogOpen: boolean
   isSidebarExpanded: boolean
-  setAddUserDialogOpen: (isOpen: boolean) => void
-  addUserForm: UseFormReturn<z.infer<typeof addUserFormSchema>>
-  onAddUser: (values: z.infer<typeof addUserFormSchema>) => void
+  setAddClientDialogOpen: (isOpen: boolean) => void
+  addClientForm: UseFormReturn<z.infer<typeof addClientFormSchema>>
+  onAddClient: (values: z.infer<typeof addClientFormSchema>) => void
   onDeleteSelected: () => void
 }
 
-export function UserActions({ 
+export function ClientActions({ 
   table,
-  isAddUserDialogOpen,
+  isAddClientDialogOpen,
   isSidebarExpanded,
-  setAddUserDialogOpen,
-  addUserForm,
-  onAddUser,
+  setAddClientDialogOpen,
+  addClientForm,
+  onAddClient,
   onDeleteSelected,
-}: UserActionsProps) {
+}: ClientActionsProps) {
   
-  const AddUserDialog = (
-    <Dialog open={isAddUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
+  const AddClientDialog = (
+    <Dialog open={isAddClientDialogOpen} onOpenChange={setAddClientDialogOpen}>
       <DialogTrigger asChild>
         <Button>
           <UserPlus className="mr-2 h-4 w-4" />
-          Add User
+          Add Client
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create User</DialogTitle>
+          <DialogTitle>Create Client</DialogTitle>
           <DialogDescription>
-            Fill in the details below to add a new user to the system.
+            Fill in the details below to add a new client to the system.
           </DialogDescription>
         </DialogHeader>
-        <Form {...addUserForm}>
-          <form onSubmit={addUserForm.handleSubmit(onAddUser)} className="space-y-4 py-4">
+        <Form {...addClientForm}>
+          <form onSubmit={addClientForm.handleSubmit(onAddClient)} className="space-y-4 py-4">
             <FormField
-              control={addUserForm.control}
-              name="email"
+              control={addClientForm.control}
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Client Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your email" {...field} />
+                    <Input placeholder="Enter the client name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
-                
-              )}
-            />
-
-             <FormField
-              control={addUserForm.control}
-              name="firstname"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your first name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-                
-              )}
-            />
-
-            <FormField
-              control={addUserForm.control}
-              name="lastname"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your first name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-                
-              )}
-            />
-
-            <FormField
-              control={addUserForm.control}
-              name="firstname"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your first name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-                
               )}
             />
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="button" variant="ghost">Cancel</Button>
               </DialogClose>
-              <Button type="submit">Add User</Button>
+              <Button type="submit">Add Client</Button>
             </DialogFooter>
           </form>
         </Form>
@@ -191,7 +145,7 @@ export function UserActions({
             <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the selected user(s).
+                This action cannot be undone. This will permanently delete the selected client(s).
             </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -268,30 +222,30 @@ export function UserActions({
       <CardHeader>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <CardTitle>Users</CardTitle>
-            <CardDescription>UI for admins to manage identities.</CardDescription>
+            <CardTitle>Clients</CardTitle>
+            <CardDescription>Manage your application clients.</CardDescription>
           </div>
           <div className="flex items-center gap-2">
             <div className="relative flex-1 md:grow-0">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="User Search"
-                  value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+                  placeholder="Client Search"
+                  value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
                   onChange={(event) =>
-                    table.getColumn("email")?.setFilterValue(event.target.value)
+                    table.getColumn("name")?.setFilterValue(event.target.value)
                   }
                   className="pl-9 w-full md:w-[150px] lg:w-[250px]"
                 />
             </div>
             
             <div className="items-center gap-2 hidden sm:flex">
-                 <UserFilters table={table} />
+                 <ClientFilters table={table} />
             </div>
 
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
             
             <div className={cn("hidden items-center gap-2 xl:flex", isSidebarExpanded && "hidden")}>
-                {AddUserDialog}
+                {AddClientDialog}
             </div>
 
             <div className={cn("hidden items-center gap-2 lg:flex", isSidebarExpanded && "hidden")}>
@@ -311,17 +265,17 @@ export function UserActions({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => setAddUserDialogOpen(true)} className={cn(isSidebarExpanded ? 'flex' : 'xl:hidden')}>
-                           <UserPlus className="mr-2 h-4 w-4" /> Add User
+                        <DropdownMenuItem onSelect={() => setAddClientDialogOpen(true)} className={cn(isSidebarExpanded ? 'flex' : 'xl:hidden')}>
+                           <UserPlus className="mr-2 h-4 w-4" /> Add Client
                         </DropdownMenuItem>
                         <DropdownMenuItem onSelect={(e) => e.preventDefault()} className={cn(isSidebarExpanded ? 'flex' : 'lg:hidden')}>
                           <div onClick={(e) => {
                             e.stopPropagation();
-                            const trigger = document.getElementById('delete-dialog-trigger');
+                            const trigger = document.getElementById('delete-dialog-trigger-client');
                             if(trigger) trigger.click();
                           }}>
                            <AlertDialog>
-                              <AlertDialogTrigger asChild id="delete-dialog-trigger">
+                              <AlertDialogTrigger asChild id="delete-dialog-trigger-client">
                                   <div className="flex items-center">
                                     <Trash2 className="mr-2 h-4 w-4" /> Delete
                                   </div>
@@ -330,7 +284,7 @@ export function UserActions({
                                   <AlertDialogHeader>
                                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                      This action cannot be undone. This will permanently delete the selected user(s).
+                                      This action cannot be undone. This will permanently delete the selected client(s).
                                   </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
@@ -391,7 +345,7 @@ export function UserActions({
                         </DropdownMenuSub>
                         <div className="flex sm:hidden">
                             <DropdownMenuSeparator />
-                            <UserFilters table={table} />
+                            <ClientFilters table={table} />
                         </div>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -404,3 +358,5 @@ export function UserActions({
     </Card>
   )
 }
+
+    
