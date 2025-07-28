@@ -16,7 +16,6 @@ import {
   MoreVertical,
   Search,
   RefreshCw,
-  AlertCircle
 } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
@@ -62,11 +61,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  useFormField,
 } from "@/shared/components/ui/form"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card"
 import { UserFilters } from "./user-filters"
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover"
 
 const addUserFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -91,6 +92,20 @@ export function UserActions({
   onAddUser,
   onDeleteSelected,
 }: UserActionsProps) {
+
+  const [popoverState, setPopoverState] = React.useState({
+    email: false,
+  });
+
+  const handleFocus = (fieldName: 'email', hasError: boolean) => {
+    if (hasError) {
+      setPopoverState(prev => ({ ...prev, [fieldName]: true }));
+    }
+  };
+
+  const handleBlur = (fieldName: 'email') => {
+    setPopoverState(prev => ({ ...prev, [fieldName]: false }));
+  };
   
   const AddUserDialog = (
     <Dialog open={isAddUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
@@ -112,60 +127,26 @@ export function UserActions({
             <FormField
               control={addUserForm.control}
               name="email"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your email" {...field} />
-                  </FormControl>
-                  <FormMessage />
+                  <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
+                   <Popover open={popoverState.email && !!fieldState.error} modal={false}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                           <Input 
+                              placeholder="Enter your email" 
+                              {...field}
+                              error={!!fieldState.error}
+                              onFocus={() => handleFocus('email', !!fieldState.error)}
+                              onBlur={() => handleBlur('email')}
+                            />
+                        </FormControl>
+                      </PopoverTrigger>
+                       <PopoverContent className="w-auto" side="bottom" align="start">
+                        <FormMessage>{fieldState.error?.message}</FormMessage>
+                      </PopoverContent>
+                    </Popover>
                 </FormItem>
-                
-              )}
-            />
-
-             <FormField
-              control={addUserForm.control}
-              name="firstname"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your first name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-                
-              )}
-            />
-
-            <FormField
-              control={addUserForm.control}
-              name="lastname"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your first name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-                
-              )}
-            />
-
-            <FormField
-              control={addUserForm.control}
-              name="firstname"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your first name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-                
               )}
             />
             <DialogFooter>
@@ -291,15 +272,15 @@ export function UserActions({
 
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
             
-            <div className={cn("hidden items-center gap-2 xl:flex", isSidebarExpanded && "hidden")}>
+            <div className={cn("hidden items-center gap-2 xl:flex", isSidebarExpanded && "xl:hidden")}>
                 {AddUserDialog}
             </div>
 
-            <div className={cn("hidden items-center gap-2 lg:flex", isSidebarExpanded && "hidden")}>
+            <div className={cn("hidden items-center gap-2 lg:flex", isSidebarExpanded && "lg:hidden")}>
               {DeleteDialog}
             </div>
 
-            <div className={cn("hidden items-center gap-2 md-lg:flex", isSidebarExpanded && "hidden")}>
+            <div className={cn("hidden items-center gap-2 md-lg:flex", isSidebarExpanded && "md-lg:hidden")}>
               {ExportMenu}
               {ColumnChooser}
             </div>
@@ -312,10 +293,10 @@ export function UserActions({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => setAddUserDialogOpen(true)} className={cn(isSidebarExpanded ? 'flex' : 'xl:hidden')}>
+                        <DropdownMenuItem onSelect={() => setAddUserDialogOpen(true)} className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'xl:hidden')}>
                            <UserPlus className="mr-2 h-4 w-4" /> Add User
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className={cn(isSidebarExpanded ? 'flex' : 'lg:hidden')}>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'lg:hidden')}>
                           <div onClick={(e) => {
                             e.stopPropagation();
                             const trigger = document.getElementById('delete-dialog-trigger');
@@ -342,7 +323,7 @@ export function UserActions({
                           </AlertDialog>
                           </div>
                         </DropdownMenuItem>
-                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'md-lg:hidden')}>
+                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'md-lg:hidden')}>
                             <DropdownMenuSubTrigger>
                                 <FileUp className="mr-2 h-4 w-4" />
                             </DropdownMenuSubTrigger>
@@ -365,7 +346,7 @@ export function UserActions({
                                 </DropdownMenuItem>
                             </DropdownMenuSubContent>
                         </DropdownMenuSub>
-                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'md-lg:hidden')}>
+                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'md-lg:hidden')}>
                             <DropdownMenuSubTrigger>
                                 <Columns className="mr-2 h-4 w-4" />
                                 <span>Column Chooser</span>

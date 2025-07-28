@@ -62,12 +62,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  useFormField
 } from "@/shared/components/ui/form"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card"
 import { ClientFilters } from "./client-filters"
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover"
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
@@ -95,6 +95,21 @@ export function ClientActions({
   onAddClient,
   onDeleteSelected,
 }: ClientActionsProps) {
+
+  const [popoverState, setPopoverState] = React.useState({
+    name: false,
+    identifier: false,
+  });
+
+  const handleFocus = (fieldName: 'name' | 'identifier', hasError: boolean) => {
+    if (hasError) {
+      setPopoverState(prev => ({ ...prev, [fieldName]: true }));
+    }
+  };
+
+  const handleBlur = (fieldName: 'name' | 'identifier') => {
+    setPopoverState(prev => ({ ...prev, [fieldName]: false }));
+  };
   
   const AddClientDialog = (
     <Dialog open={isAddClientDialogOpen} onOpenChange={setAddClientDialogOpen}>
@@ -119,14 +134,22 @@ export function ClientActions({
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Client Name <span className="text-destructive">*</span></FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input placeholder="Enter client name" {...field} error={fieldState.invalid} />
-                      {fieldState.invalid && (
-                        <AlertCircle className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-destructive" />
-                      )}
-                    </div>
-                  </FormControl>
+                   <Popover open={popoverState.name && !!fieldState.error} modal={false}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter client name" 
+                            {...field} 
+                            error={!!fieldState.error}
+                            onFocus={() => handleFocus('name', !!fieldState.error)}
+                            onBlur={() => handleBlur('name')}
+                          />
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto" side="bottom" align="start">
+                        <FormMessage>{fieldState.error?.message}</FormMessage>
+                      </PopoverContent>
+                    </Popover>
                 </FormItem>
               )}
             />
@@ -136,14 +159,22 @@ export function ClientActions({
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Identifier <span className="text-destructive">*</span></FormLabel>
-                   <FormControl>
-                    <div className="relative">
-                      <Input placeholder="Enter client identifier" {...field} error={fieldState.invalid} />
-                      {fieldState.invalid && (
-                        <AlertCircle className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-destructive" />
-                      )}
-                    </div>
-                  </FormControl>
+                   <Popover open={popoverState.identifier && !!fieldState.error} modal={false}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter client identifier" 
+                            {...field} 
+                            error={!!fieldState.error}
+                            onFocus={() => handleFocus('identifier', !!fieldState.error)}
+                            onBlur={() => handleBlur('identifier')}
+                          />
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto" side="bottom" align="start">
+                        <FormMessage>{fieldState.error?.message}</FormMessage>
+                      </PopoverContent>
+                    </Popover>
                 </FormItem>
               )}
             />
@@ -294,15 +325,15 @@ export function ClientActions({
 
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
             
-            <div className={cn("hidden items-center gap-2 xl:flex", isSidebarExpanded && "hidden")}>
+            <div className={cn("hidden items-center gap-2 xl:flex", isSidebarExpanded && "xl:hidden")}>
                 {AddClientDialog}
             </div>
 
-            <div className={cn("hidden items-center gap-2 lg:flex", isSidebarExpanded && "hidden")}>
+            <div className={cn("hidden items-center gap-2 lg:flex", isSidebarExpanded && "lg:hidden")}>
               {DeleteDialog}
             </div>
 
-            <div className={cn("hidden items-center gap-2 md-lg:flex", isSidebarExpanded && "hidden")}>
+            <div className={cn("hidden items-center gap-2 md-lg:flex", isSidebarExpanded && "md-lg:hidden")}>
               {ExportMenu}
               {ColumnChooser}
             </div>
@@ -315,10 +346,10 @@ export function ClientActions({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => setAddClientDialogOpen(true)} className={cn(isSidebarExpanded ? 'flex' : 'xl:hidden')}>
+                        <DropdownMenuItem onSelect={() => setAddClientDialogOpen(true)} className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'xl:hidden')}>
                            <UserPlus className="mr-2 h-4 w-4" /> Add Client
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className={cn(isSidebarExpanded ? 'flex' : 'lg:hidden')}>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'lg:hidden')}>
                           <div onClick={(e) => {
                             e.stopPropagation();
                             const trigger = document.getElementById('delete-dialog-trigger-client');
@@ -345,7 +376,7 @@ export function ClientActions({
                           </AlertDialog>
                           </div>
                         </DropdownMenuItem>
-                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'md-lg:hidden')}>
+                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'md-lg:hidden')}>
                             <DropdownMenuSubTrigger>
                                 <FileUp className="mr-2 h-4 w-4" />
                             </DropdownMenuSubTrigger>
@@ -368,7 +399,7 @@ export function ClientActions({
                                 </DropdownMenuItem>
                             </DropdownMenuSubContent>
                         </DropdownMenuSub>
-                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'md-lg:hidden')}>
+                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'md-lg:hidden')}>
                             <DropdownMenuSubTrigger>
                                 <Columns className="mr-2 h-4 w-4" />
                                 <span>Column Chooser</span>
