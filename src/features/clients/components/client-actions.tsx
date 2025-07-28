@@ -110,42 +110,7 @@ export function ClientActions({
         </DialogHeader>
         <Form {...addClientForm}>
           <form onSubmit={addClientForm.handleSubmit(onAddClient)} className="space-y-4 py-2">
-            <FormField
-              control={addClientForm.control}
-              name="logo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Logo</FormLabel>
-                  <FormControl>
-                    <div className="flex flex-col items-center justify-center w-full">
-                        <label
-                            htmlFor="dropzone-file"
-                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                        >
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                    Click to upload or drag and drop
-                                </p>
-                            </div>
-                            <Input 
-                                id="dropzone-file" 
-                                type="file" 
-                                className="hidden" 
-                                onChange={(e) => field.onChange(e.target.files)} 
-                            />
-                        </label>
-                         <div className="flex items-center mt-2">
-                            <Button asChild variant="outline" size="sm">
-                                <label htmlFor="dropzone-file">Select a file</label>
-                            </Button>
-                            <span className="ml-2 text-sm text-muted-foreground">or Drop file here</span>
-                        </div>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            
             <FormField
               control={addClientForm.control}
               name="name"
@@ -201,6 +166,43 @@ export function ClientActions({
                     <Input placeholder="Homepage URL" {...field} />
                   </FormControl>
                    <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={addClientForm.control}
+              name="logo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Logo</FormLabel>
+                  <FormControl>
+                    <div className="flex flex-col items-center justify-center w-full">
+                        <label
+                            htmlFor="dropzone-file"
+                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                        >
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                    Click to upload or drag and drop
+                                </p>
+                            </div>
+                            <Input 
+                                id="dropzone-file" 
+                                type="file" 
+                                className="hidden" 
+                                onChange={(e) => field.onChange(e.target.files)} 
+                            />
+                        </label>
+                         <div className="flex items-center mt-2">
+                            <Button asChild variant="outline" size="sm">
+                                <label htmlFor="dropzone-file">Select a file</label>
+                            </Button>
+                            <span className="ml-2 text-sm text-muted-foreground">or Drop file here</span>
+                        </div>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -327,20 +329,18 @@ export function ClientActions({
 
             <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
             
-            <div className={cn("hidden items-center gap-2 xl:flex", isSidebarExpanded && "xl:hidden")}>
-                {AddClientDialog}
+            {/* Desktop Actions */}
+            <div className={cn("hidden md:flex items-center gap-2")}>
+                <div className={cn(isSidebarExpanded && "hidden", "xl:flex")}>{AddClientDialog}</div>
+                <div className={cn(isSidebarExpanded && "hidden", "lg:flex")}>{DeleteDialog}</div>
+                <div className={cn(isSidebarExpanded && "hidden", "md-lg:flex")}>
+                    {ExportMenu}
+                    {ColumnChooser}
+                </div>
             </div>
 
-            <div className={cn("hidden items-center gap-2 lg:flex", isSidebarExpanded && "lg:hidden")}>
-              {DeleteDialog}
-            </div>
-
-            <div className={cn("hidden items-center gap-2 md-lg:flex", isSidebarExpanded && "md-lg:hidden")}>
-              {ExportMenu}
-              {ColumnChooser}
-            </div>
-
-            <div className={cn("flex xl:hidden", isSidebarExpanded && "flex")}>
+            {/* Mobile/Tablet Actions */}
+            <div className={cn("flex md:hidden")}>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
@@ -348,17 +348,17 @@ export function ClientActions({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => setAddClientDialogOpen(true)} className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'xl:hidden')}>
+                        <DropdownMenuItem onSelect={() => setAddClientDialogOpen(true)}>
                            <UserPlus className="mr-2 h-4 w-4" /> Add Client
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'lg:hidden')}>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                           <div onClick={(e) => {
                             e.stopPropagation();
-                            const trigger = document.getElementById('delete-dialog-trigger-client');
+                            const trigger = document.getElementById('delete-dialog-trigger-client-mobile');
                             if(trigger) trigger.click();
                           }}>
                            <AlertDialog>
-                              <AlertDialogTrigger asChild id="delete-dialog-trigger-client">
+                              <AlertDialogTrigger asChild id="delete-dialog-trigger-client-mobile">
                                   <div className="flex items-center">
                                     <Trash2 className="mr-2 h-4 w-4" /> Delete
                                   </div>
@@ -378,9 +378,9 @@ export function ClientActions({
                           </AlertDialog>
                           </div>
                         </DropdownMenuItem>
-                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'md-lg:hidden')}>
+                        <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
-                                <FileUp className="mr-2 h-4 w-4" />
+                                <FileUp className="mr-2 h-4 w-4" /> Export
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent>
                                 <DropdownMenuItem>
@@ -401,7 +401,7 @@ export function ClientActions({
                                 </DropdownMenuItem>
                             </DropdownMenuSubContent>
                         </DropdownMenuSub>
-                        <DropdownMenuSub className={cn(isSidebarExpanded ? 'flex' : 'hidden', 'md-lg:hidden')}>
+                        <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
                                 <Columns className="mr-2 h-4 w-4" />
                                 <span>Column Chooser</span>
@@ -441,3 +441,5 @@ export function ClientActions({
     </Card>
   )
 }
+
+    
