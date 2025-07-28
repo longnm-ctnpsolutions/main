@@ -15,7 +15,8 @@ import {
   ChevronDown,
   MoreVertical,
   Search,
-  RefreshCw
+  RefreshCw,
+  AlertCircle
 } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
@@ -404,3 +405,5 @@ export function UserActions({
     </Card>
   )
 }
+
+    

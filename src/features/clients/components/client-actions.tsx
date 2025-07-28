@@ -15,7 +15,8 @@ import {
   ChevronDown,
   MoreVertical,
   Search,
-  RefreshCw
+  RefreshCw,
+  AlertCircle
 } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
@@ -61,6 +62,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  useFormField
 } from "@/shared/components/ui/form"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
@@ -114,26 +116,34 @@ export function ClientActions({
             <FormField
               control={addClientForm.control}
               name="name"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Client Name</FormLabel>
+                  <FormLabel>Client Name <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter client name" {...field} />
+                    <div className="relative">
+                      <Input placeholder="Enter client name" {...field} error={fieldState.invalid} />
+                      {fieldState.invalid && (
+                        <AlertCircle className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-destructive" />
+                      )}
+                    </div>
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={addClientForm.control}
               name="identifier"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Identifier</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter client identifier" {...field} />
+                  <FormLabel>Identifier <span className="text-destructive">*</span></FormLabel>
+                   <FormControl>
+                    <div className="relative">
+                      <Input placeholder="Enter client identifier" {...field} error={fieldState.invalid} />
+                      {fieldState.invalid && (
+                        <AlertCircle className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-destructive" />
+                      )}
+                    </div>
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -146,7 +156,6 @@ export function ClientActions({
                   <FormControl>
                     <Input placeholder="Enter description" {...field} />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -159,7 +168,6 @@ export function ClientActions({
                   <FormControl>
                     <Input placeholder="Homepage URL" {...field} />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />

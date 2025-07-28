@@ -53,7 +53,6 @@ export function ClientDashboard() {
       description: "",
       homepageurl: "",
      },
-     mode: "onBlur"
   })
 
   const handleAddClient = (values: z.infer<typeof addClientFormSchema>) => {
