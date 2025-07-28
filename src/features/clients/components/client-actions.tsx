@@ -67,7 +67,6 @@ import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card"
 import { ClientFilters } from "./client-filters"
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover"
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
@@ -95,21 +94,6 @@ export function ClientActions({
   onAddClient,
   onDeleteSelected,
 }: ClientActionsProps) {
-
-  const [popoverState, setPopoverState] = React.useState({
-    name: false,
-    identifier: false,
-  });
-
-  const handleFocus = (fieldName: 'name' | 'identifier', hasError: boolean) => {
-    if (hasError) {
-      setPopoverState(prev => ({ ...prev, [fieldName]: true }));
-    }
-  };
-
-  const handleBlur = (fieldName: 'name' | 'identifier') => {
-    setPopoverState(prev => ({ ...prev, [fieldName]: false }));
-  };
   
   const AddClientDialog = (
     <Dialog open={isAddClientDialogOpen} onOpenChange={setAddClientDialogOpen}>
@@ -134,22 +118,14 @@ export function ClientActions({
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Client Name <span className="text-destructive">*</span></FormLabel>
-                   <Popover open={popoverState.name && !!fieldState.error} modal={false}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter client name" 
-                            {...field} 
-                            error={!!fieldState.error}
-                            onFocus={() => handleFocus('name', !!fieldState.error)}
-                            onBlur={() => handleBlur('name')}
-                          />
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto" side="bottom" align="start">
-                        <FormMessage>{fieldState.error?.message}</FormMessage>
-                      </PopoverContent>
-                    </Popover>
+                  <FormControl>
+                    <Input 
+                      placeholder="Enter client name" 
+                      {...field} 
+                      error={!!fieldState.error}
+                    />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -159,22 +135,14 @@ export function ClientActions({
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Identifier <span className="text-destructive">*</span></FormLabel>
-                   <Popover open={popoverState.identifier && !!fieldState.error} modal={false}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter client identifier" 
-                            {...field} 
-                            error={!!fieldState.error}
-                            onFocus={() => handleFocus('identifier', !!fieldState.error)}
-                            onBlur={() => handleBlur('identifier')}
-                          />
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto" side="bottom" align="start">
-                        <FormMessage>{fieldState.error?.message}</FormMessage>
-                      </PopoverContent>
-                    </Popover>
+                  <FormControl>
+                    <Input 
+                      placeholder="Enter client identifier" 
+                      {...field} 
+                      error={!!fieldState.error}
+                    />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />

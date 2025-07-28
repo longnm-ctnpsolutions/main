@@ -92,20 +92,6 @@ export function UserActions({
   onAddUser,
   onDeleteSelected,
 }: UserActionsProps) {
-
-  const [popoverState, setPopoverState] = React.useState({
-    email: false,
-  });
-
-  const handleFocus = (fieldName: 'email', hasError: boolean) => {
-    if (hasError) {
-      setPopoverState(prev => ({ ...prev, [fieldName]: true }));
-    }
-  };
-
-  const handleBlur = (fieldName: 'email') => {
-    setPopoverState(prev => ({ ...prev, [fieldName]: false }));
-  };
   
   const AddUserDialog = (
     <Dialog open={isAddUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
@@ -130,22 +116,14 @@ export function UserActions({
               render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
-                   <Popover open={popoverState.email && !!fieldState.error} modal={false}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                           <Input 
-                              placeholder="Enter your email" 
-                              {...field}
-                              error={!!fieldState.error}
-                              onFocus={() => handleFocus('email', !!fieldState.error)}
-                              onBlur={() => handleBlur('email')}
-                            />
-                        </FormControl>
-                      </PopoverTrigger>
-                       <PopoverContent className="w-auto" side="bottom" align="start">
-                        <FormMessage>{fieldState.error?.message}</FormMessage>
-                      </PopoverContent>
-                    </Popover>
+                  <FormControl>
+                      <Input 
+                        placeholder="Enter your email" 
+                        {...field} 
+                        error={!!fieldState.error}
+                      />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
