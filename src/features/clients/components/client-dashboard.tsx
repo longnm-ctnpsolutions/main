@@ -31,6 +31,7 @@ const addClientFormSchema = z.object({
   identifier: z.string().min(1, { message: "Please enter a client identifier." }),
   description: z.string(),
   homepageurl: z.string(),
+  logo: z.any().optional(),
 })
 
 export function ClientDashboard() {
@@ -52,6 +53,7 @@ export function ClientDashboard() {
       identifier: "",
       description: "",
       homepageurl: "",
+      logo: null,
      },
   })
 
