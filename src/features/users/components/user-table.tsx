@@ -184,7 +184,7 @@ UserTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef<User>[] =
       
 
       const handleDetailsClick = () => {
-        router.push(`/en/users/${user.id}`);
+        router.push(`/en/clients/${user.id}`);
       };
       return (
         <div className="text-right">
