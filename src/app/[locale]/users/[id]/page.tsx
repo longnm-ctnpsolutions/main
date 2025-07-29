@@ -1,8 +1,17 @@
+"use client"
+
+import * as React from "react"
+import { Card } from "@/shared/components/ui/card"
+import UserDetailHeader from "@/features/users/components/userdetail-header"
+import UserDetailTabs from "@/features/users/components/userdetail-tab"
+
 export default function UserDetailPage({ params }: { params: { id: string } }) {
   return (
-    <div>
-      <h1 className="text-2xl font-bold">User Details</h1>
-      <p>Details for user with ID: {params.id}</p>
-    </div>
+
+    <div className="w-full space-y-6">
+      <UserDetailHeader />
+      <UserDetailTabs />
+  </div>
+    
   );
 }

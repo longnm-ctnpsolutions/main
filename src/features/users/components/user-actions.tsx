@@ -101,7 +101,7 @@ export function UserActions({
           Add User
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-sm:w-full max-sm:h-full max-sm:max-w-none max-sm:rounded-none max-sm:border-0">
         <DialogHeader>
           <DialogTitle>Create User</DialogTitle>
           <DialogDescription>
