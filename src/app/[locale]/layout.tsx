@@ -7,7 +7,7 @@ import {
   SidebarProvider,
 } from "@/shared/components/ui/sidebar"
 import { Header } from "@/shared/components/layout/header"
-import { SidebarNav } from "@/shared/components/layout/sidebar-nav"
+import { SidebarNav } from "@/shared/components/layout/sidebar"
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   return (
