@@ -67,6 +67,7 @@ import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Card, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card"
 import { ClientFilters } from "./client-filters"
+import AddClientDialog from '@/features/clients/components/add-client-dialog'
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
@@ -96,127 +97,134 @@ export function ClientActions({
   onDeleteSelected,
 }: ClientActionsProps) {
   
-  const AddClientDialog = (
-    <Dialog open={isAddClientDialogOpen} onOpenChange={setAddClientDialogOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Add Client
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Add Client</DialogTitle>
-        </DialogHeader>
-        <Form {...addClientForm}>
-          <form onSubmit={addClientForm.handleSubmit(onAddClient)} className="space-y-4 py-2">
-            
-            <FormField
-              control={addClientForm.control}
-              name="name"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel>Client Name <span className="text-destructive">*</span></FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter client name" 
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={addClientForm.control}
-              name="identifier"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel>Identifier <span className="text-destructive">*</span></FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter client identifier" 
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={addClientForm.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter description" {...field} />
-                  </FormControl>
-                   <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={addClientForm.control}
-              name="homepageurl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Homepage URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Homepage URL" {...field} />
-                  </FormControl>
-                   <FormMessage />
-                </FormItem>
-              )}
-            />
+  // const AddClientDialog = (
+  //   <Dialog open={isAddClientDialogOpen} onOpenChange={setAddClientDialogOpen}>
+  //     <DialogTrigger asChild>
+  //       <Button>
+  //         <UserPlus className="mr-2 h-4 w-4" />
+  //         Add Client
+  //       </Button>
+  //     </DialogTrigger>
+  //     <DialogContent className="sm:max-w-[425px] max-sm:w-full max-sm:h-full max-sm:max-w-none max-sm:rounded-none max-sm:border-0 max-sm:p-0 max-sm:flex max-sm:flex-col">
+  //     <div className="max-sm:p-4 max-sm:border-b-2">
+  //       <DialogHeader>
+  //         <DialogTitle className="max-sm:text-left">Add Client</DialogTitle>
+  //       </DialogHeader>
+  //     </div>
 
-            <FormField
-              control={addClientForm.control}
-              name="logo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Logo</FormLabel>
-                  <FormControl>
-                    <div className="flex flex-col items-center justify-center w-full">
-                        <label
-                            htmlFor="dropzone-file"
-                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                        >
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                    Click to upload or drag and drop
-                                </p>
-                            </div>
-                            <Input 
-                                id="dropzone-file" 
-                                type="file" 
-                                className="hidden" 
-                                onChange={(e) => field.onChange(e.target.files)} 
-                            />
-                        </label>
-                         <div className="flex items-center mt-2">
-                            <Button asChild variant="outline" size="sm">
-                                <label htmlFor="dropzone-file">Select a file</label>
-                            </Button>
-                            <span className="ml-2 text-sm text-muted-foreground">or Drop file here</span>
-                        </div>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="ghost">Cancel</Button>
-              </DialogClose>
-              <Button type="submit">Add Client</Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  );
+  //       <div className="flex-1 overflow-y-auto max-sm:pl-4 max-sm:pr-4 max-sm:pb-4 max-sm:pt-0">
+  //       <Form {...addClientForm}>
+  //         <form onSubmit={addClientForm.handleSubmit(onAddClient)} className="space-y-3">
+  //           <FormField
+  //             control={addClientForm.control}
+  //             name="name"
+  //             render={({ field, fieldState }) => (
+  //               <FormItem>
+  //                 <FormLabel>Client Name <span className="text-destructive">*</span></FormLabel>
+  //                 <FormControl>
+  //                   <Input 
+  //                     placeholder="Enter client name" 
+  //                     {...field}
+  //                   />
+  //                 </FormControl>
+  //                 <FormMessage />
+  //               </FormItem>
+  //             )}
+  //           />
+  //           <FormField
+  //             control={addClientForm.control}
+  //             name="identifier"
+  //             render={({ field, fieldState }) => (
+  //               <FormItem>
+  //                 <FormLabel>Identifier <span className="text-destructive">*</span></FormLabel>
+  //                 <FormControl>
+  //                   <Input 
+  //                     placeholder="Enter client identifier" 
+  //                     {...field}
+  //                   />
+  //                 </FormControl>
+  //                 <FormMessage />
+  //               </FormItem>
+  //             )}
+  //           />
+  //           <FormField
+  //             control={addClientForm.control}
+  //             name="description"
+  //             render={({ field }) => (
+  //               <FormItem>
+  //                 <FormLabel>Description</FormLabel>
+  //                 <FormControl>
+  //                   <Input placeholder="Enter description" {...field} />
+  //                 </FormControl>
+  //                  <FormMessage />
+  //               </FormItem>
+  //             )}
+  //           />
+  //           <FormField
+  //             control={addClientForm.control}
+  //             name="homepageurl"
+  //             render={({ field }) => (
+  //               <FormItem>
+  //                 <FormLabel>Homepage URL</FormLabel>
+  //                 <FormControl>
+  //                   <Input placeholder="Homepage URL" {...field} />
+  //                 </FormControl>
+  //                  <FormMessage />
+  //               </FormItem>
+  //             )}
+  //           />
+  //           <FormField
+  //             control={addClientForm.control}
+  //             name="logo"
+  //             render={({ field }) => (
+  //               <FormItem>
+  //                 <FormLabel>Logo</FormLabel>
+  //                 <FormControl>
+  //                   <div className="flex flex-col items-center justify-center w-full">
+  //                       <label
+  //                           htmlFor="dropzone-file"
+  //                           className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+  //                       >
+  //                           <div className="flex flex-col items-center justify-center pt-5 pb-6">
+  //                               <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+  //                                   Click to upload or drag and drop
+  //                               </p>
+  //                           </div>
+  //                           <Input 
+  //                               id="dropzone-file" 
+  //                               type="file" 
+  //                               className="hidden" 
+  //                               onChange={(e) => field.onChange(e.target.files)} 
+  //                           />
+  //                       </label>
+  //                        <div className="flex items-center mt-2">
+  //                           <Button asChild variant="outline" size="sm">
+  //                               <label htmlFor="dropzone-file">Select a file</label>
+  //                           </Button>
+  //                           <span className="ml-2 text-sm text-muted-foreground">or Drop file here</span>
+  //                       </div>
+  //                   </div>
+  //                 </FormControl>
+  //                 <FormMessage />
+  //               </FormItem>
+  //             )}
+  //           />
+  //         </form>
+  //       </Form>
+  //       </div>
+  //       <DialogFooter className="flex justify-center gap-2 max-sm:flex-row max-sm:justify-center max-sm:p-4">
+  //         <DialogClose asChild>
+  //           <Button type="button" variant="outline" size="sm">
+  //             Cancel
+  //           </Button>
+  //         </DialogClose>
+  //         <Button type="submit" size="sm">
+  //           Add Client
+  //         </Button>
+  //       </DialogFooter>
+  //     </DialogContent>
+  //   </Dialog>
+  // );
 
   const DeleteDialog = (
      <AlertDialog>
@@ -331,7 +339,14 @@ export function ClientActions({
             
             {/* Desktop Actions */}
             <div className={cn("hidden md:flex items-center gap-2")}>
-                <div className={cn(isSidebarExpanded && "hidden", "xl:flex")}>{AddClientDialog}</div>
+                <div className={cn(isSidebarExpanded && "hidden", "xl:flex")}> 
+                  <AddClientDialog
+                    isOpen={isAddClientDialogOpen}
+                    onOpenChange={setAddClientDialogOpen}
+                    form={addClientForm}
+                    onSubmit={onAddClient}
+                  />
+        </div>
                 <div className={cn(isSidebarExpanded && "hidden", "lg:flex")}>{DeleteDialog}</div>
                 <div className={cn(isSidebarExpanded && "hidden", "md-lg:flex")}>
                     {ExportMenu}

@@ -38,6 +38,7 @@ import {
   AlertDialogTrigger,
 } from "@/shared/components/ui/alert-dialog"
 import { cn } from "@/shared/lib/utils"
+import { useRouter } from 'next/navigation';
 
 interface UserTableProps {
   table: TableType<User>;
@@ -178,7 +179,13 @@ UserTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef<User>[] =
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const user = row.original
+      const user = row.original;
+      const router = useRouter();
+      
+
+      const handleDetailsClick = () => {
+        router.push(`/en/users/${user.id}`);
+      };
       return (
         <div className="text-right">
           <DropdownMenu>
@@ -189,7 +196,7 @@ UserTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef<User>[] =
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Details</DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleDetailsClick}>Details</DropdownMenuItem>
               <DropdownMenuItem>Change Password</DropdownMenuItem>
               <DropdownMenuItem>Deactivate</DropdownMenuItem>
               <AlertDialog>
