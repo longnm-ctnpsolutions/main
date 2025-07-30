@@ -8,7 +8,8 @@ import { useMenuState } from "@/layout/hooks/use-menu-state";
 import { MenuItem } from "./nav-item";
 
 export function SidebarNav() {
-  const { state } = useSidebar();
+  const { state, setOpen, isMobile, openMobile } = useSidebar();
+  const effectiveState = isMobile && openMobile ? 'expanded' : state;
   const { openState, toggleMenu } = useMenuState(menuConfig);
 
   return (
@@ -29,7 +30,7 @@ export function SidebarNav() {
           </React.Fragment>
         ))}
       </SidebarContent>
-      {state !== 'collapsed' && (
+      {effectiveState !== 'collapsed' && (
         <div className="p-4 transition-all duration-500">
           <div className="text-xs text-muted-foreground transition-all duration-500">
             <div>Copyright © 2025</div>

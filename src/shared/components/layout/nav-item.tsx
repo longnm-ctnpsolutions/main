@@ -28,7 +28,8 @@ interface MenuItemProps {
 }
 
 export function MenuItem({ item, level = 0, parentPath = "", openState, toggleMenu }: MenuItemProps) {
-  const { state, setOpen } = useSidebar();
+  const { state, setOpen, isMobile, openMobile } = useSidebar();
+  const effectiveState = isMobile && openMobile ? 'expanded' : state;
   const pathname = usePathname();
   const locale = pathname.split('/')[1] || 'en';
   
@@ -37,7 +38,7 @@ export function MenuItem({ item, level = 0, parentPath = "", openState, toggleMe
   const isActive = item.href ? pathname.includes(item.href) : false;
   
   const handleMenuClick = () => {
-    if (state === 'collapsed') {
+    if (effectiveState  === 'collapsed') {
       setOpen(true);
     }
   };
@@ -54,7 +55,7 @@ export function MenuItem({ item, level = 0, parentPath = "", openState, toggleMe
             isActive={isActive}
             className={cn(
               "w-full flex items-center",
-              state === 'collapsed' && "justify-center",
+              effectiveState  === 'collapsed' && "justify-center",
               level > 0 && "ml-4"
             )}
             onClick={handleMenuClick}
@@ -62,7 +63,7 @@ export function MenuItem({ item, level = 0, parentPath = "", openState, toggleMe
             {level === 0 && (
               <item.icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
             )}
-            {state !== 'collapsed' && (
+            {effectiveState  !== 'collapsed' && (
               <span className="flex-1 overflow-hidden whitespace-nowrap ml-2">
                 {item.label}
               </span>
@@ -81,12 +82,12 @@ export function MenuItem({ item, level = 0, parentPath = "", openState, toggleMe
             tooltip={item.label}
             className={cn(
               "w-full flex items-center",
-              state === 'collapsed' && "justify-center"
+              effectiveState  === 'collapsed' && "justify-center"
             )}
             onClick={handleMenuClick}
           >
             <item.icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-            {state !== 'collapsed' && (
+            {effectiveState  !== 'collapsed' && (
               <div className="flex-1 overflow-hidden whitespace-nowrap flex items-center justify-between ml-2">
                 <span>{item.label}</span>
                 {isOpen ? (

@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -34,6 +33,7 @@ type SidebarContext = {
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
+  isTablet: boolean
   toggleSidebar: () => void
 }
 
@@ -46,6 +46,23 @@ function useSidebar() {
   }
 
   return context
+}
+
+// Custom hook to detect tablet size
+function useIsTablet() {
+  const [isTablet, setIsTablet] = React.useState(false)
+
+  React.useEffect(() => {
+    const checkTablet = () => {
+      setIsTablet(window.innerWidth < 1200 && window.innerWidth >= 768)
+    }
+    
+    checkTablet()
+    window.addEventListener('resize', checkTablet)
+    return () => window.removeEventListener('resize', checkTablet)
+  }, [])
+
+  return isTablet
 }
 
 const SidebarProvider = React.forwardRef<
@@ -67,6 +84,7 @@ const SidebarProvider = React.forwardRef<
     ref
   ) => {
     const isMobile = useIsMobile()
+    const isTablet = useIsTablet()
     const [openMobile, setOpenMobile] = React.useState(false)
 
     const [_open, _setOpen] = React.useState(defaultOpen)
@@ -85,9 +103,11 @@ const SidebarProvider = React.forwardRef<
     )
 
     const toggleSidebar = React.useCallback(() => {
-      return isMobile
-        ? setOpenMobile((open) => !open)
-        : setOpen((open) => !open)
+      if (isMobile) {
+        return setOpenMobile((open) => !open)
+      } else {
+        return setOpen((open) => !open)
+      }
     }, [isMobile, setOpen, setOpenMobile])
 
     React.useEffect(() => {
@@ -97,12 +117,16 @@ const SidebarProvider = React.forwardRef<
           (event.metaKey || event.ctrlKey)
         ) {
           event.preventDefault()
-          toggleSidebar()
+          if (isMobile) {
+            setOpenMobile((open) => !open)
+          } else {
+            setOpen((open) => !open)
+          }
         }
       }
       window.addEventListener("keydown", handleKeyDown)
       return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [toggleSidebar])
+    }, [isMobile, setOpen, setOpenMobile])
 
     const state = open ? "expanded" : "collapsed"
 
@@ -112,11 +136,12 @@ const SidebarProvider = React.forwardRef<
         open,
         setOpen,
         isMobile,
+        isTablet,
         openMobile,
         setOpenMobile,
         toggleSidebar,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, isTablet, openMobile, setOpenMobile, toggleSidebar]
     )
 
     return (
@@ -149,31 +174,90 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, open, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, isTablet, state, open, openMobile, setOpenMobile, setOpen } = useSidebar()
 
+    // Mobile: Use Sheet with custom overlay positioning
     if (isMobile) {
       return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-          <SheetContent
-            data-sidebar="sidebar"
-            data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-            style={{ "--sidebar-width": SIDEBAR_WIDTH_MOBILE } as React.CSSProperties}
-            side={side}
-          >
-            <div className="flex h-full w-full flex-col">{children}</div>
-          </SheetContent>
-        </Sheet>
+        <>
+          <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+            <SheetContent
+              data-sidebar="sidebar"
+              data-mobile="true" 
+              data-state="expanded" // Force expanded state for mobile
+              className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden top-16 h-[calc(100vh-4rem)] z-40 border-0"
+              style={{ "--sidebar-width": SIDEBAR_WIDTH } as React.CSSProperties}
+              side={side}
+              // Don't prevent these events - let them work normally
+              onEscapeKeyDown={() => setOpenMobile(false)}
+            >
+              <div className="flex h-full w-full flex-col" data-state="expanded">
+                {children}
+              </div>
+            </SheetContent>
+          </Sheet>
+          {/* Custom overlay: only covers content area from header down, positioned behind sidebar */}
+          {openMobile && (
+            <>
+              {/* Hide default shadcn overlay */}
+              <style jsx global>{`
+                [data-radix-popper-content-wrapper] {
+                  z-index: -1 !important;
+                }
+                .fixed.inset-0.z-50 {
+                  display: none !important;
+                }
+              `}</style>
+              <div 
+                className="fixed top-16 bottom-0 z-30 bg-black/50"
+                style={{ 
+                  left: side === "left" ? SIDEBAR_WIDTH : "0",
+                  right: side === "right" ? SIDEBAR_WIDTH : "0"
+                }}
+                onClick={() => setOpenMobile(false)}
+              />
+            </>
+          )}
+        </>
       )
     }
 
+    // Tablet: Icon only when collapsed, full width with overlay when expanded
+    if (isTablet) {
+      return (
+        <>
+          <div
+            ref={ref}
+            data-sidebar="sidebar"
+            data-state={state}
+            className={cn(
+              "fixed left-0 top-16 z-30 flex flex-col h-[calc(100vh-4rem)] bg-sidebar text-sidebar-foreground border-r transition-all duration-300 ease-in-out",
+              state === 'expanded' ? 'w-[16rem]' : 'w-[3.5rem]',
+              className
+            )}
+            {...props}
+          >
+            {children}
+          </div>
+          {/* Overlay when expanded on tablet */}
+          {state === 'expanded' && (
+            <div 
+              className="fixed inset-0 top-16 z-20 bg-black/50"
+              onClick={() => setOpen(false)} // Fix: Use setOpen from context
+            />
+          )}
+        </>
+      )
+    }
+
+    // Desktop: Normal behavior
     return (
       <div
         ref={ref}
         data-sidebar="sidebar"
         data-state={state}
         className={cn(
-          "hidden md:flex flex-col h-full bg-sidebar text-sidebar-foreground border-r transition-all duration-500 ease-in-out",
+          "flex flex-col h-full bg-sidebar text-sidebar-foreground border-r transition-all duration-300 ease-in-out",
           state === 'expanded' ? 'w-[16rem]' : 'w-[3.5rem]',
           className
         )}
@@ -231,14 +315,18 @@ const SidebarContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-  const { state } = useSidebar();
+  const { state, isMobile, openMobile } = useSidebar();
+  // On mobile, when sidebar is open, treat as expanded
+  const effectiveState = isMobile && openMobile ? 'expanded' : state;
+  
   return (
     <div
       ref={ref}
       data-sidebar="content"
+      data-state={effectiveState}
       className={cn(
         "flex min-h-0 flex-1 flex-col gap-2 overflow-auto",
-        state === 'collapsed' && 'overflow-hidden',
+        effectiveState === 'collapsed' && 'overflow-hidden',
         className
       )}
       {...props}
@@ -294,13 +382,16 @@ const SidebarMenuButton = React.forwardRef<
     ref
   ) => {
     const Comp = asChild ? Slot : "button"
-    const { state, isMobile } = useSidebar()
+    const { state, isMobile, openMobile } = useSidebar()
+    // On mobile, when sidebar is open, treat as expanded
+    const effectiveState = isMobile && openMobile ? 'expanded' : state;
 
     const buttonContent = (
       <Comp
         ref={ref}
         data-sidebar="menu-button"
         data-active={isActive}
+        data-state={effectiveState}
         className={cn(
           "flex w-full items-center gap-3 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50",
           "data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground",
@@ -312,7 +403,8 @@ const SidebarMenuButton = React.forwardRef<
       </Comp>
     )
 
-    if (!tooltip || state === 'expanded') {
+    // Show tooltip only when collapsed and not on mobile
+    if (!tooltip || effectiveState === 'expanded' || isMobile) {
       return buttonContent;
     }
 
@@ -322,7 +414,7 @@ const SidebarMenuButton = React.forwardRef<
         <TooltipContent
           side="right"
           align="center"
-          hidden={state !== "collapsed" || isMobile}
+          hidden={effectiveState !== "collapsed" || isMobile}
         >
           {tooltip}
         </TooltipContent>
@@ -336,13 +428,17 @@ const SidebarMenuSub = React.forwardRef<
   HTMLUListElement,
   React.ComponentProps<"ul">
 >(({ className, ...props }, ref) => {
-    const { state } = useSidebar();
-    if (state === 'collapsed') return null;
+    const { state, isMobile, openMobile } = useSidebar();
+    // On mobile, when sidebar is open, treat as expanded
+    const effectiveState = isMobile && openMobile ? 'expanded' : state;
+    
+    if (effectiveState === 'collapsed') return null;
 
     return (
         <ul
             ref={ref}
             data-sidebar="menu-sub"
+            data-state={effectiveState}
             className={cn(
                 "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-sidebar-border px-2.5 py-0.5",
                 className
@@ -395,6 +491,7 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
 // Keep other exports if they exist and are needed
 export const SidebarRail = React.forwardRef<
   HTMLButtonElement,
@@ -448,5 +545,3 @@ export const SidebarMenuSubItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
 >(() => null);
-
-    
