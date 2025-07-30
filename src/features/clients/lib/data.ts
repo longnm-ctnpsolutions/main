@@ -1,5 +1,5 @@
 
-import type { Client } from "@/features/clients/types/client.types";
+import type { Client, Permission } from "@/features/clients/types/client.types";
 
 export const clients: Client[] = [
   { id: 'client-1', name: 'Main Web App', clientId: 'a1b2c3d4e5', status: 'active' },
@@ -12,4 +12,13 @@ export const clients: Client[] = [
   { id: 'client-8', name: 'Development Server', clientId: 'j6k7l8m9n0', status: 'active' },
   { id: 'client-9', name: 'Staging App', clientId: 'o1p2q3r4s5', status: 'active' },
   { id: 'client-10', name: 'Customer Portal', clientId: 't6u7v8w9x0', status: 'active' },
+];
+
+export const permissions: Permission[] = [
+  { permission: "read:user", description: "Read user profile" },
+  { permission: "write:user", description: "Update user profile" },
+  { permission: "delete:user", description: "Delete user account" },
+  { permission: "read:settings", description: "View settings" },
+  { permission: "update:settings", description: "Change settings" },
+  { permission: "admin:all", description: "Full admin access" },
 ];

@@ -5,3 +5,8 @@ export type Client = {
   clientId: string;
   status: 'active' | 'inactive';
 };
+
+export type Permission = {
+  permission: string;
+  description: string;
+};
