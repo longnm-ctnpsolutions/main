@@ -112,7 +112,6 @@ export const useHeaderTheme = () => {
   const themeOptions: ThemeOption[] = [
     { value: 'light', label: 'Light', icon: '☀️' },
     { value: 'dark', label: 'Dark', icon: '🌙' },
-    { value: 'system', label: 'System', icon: '💻' }
   ];
 
   const handleThemeChange = useCallback((theme: ThemeOption['value']) => {
@@ -128,8 +127,6 @@ export const useHeaderTheme = () => {
 export const useHeaderLanguage = (menuState: MenuState, menuActions: MenuActions) => {
   const languageOptions: LanguageOption[] = [
     { code: 'EN', label: 'English', flag: '🇺🇸' },
-    { code: 'ES', label: 'Spanish', flag: '🇪🇸' },
-    { code: 'FR', label: 'French', flag: '🇫🇷' },
     { code: 'VI', label: 'Vietnamese', flag: '🇻🇳' }
   ];
 
