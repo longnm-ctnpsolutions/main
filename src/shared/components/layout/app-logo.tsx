@@ -25,7 +25,7 @@ export function AppLogo({
           }}
         />
       )}
-      <div className="font-headline text-xl font-semibold text-primary">
+      <div className="font-headline text-xl font-medium text-primary">
         {appName}
       </div>
     </div>

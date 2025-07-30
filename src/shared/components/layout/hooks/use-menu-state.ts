@@ -1,4 +1,3 @@
-// Updated use-menu-state.tsx - Add close all functionality
 "use client";
 
 import * as React from "react";
@@ -42,31 +41,39 @@ export function useMenuState(menuConfig: MenuItem[]) {
     setOpenState(getDefaultOpenState(menuConfig));
   }, [pathname, menuConfig]);
 
+  // Listen for sidebar opened event to re-expand active submenus
+  React.useEffect(() => {
+    const handleSidebarOpened = () => {
+      const defaultState = getDefaultOpenState(menuConfig);
+      setOpenState(prevState => ({
+        ...prevState,
+        ...defaultState // Merge with existing state, prioritizing active items
+      }));
+    };
+
+    window.addEventListener('sidebar-opened', handleSidebarOpened);
+    return () => window.removeEventListener('sidebar-opened', handleSidebarOpened);
+  }, [menuConfig, pathname]);
+
   const toggleMenu = (menuId: string) => {
     setOpenState(prev => ({ ...prev, [menuId]: !prev[menuId] }));
   };
 
   // Function to close all submenus - can be called externally
   const closeAllSubmenus = React.useCallback(() => {
+    const currentOpenMenus = Object.keys(openState).filter(key => openState[key]);
+    
+    if (currentOpenMenus.length === 0) return;
+    
+    // Close all submenus immediately to prevent flash
     setOpenState(prev => {
       const newState = { ...prev };
-      const openMenus = Object.keys(newState).filter(key => newState[key]);
-      
-      if (openMenus.length === 0) return prev; // No change if nothing is open
-      
-      // Close all submenus with smooth transition
-      openMenus.forEach((key, index) => {
-        setTimeout(() => {
-          setOpenState(current => ({
-            ...current,
-            [key]: false
-          }));
-        }, index * 30); // 30ms stagger for smooth closing animation
+      Object.keys(newState).forEach(key => {
+        newState[key] = false;
       });
-      
-      return prev; // Return current state, individual timeouts will update
+      return newState;
     });
-  }, []);
+  }, [openState]);
 
   return { 
     openState, 

@@ -2,6 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { useRouter, usePathname } from 'next/navigation';
+import { SquareUser, LogOut } from "lucide-react";
 import type { 
   MenuState, 
   MenuActions, 
@@ -168,25 +169,13 @@ export const useUserMenu = (user?: User) => {
     {
       key: 'profile',
       label: 'Profile',
-      icon: '👤',
+      icon: SquareUser,
       onClick: handleProfile
-    },
-    {
-      key: 'settings',
-      label: 'Settings',
-      icon: '⚙️',
-      onClick: handleSettings
-    },
-    {
-      key: 'support',
-      label: 'Support',
-      icon: '❓',
-      onClick: handleSupport
     },
     {
       key: 'logout',
       label: 'Logout',
-      icon: '🚪',
+      icon: LogOut,
       onClick: handleLogout,
       separator: true
     }

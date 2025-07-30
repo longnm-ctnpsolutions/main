@@ -28,7 +28,7 @@ export interface LanguageOption {
 export interface UserMenuAction {
   key: string;
   label: string;
-  icon?: string;
+  icon: React.ComponentType<any>;
   onClick: () => void;
   separator?: boolean;
   disabled?: boolean;

@@ -10,6 +10,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { useUserMenu } from "@/shared/components/layout/hooks/header-menu-state";
 import type { User } from "@/shared/components/layout/types/header-menu.type";
+import React from 'react';
+
 
 interface UserMenuProps {
   user?: User;
@@ -26,11 +28,12 @@ export function UserMenu({ user }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Avatar className="h-8 w-8">
+        <Button variant="ghost" size="icon" className="rounded-md" aria-label="Open user menu">
+          <Avatar className="rounded-md cursor-pointer h-8 w-8">
             <AvatarImage 
-              src={user?.avatar || "https://placehold.co/40x40"} 
-              alt={user?.name || "User"} 
+              src={user?.avatar || "/images/personal.svg"} 
+              alt={user?.name || "User"}
+              data-ai-hint="avatar user"  
             />
             <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
           </Avatar>
@@ -38,7 +41,7 @@ export function UserMenu({ user }: UserMenuProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>
-          {user?.name || 'My Account'}
+          {user?.name || 'User Name'}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {userMenuActions.map((action, index) => (
@@ -49,7 +52,11 @@ export function UserMenu({ user }: UserMenuProps) {
               className="flex items-center gap-2"
               disabled={action.disabled}
             >
-              {action.icon && <span className="text-sm">{action.icon}</span>}
+              {action.icon && (
+                <span className="text-sm">
+                  {React.createElement(action.icon)}
+                </span>
+              )}
               <span>{action.label}</span>
             </DropdownMenuItem>
           </div>

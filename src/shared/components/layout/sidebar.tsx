@@ -1,4 +1,3 @@
-// Clean sidebar-nav.tsx - Keep using useMenuState
 "use client";
 
 import * as React from "react";
@@ -22,11 +21,9 @@ export function SidebarNav() {
     
     if (openMenus.length === 0) return;
     
-    // Close submenus with staggered animation for smooth effect
-    openMenus.forEach((key, index) => {
-      setTimeout(() => {
-        toggleMenu(key);
-      }, index * 50); // 50ms delay between each submenu closing
+    // Close all submenus immediately to prevent flash on mobile
+    openMenus.forEach(key => {
+      toggleMenu(key);
     });
   }, [openState, toggleMenu]);
 
