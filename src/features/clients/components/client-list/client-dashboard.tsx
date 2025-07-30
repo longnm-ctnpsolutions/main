@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -20,11 +19,11 @@ import * as z from "zod"
 import type { Client } from "@/features/clients/types/client.types"
 import { clients as defaultClients } from "@/features/clients/lib/data"
 import { useToast } from "@/shared/hooks/use-toast"
-import { Card, CardContent } from "@/shared/components/ui/card"
 import { ClientTable } from "./client-table"
-import { ClientPagination } from "./client-pagination"
-import { ClientActions } from "./client-actions"
+import { ClientPagination } from "@/features/clients/components/client-pagination"
+import { ClientActions } from "@/features/clients/components/client-actions"
 import { useSidebar } from "@/shared/components/ui/sidebar"
+import { ListLayout } from "@/shared/components/custom-ui/list-layout" 
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
@@ -123,10 +122,12 @@ export function ClientDashboard() {
     }
   }, [table, columnFilters]);
 
+  // Check if empty state
+  const isEmpty = clients.length === 0
+
   return (
-    <div className="flex flex-col h-full w-full space-y-4">
-      {/* Fixed Actions Area */}
-      <div className="flex-shrink-0">
+    <ListLayout
+      actions={
         <ClientActions 
           table={table}
           isAddClientDialogOpen={isAddClientDialogOpen}
@@ -136,21 +137,26 @@ export function ClientDashboard() {
           onDeleteSelected={handleDeleteSelected}
           isSidebarExpanded={isSidebarExpanded}
         />
-      </div>
-      
-      {/* Scrollable Table Area */}
-      <div className="flex-1 overflow-hidden">
-        <Card className="h-full">
-          <CardContent className="p-0 h-full overflow-auto">
-            <ClientTable table={table} columns={ClientTable.columns(handleDeleteRow)} />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Fixed Pagination Area */}
-      <div className="flex-shrink-0">
+      }
+      tableContent={
+        <ClientTable table={table} columns={ClientTable.columns(handleDeleteRow)} />
+      }
+      pagination={
         <ClientPagination table={table} />
-      </div>
-    </div>
+      }
+      emptyState={
+        isEmpty ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground mb-4">No clients found</p>
+            <button 
+              onClick={() => setAddClientDialogOpen(true)}
+              className="text-primary underline"
+            >
+              Add your first client
+            </button>
+          </div>
+        ) : undefined
+      }
+    />
   )
 }
