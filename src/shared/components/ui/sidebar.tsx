@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -10,7 +11,7 @@ import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Separator } from "@/shared/components/ui/separator"
-import { Sheet, SheetContent } from "@/shared/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle } from "@/shared/components/ui/sheet"
 import { Skeleton } from "@/shared/components/ui/skeleton"
 import {
   Tooltip,
@@ -191,6 +192,7 @@ const Sidebar = React.forwardRef<
               // Don't prevent these events - let them work normally
               onEscapeKeyDown={() => setOpenMobile(false)}
             >
+              <SheetTitle className="sr-only">Sidebar Menu</SheetTitle>
               <div className="flex h-full w-full flex-col" data-state="expanded">
                 {children}
               </div>
@@ -545,3 +547,5 @@ export const SidebarMenuSubItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
 >(() => null);
+
+    
