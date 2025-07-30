@@ -123,26 +123,34 @@ export function ClientDashboard() {
     }
   }, [table, columnFilters]);
 
-
   return (
-    <div className="w-full space-y-4">
-      <ClientActions 
-        table={table}
-        isAddClientDialogOpen={isAddClientDialogOpen}
-        setAddClientDialogOpen={setAddClientDialogOpen}
-        addClientForm={addClientForm}
-        onAddClient={handleAddClient}
-        onDeleteSelected={handleDeleteSelected}
-        isSidebarExpanded={isSidebarExpanded}
-      />
+    <div className="flex flex-col h-full w-full space-y-4">
+      {/* Fixed Actions Area */}
+      <div className="flex-shrink-0">
+        <ClientActions 
+          table={table}
+          isAddClientDialogOpen={isAddClientDialogOpen}
+          setAddClientDialogOpen={setAddClientDialogOpen}
+          addClientForm={addClientForm}
+          onAddClient={handleAddClient}
+          onDeleteSelected={handleDeleteSelected}
+          isSidebarExpanded={isSidebarExpanded}
+        />
+      </div>
       
-      <Card>
-        <CardContent className="p-0">
+      {/* Scrollable Table Area */}
+      <div className="flex-1 overflow-hidden">
+        <Card className="h-full">
+          <CardContent className="p-0 h-full overflow-auto">
             <ClientTable table={table} columns={ClientTable.columns(handleDeleteRow)} />
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
-      <ClientPagination table={table} />
+      {/* Fixed Pagination Area */}
+      <div className="flex-shrink-0">
+        <ClientPagination table={table} />
+      </div>
     </div>
   )
 }
