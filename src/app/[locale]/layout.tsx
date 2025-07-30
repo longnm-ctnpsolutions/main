@@ -30,7 +30,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         {/* Main Content */}
         <main
           className={cn(
-            "flex-1 bg-muted/40 p-4 sm:p-6 lg:p-8 transition-all duration-300 ease-in-out overflow-hidden",
+            "flex-1 bg-muted/40 p-4 sm:p-6 transition-all duration-300 ease-in-out overflow-hidden",
             // Desktop: adjust margin based on sidebar state
             !isMobile && !isTablet && (state === "expanded" ? "ml-0" : "ml-0"),
             // Tablet: adjust margin when sidebar is collapsed (icon only), no margin when expanded (overlay)
