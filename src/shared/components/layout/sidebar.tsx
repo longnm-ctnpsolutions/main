@@ -8,9 +8,29 @@ import { useMenuState } from "@/layout/hooks/use-menu-state";
 import { MenuItem } from "./nav-item";
 
 export function SidebarNav() {
-  const { state, setOpen, isMobile, openMobile } = useSidebar();
+  const { state, isMobile, openMobile, setCloseAllSubmenus } = useSidebar();
   const effectiveState = isMobile && openMobile ? 'expanded' : state;
+  
+  // Use the existing useMenuState hook
   const { openState, toggleMenu } = useMenuState(menuConfig);
+
+  // Create a function to close all submenus and register it with sidebar context
+  const closeAllSubmenus = React.useCallback(() => {
+    // Get all currently open submenus
+    const openMenus = Object.keys(openState).filter(key => openState[key]);
+    
+    if (openMenus.length === 0) return;
+    
+    // Close all submenus immediately to prevent flash on mobile
+    openMenus.forEach(key => {
+      toggleMenu(key);
+    });
+  }, [openState, toggleMenu]);
+
+  // Register the close function with sidebar context
+  React.useEffect(() => {
+    setCloseAllSubmenus(closeAllSubmenus);
+  }, [setCloseAllSubmenus, closeAllSubmenus]);
 
   return (
     <div className="flex flex-col h-full">

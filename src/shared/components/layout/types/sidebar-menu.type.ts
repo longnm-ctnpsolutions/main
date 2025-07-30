@@ -1,4 +1,4 @@
-import { User, Briefcase, Settings, Shield, Database, BarChart } from "lucide-react";
+import { User, BriefcaseBusiness, Settings, Shield, SquareUser } from "lucide-react";
 
 export interface MenuItem {
   id: string;
@@ -14,7 +14,7 @@ export const menuConfig: MenuItem[] = [
   {
     id: "identity",
     label: "Identity Manager",
-    icon: User,
+    icon: SquareUser,
     dividerAfter: true,
     children: [
       { id: "users", label: "Users", icon: User, href: "/users" },
@@ -25,28 +25,9 @@ export const menuConfig: MenuItem[] = [
   {
     id: "applications",
     label: "Applications",
-    icon: Briefcase,
+    icon: BriefcaseBusiness,
     href: "/applications",
     dividerAfter: true,
-  },
-  {
-    id: "analytics",
-    label: "Analytics",
-    icon: BarChart,
-    dividerAfter: true,
-    children: [
-      { id: "reports", label: "Reports", icon: BarChart, href: "/analytics/reports" },
-      { id: "dashboard", label: "Dashboard", icon: Database, href: "/analytics/dashboard" },
-      { 
-        id: "advanced", 
-        label: "Advanced Analytics", 
-        icon: BarChart, 
-        children: [
-          { id: "trends", label: "Trends", icon: BarChart, href: "/analytics/advanced/trends" },
-          { id: "predictions", label: "Predictions", icon: BarChart, href: "/analytics/advanced/predictions" },
-        ]
-      },
-    ]
   },
   {
     id: "settings",
@@ -55,7 +36,6 @@ export const menuConfig: MenuItem[] = [
     dividerAfter: true,
     children: [
       { id: "profile", label: "User Profile", icon: User, href: "/user-profile" },
-      { id: "system", label: "System Settings", icon: Settings, href: "/system-settings" },
     ]
   },
 ];

@@ -1,17 +1,16 @@
-
 "use client"
 
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import { PanelLeft, AlignJustify  } from "lucide-react"
 
 import { useIsMobile } from "@/shared/hooks/use-mobile"
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Separator } from "@/shared/components/ui/separator"
-import { Sheet, SheetContent, SheetTitle } from "@/shared/components/ui/sheet"
+import { Sheet, SheetContent } from "@/shared/components/ui/sheet"
 import { Skeleton } from "@/shared/components/ui/skeleton"
 import {
   Tooltip,
@@ -36,6 +35,8 @@ type SidebarContext = {
   isMobile: boolean
   isTablet: boolean
   toggleSidebar: () => void
+  closeAllSubmenus: () => void
+  setCloseAllSubmenus: (fn: () => void) => void
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
@@ -87,6 +88,9 @@ const SidebarProvider = React.forwardRef<
     const isMobile = useIsMobile()
     const isTablet = useIsTablet()
     const [openMobile, setOpenMobile] = React.useState(false)
+    
+    // Reference to external close all submenus function
+    const closeAllSubmenusRef = React.useRef<(() => void) | null>(null)
 
     const [_open, _setOpen] = React.useState(defaultOpen)
     const open = openProp ?? _open
@@ -103,13 +107,52 @@ const SidebarProvider = React.forwardRef<
       [setOpenProp, open]
     )
 
+    const closeAllSubmenus = React.useCallback(() => {
+      if (closeAllSubmenusRef.current) {
+        closeAllSubmenusRef.current()
+      }
+    }, [])
+
+    const setCloseAllSubmenus = React.useCallback((fn: () => void) => {
+      closeAllSubmenusRef.current = fn
+    }, [])
+
     const toggleSidebar = React.useCallback(() => {
       if (isMobile) {
-        return setOpenMobile((open) => !open)
+        if (openMobile) {
+          // Closing: close submenus first, then close sidebar with delay
+          closeAllSubmenus()
+          setTimeout(() => {
+            setOpenMobile(false)
+          }, 200) // Increased delay to prevent flash
+        } else {
+          // Opening: open sidebar first, then expand active submenus
+          setOpenMobile(true)
+          setTimeout(() => {
+            // Re-apply default submenu states (auto-expand active items)
+            if (closeAllSubmenusRef.current) {
+              // This will trigger useMenuState to recalculate and open active submenus
+              const event = new CustomEvent('sidebar-opened')
+              window.dispatchEvent(event)
+            }
+          }, 100)
+        }
       } else {
-        return setOpen((open) => !open)
+        if (open) {
+          // Closing: close submenus and sidebar together on desktop
+          closeAllSubmenus()
+          setOpen(false)
+        } else {
+          // Opening: open sidebar first, then expand active submenus
+          setOpen(true)
+          setTimeout(() => {
+            // Re-apply default submenu states (auto-expand active items)
+            const event = new CustomEvent('sidebar-opened')
+            window.dispatchEvent(event)
+          }, 100)
+        }
       }
-    }, [isMobile, setOpen, setOpenMobile])
+    }, [isMobile, open, openMobile, setOpen, setOpenMobile, closeAllSubmenus])
 
     React.useEffect(() => {
       const handleKeyDown = (event: KeyboardEvent) => {
@@ -118,16 +161,41 @@ const SidebarProvider = React.forwardRef<
           (event.metaKey || event.ctrlKey)
         ) {
           event.preventDefault()
+          
           if (isMobile) {
-            setOpenMobile((open) => !open)
+            if (openMobile) {
+              // Closing: close submenus first, then close sidebar with delay
+              closeAllSubmenus()
+              setTimeout(() => {
+                setOpenMobile(false)
+              }, 200)
+            } else {
+              // Opening: open sidebar first, then expand active submenus
+              setOpenMobile(true)
+              setTimeout(() => {
+                const event = new CustomEvent('sidebar-opened')
+                window.dispatchEvent(event)
+              }, 100)
+            }
           } else {
-            setOpen((open) => !open)
+            if (open) {
+              // Closing: close submenus and sidebar together on desktop
+              closeAllSubmenus()
+              setOpen(false)
+            } else {
+              // Opening: open sidebar first, then expand active submenus
+              setOpen(true)
+              setTimeout(() => {
+                const event = new CustomEvent('sidebar-opened')
+                window.dispatchEvent(event)
+              }, 100)
+            }
           }
         }
       }
       window.addEventListener("keydown", handleKeyDown)
       return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [isMobile, setOpen, setOpenMobile])
+    }, [isMobile, open, openMobile, setOpen, setOpenMobile, closeAllSubmenus])
 
     const state = open ? "expanded" : "collapsed"
 
@@ -141,8 +209,10 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        closeAllSubmenus,
+        setCloseAllSubmenus,
       }),
-      [state, open, setOpen, isMobile, isTablet, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, isTablet, openMobile, setOpenMobile, toggleSidebar, closeAllSubmenus, setCloseAllSubmenus]
     )
 
     return (
@@ -175,13 +245,28 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, isTablet, state, open, openMobile, setOpenMobile, setOpen } = useSidebar()
+    const { isMobile, isTablet, state, open, openMobile, setOpenMobile, setOpen, closeAllSubmenus } = useSidebar()
 
     // Mobile: Use Sheet with custom overlay positioning
     if (isMobile) {
       return (
         <>
-          <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+          <Sheet open={openMobile} onOpenChange={(open) => {
+            if (!open) {
+              // When closing: close submenus first, then close sidebar
+              closeAllSubmenus?.()
+              setTimeout(() => {
+                setOpenMobile(false)
+              }, 200) // Increased delay to prevent flash
+            } else {
+              setOpenMobile(true)
+              // When opening, expand active submenus after sidebar is open
+              setTimeout(() => {
+                const event = new CustomEvent('sidebar-opened')
+                window.dispatchEvent(event)
+              }, 100)
+            }
+          }} {...props}>
             <SheetContent
               data-sidebar="sidebar"
               data-mobile="true" 
@@ -189,10 +274,14 @@ const Sidebar = React.forwardRef<
               className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden top-16 h-[calc(100vh-4rem)] z-40 border-0"
               style={{ "--sidebar-width": SIDEBAR_WIDTH } as React.CSSProperties}
               side={side}
-              // Don't prevent these events - let them work normally
-              onEscapeKeyDown={() => setOpenMobile(false)}
+              onEscapeKeyDown={() => {
+                // Close submenus first, then close sidebar
+                closeAllSubmenus?.()
+                setTimeout(() => {
+                  setOpenMobile(false)
+                }, 200) // Increased delay to prevent flash
+              }}
             >
-              <SheetTitle className="sr-only">Sidebar Menu</SheetTitle>
               <div className="flex h-full w-full flex-col" data-state="expanded">
                 {children}
               </div>
@@ -211,12 +300,18 @@ const Sidebar = React.forwardRef<
                 }
               `}</style>
               <div 
-                className="fixed top-16 bottom-0 z-30 bg-black/50"
+                className="fixed top-16 bottom-0 z-30 bg-black/50 transition-opacity duration-200"
                 style={{ 
                   left: side === "left" ? SIDEBAR_WIDTH : "0",
                   right: side === "right" ? SIDEBAR_WIDTH : "0"
                 }}
-                onClick={() => setOpenMobile(false)}
+                onClick={() => {
+                  // Close submenus first, then close sidebar with delay for smooth animation
+                  closeAllSubmenus?.()
+                  setTimeout(() => {
+                    setOpenMobile(false)
+                  }, 200) // Increased delay to prevent flash
+                }}
               />
             </>
           )}
@@ -284,14 +379,14 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-8 w-8", className)}
+      className={cn("h-10 w-10", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
       }}
       {...props}
     >
-      <PanelLeft />
+      <AlignJustify />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
@@ -547,5 +642,3 @@ export const SidebarMenuSubItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
 >(() => null);
-
-    
