@@ -34,9 +34,9 @@ export function ListLayout({
       )}
       
       {/* Scrollable Table Area */}
-      <div className="flex-1 overflow-hidden">
-        <Card className={cn("h-full", cardClassName)}>
-          <CardContent className="p-0 h-full overflow-auto">
+    <div className="flex-1 overflow-hidden">
+        <Card className={cn("h-full flex flex-col", cardClassName)}>
+          <CardContent className="p-0 h-full flex flex-col overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-muted-foreground">Loading...</div>
