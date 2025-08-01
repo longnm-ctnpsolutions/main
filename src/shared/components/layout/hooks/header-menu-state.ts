@@ -130,15 +130,15 @@ export const useHeaderLanguage = (menuState: MenuState, menuActions: MenuActions
     { code: 'EN', label: 'English', flag: '🇺🇸' },
     { code: 'VI', label: 'Vietnamese', flag: '🇻🇳' }
   ];
-
+  
   const handleLanguageChange = useCallback((languageCode: string) => {
     menuActions.setLanguage(languageCode);
     // Thêm logic i18n ở đây
     console.log(`Language changed to: ${languageCode}`);
   }, [menuActions]);
-
+  const cleanLanguage = menuState.currentLanguage.replace(/"/g, '')
   return {
-    currentLanguage: menuState.currentLanguage,
+    currentLanguage: cleanLanguage,
     languageOptions,
     handleLanguageChange
   };
