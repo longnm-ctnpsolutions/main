@@ -1,6 +1,8 @@
+
 "use client"
 
 import * as React from "react"
+import Image from "next/image";
 import {
   ColumnDef,
   flexRender,
@@ -46,7 +48,7 @@ interface ClientTableProps {
 export function ClientTable({ table, columns }: ClientTableProps) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Header - Fixed với table layout */}
+      {/* Header - Fixed with table layout */}
       <div className="flex-shrink-0 border-b bg-background">
         <div className="w-full" style={{ tableLayout: 'fixed' }}>
           <Table>
@@ -61,11 +63,11 @@ export function ClientTable({ table, columns }: ClientTableProps) {
                           'hidden sm:table-cell': header.id === 'status'
                         })}
                         style={{ 
-                          width: header.id === 'select' ? '50px' : 
-                                header.id === 'name' ? '200px' :
-                                header.id === 'clientId' ? '150px' :
-                                header.id === 'status' ? '120px' :
-                                header.id === 'actions' ? '80px' : 'auto'
+                          width: header.id === 'select' ? '5%' : 
+                                header.id === 'name' ? '25%' :
+                                header.id === 'description' ? '50%' :
+                                header.id === 'status' ? '10%' :
+                                header.id === 'actions' ? '10%' : 'auto'
                         }}
                       >
                         {header.isPlaceholder
@@ -102,11 +104,11 @@ export function ClientTable({ table, columns }: ClientTableProps) {
                           'hidden sm:table-cell': cell.column.id === 'status'
                         })}
                         style={{
-                          width: cell.column.id === 'select' ? '50px' : 
-                                cell.column.id === 'name' ? '200px' :
-                                cell.column.id === 'clientId' ? '150px' :
-                                cell.column.id === 'status' ? '120px' :
-                                cell.column.id === 'actions' ? '80px' : 'auto'
+                          width: cell.column.id === 'select' ? '5%' : 
+                                cell.column.id === 'name' ? '25%' :
+                                cell.column.id === 'description' ? '50%' :
+                                cell.column.id === 'status' ? '10%' :
+                                cell.column.id === 'actions' ? '10%' : 'auto'
                         }}
                       >
                         {flexRender(
@@ -166,17 +168,41 @@ ClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef<Client>
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          Client Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+    cell: ({ row }) => (
+      <div className="flex items-center gap-3">
+        {row.original.logo && (
+          <Image 
+            src={row.original.logo} 
+            alt={`${row.getValue("name")} logo`}
+            width={32}
+            height={32}
+            className="rounded-md"
+            data-ai-hint="logo"
+          />
+        )}
+        <div className="font-medium">{row.getValue("name")}</div>
+      </div>
+    ),
   },
   {
-    accessorKey: "clientId",
-    header: "Client ID",
-    cell: ({ row }) => <div>{row.getValue("clientId")}</div>,
+    accessorKey: "description",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Description
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => <div className="text-muted-foreground">{row.getValue("description")}</div>,
   },
   {
     accessorKey: "status",
@@ -188,7 +214,7 @@ ClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef<Client>
         <div className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold",
           isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
         )}>
-           <span className={cn("mr-1 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
+           <span className={cn("mr-1.5 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
            <span className="capitalize">{status}</span>
         </div>
       )
@@ -210,7 +236,6 @@ ClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef<Client>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem>Details</DropdownMenuItem>
-              <DropdownMenuItem>Delete</DropdownMenuItem>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50">Delete</DropdownMenuItem>

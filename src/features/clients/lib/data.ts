@@ -2,14 +2,44 @@
 import type { Client } from "@/features/clients/types/client.types";
 
 export const clients: Client[] = [
-  { id: 'client-1', name: 'Main Web App', clientId: 'a1b2c3d4e5', status: 'active' },
-  { id: 'client-2', name: 'iOS App', clientId: 'f6g7h8i9j0', status: 'active' },
-  { id: 'client-3', name: 'Android App', clientId: 'k1l2m3n4o5', status: 'active' },
-  { id: 'client-4', name: 'Internal Dashboard', clientId: 'p6q7r8s9t0', status: 'inactive' },
-  { id: 'client-5', name: 'Marketing Site', clientId: 'u1v2w3x4y5', status: 'active' },
-  { id: 'client-6', name: 'API Gateway', clientId: 'z6a7b8c9d0', status: 'active' },
-  { id: 'client-7', name: 'Partner Integration', clientId: 'e1f2g3h4i5', status: 'inactive' },
-  { id: 'client-8', name: 'Development Server', clientId: 'j6k7l8m9n0', status: 'active' },
-  { id: 'client-9', name: 'Staging App', clientId: 'o1p2q3r4s5', status: 'active' },
-  { id: 'client-10', name: 'Customer Portal', clientId: 't6u7v8w9x0', status: 'active' },
+  { 
+    id: 'client-1', 
+    name: 'Activation', 
+    clientId: 'a1b2c3d4e5', 
+    status: 'active',
+    logo: '/images/activation.png',
+    description: 'Manage and track the activation of systems, services, or products with support for requests, approvals, and status monitoring.'
+  },
+  { 
+    id: 'client-2', 
+    name: 'ClaimTire', 
+    clientId: 'f6g7h8i9j0', 
+    status: 'active',
+    logo: '/images/claimtire.png',
+    description: 'Support tire-related claim submissions, tracking, and resolution management.'
+  },
+  { 
+    id: 'client-3', 
+    name: 'Fleet Approach', 
+    clientId: 'k1l2m3n4o5', 
+    status: 'active',
+    logo: '/images/fleet-approach.png',
+    description: 'Enable streamlined operations and insights for fleet-related activities and services.'
+  },
+  { 
+    id: 'client-4', 
+    name: 'Portal Identity', 
+    clientId: 'p6q7r8s9t0', 
+    status: 'active',
+    logo: '/images/portal-identity.png',
+    description: 'A centralized application for managing user identities, roles, permissions, and client configurations across integrated systems.'
+  },
+  { 
+    id: 'client-5', 
+    name: 'Web Order for Dealer', 
+    clientId: 'u1v2w3x4y5', 
+    status: 'active',
+    logo: '/images/web-order.png',
+    description: 'Place, track, and manage orders through the integrated online ordering system.'
+  },
 ];

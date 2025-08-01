@@ -4,4 +4,6 @@ export type Client = {
   name: string;
   clientId: string;
   status: 'active' | 'inactive';
+  logo?: string;
+  description?: string;
 };
