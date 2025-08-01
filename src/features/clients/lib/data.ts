@@ -1,4 +1,14 @@
-import type { Client } from "@/features/clients/types/client.types";
+
+import type { Client, Permission } from "@/features/clients/types/client.types";
+
+export const permissions: Permission[] = [
+  { permission: "read:user", description: "Read user profile" },
+  { permission: "write:user", description: "Update user profile" },
+  { permission: "delete:user", description: "Delete user account" },
+  { permission: "read:settings", description: "View settings" },
+  { permission: "update:settings", description: "Change settings" },
+  { permission: "admin:all", description: "Full admin access" },
+];
 
 export const clients: Client[] = [
   { 

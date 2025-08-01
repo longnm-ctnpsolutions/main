@@ -7,3 +7,8 @@ export type Client = {
   logo?: string;
   description?: string;
 };
+
+export type Permission = {
+  permission: string;
+  description: string;
+};

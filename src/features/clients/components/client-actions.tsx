@@ -60,6 +60,7 @@ export function ClientActions({
   onDeleteSelected,
   onRefreshData,
 }: ClientActionsProps) {
+
   const [isMounted, setIsMounted] = React.useState(false)
   
   React.useEffect(() => {
