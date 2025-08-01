@@ -60,14 +60,12 @@ export function ClientActions({
   onDeleteSelected,
   onRefreshData,
 }: ClientActionsProps) {
-  // Track if component is mounted (for hydration)
   const [isMounted, setIsMounted] = React.useState(false)
   
   React.useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Create column chooser component
   const ColumnChooserContent = React.useMemo(() => (
     <>
       <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
@@ -97,7 +95,6 @@ export function ClientActions({
     </>
   ), [table])
 
-  // Define actions configuration với responsive breakpoints được điều chỉnh
   const actions: ActionItem[] = React.useMemo(() => [
     {
       id: 'add-client',
@@ -156,7 +153,7 @@ export function ClientActions({
       type: 'dropdown',
       variant: 'ghost',
       size: 'icon',
-      priority: 3,
+      priority: 2,
       hideAt: { 
         minWidth: 768, // md breakpoint
         condition: ({ windowWidth }) => windowWidth < 768
@@ -175,7 +172,7 @@ export function ClientActions({
       icon: FileUp,
       type: 'dropdown',
       variant: 'ghost',
-      priority: 2,
+      priority: 3,
       hideAt: { 
         minWidth: 960,
         condition: ({ windowWidth }) => windowWidth < 960

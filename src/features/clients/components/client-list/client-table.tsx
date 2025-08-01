@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -47,72 +46,90 @@ interface ClientTableProps {
 export function ClientTable({ table, columns }: ClientTableProps) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Header - Fixed */}
+      {/* Header - Fixed với table layout */}
       <div className="flex-shrink-0 border-b bg-background">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead 
-                      key={header.id} 
-                      className={cn("bg-background", {
-                        'hidden sm:table-cell': header.id === 'status'
-                      })}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-        </Table>
+        <div className="w-full" style={{ tableLayout: 'fixed' }}>
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead 
+                        key={header.id} 
+                        className={cn("bg-background", {
+                          'hidden sm:table-cell': header.id === 'status'
+                        })}
+                        style={{ 
+                          width: header.id === 'select' ? '50px' : 
+                                header.id === 'name' ? '200px' :
+                                header.id === 'clientId' ? '150px' :
+                                header.id === 'status' ? '120px' :
+                                header.id === 'actions' ? '80px' : 'auto'
+                        }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    )
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+          </Table>
+        </div>
       </div>
 
-      {/* Body - Scrollable */}
+      {/* Body - Scrollable với cùng table layout */}
       <div className="flex-1 overflow-auto">
-        <Table>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                      key={cell.id} 
-                      className={cn({
-                        'hidden sm:table-cell': cell.column.id === 'status'
-                      })}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+        <div className="w-full" style={{ tableLayout: 'fixed' }}>
+          <Table>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell 
+                        key={cell.id} 
+                        className={cn({
+                          'hidden sm:table-cell': cell.column.id === 'status'
+                        })}
+                        style={{
+                          width: cell.column.id === 'select' ? '50px' : 
+                                cell.column.id === 'name' ? '200px' :
+                                cell.column.id === 'clientId' ? '150px' :
+                                cell.column.id === 'status' ? '120px' :
+                                cell.column.id === 'actions' ? '80px' : 'auto'
+                        }}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   )
@@ -193,8 +210,7 @@ ClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef<Client>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem>Details</DropdownMenuItem>
-              <DropdownMenuItem>Rotate Secret</DropdownMenuItem>
-              <DropdownMenuItem>Deactivate</DropdownMenuItem>
+              <DropdownMenuItem>Delete</DropdownMenuItem>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50">Delete</DropdownMenuItem>
