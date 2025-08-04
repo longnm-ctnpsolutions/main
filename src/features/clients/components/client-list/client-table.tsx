@@ -39,6 +39,7 @@ import {
 } from "@/shared/components/ui/alert-dialog"
 import { cn } from "@/shared/lib/utils"
 import { useResponsiveColumns, createColumnConfig } from "@/shared/hooks/use-responsive-columns"
+import { useRouter } from 'next/navigation';
 
 interface ClientTableProps {
   table: TableType<Client>;
@@ -380,6 +381,10 @@ ClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef<Client>
     enableHiding: false,
     cell: ({ row }) => {
       const client = row.original
+        const router = useRouter();
+        const handleDetailsClick = () => {
+        router.push(`/en/clients/${client.id}`);
+      };
       return (
         <div className="text-right">
           <DropdownMenu>
@@ -390,7 +395,7 @@ ClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef<Client>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Details</DropdownMenuItem>
+               <DropdownMenuItem onSelect={handleDetailsClick}>Details</DropdownMenuItem>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50">Delete</DropdownMenuItem>
