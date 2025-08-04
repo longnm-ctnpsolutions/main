@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -240,8 +241,8 @@ export default function ClientDetailTabs() {
               <Card className="rounded-[8px] border pt-[20px] pb-[20px] px-[24px] space-y-4 shadow-lg border-gray-200 bg-white flex-shrink-0">
                 <div className="text-lg font-semibold">Add a Permission</div>
 
-                <div className="flex w-full gap-4 items-end overflow-x-auto">
-                  <div className="flex flex-col flex-1 min-w-0 basis-1/3">
+                <div className="flex flex-col md:flex-row w-full gap-4 md:items-end">
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm mb-1">
                       Permission <span className="text-red-500">*</span>
                     </p>
@@ -251,7 +252,7 @@ export default function ClientDetailTabs() {
                     />
                   </div>
 
-                  <div className="flex flex-col flex-1 min-w-0 basis-1/3">
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm mb-1">Description</p>
                     <Input
                       className="bg-transparent w-full"
@@ -259,14 +260,13 @@ export default function ClientDetailTabs() {
                     />
                   </div>
 
-                  <div className="flex flex-col flex-1 min-w-0 basis-1/3 items-end">
+                  <div className="flex-shrink-0 flex justify-end md:justify-start">
                     <Button
                       size="sm"
-                      className="w-[70px] bg-[#0f6cbd] text-white hover:bg-[#084c91]"
+                      className="w-auto md:w-[70px] bg-[#0f6cbd] text-white hover:bg-[#084c91]"
                     >
                       Create
                     </Button>
-                    <p className="text-sm mb-1 invisible">Create</p>
                   </div>
                 </div>
               </Card>
