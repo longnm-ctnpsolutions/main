@@ -30,6 +30,7 @@ import { ClientFilters } from "./client-filters"
 import AddClientDialog from '@/features/clients/components/add-client-dialog'
 import ActionBar from '@/shared/components/custom-ui/actions-bar'
 import { ActionItem } from '@/shared/components/custom-ui/hooks/use-responsive-actions'
+import { useClientStore } from "@/shared/store/clients.store"
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
@@ -60,7 +61,7 @@ export function ClientActions({
   onDeleteSelected,
   onRefreshData,
 }: ClientActionsProps) {
-
+  const isLoading = useClientStore((state) => state.isLoading);
   const [isMounted, setIsMounted] = React.useState(false)
   
   React.useEffect(() => {

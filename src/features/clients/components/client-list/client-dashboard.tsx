@@ -17,13 +17,13 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 
 import type { Client } from "@/features/clients/types/client.types"
-import { clients as defaultClients } from "@/features/clients/lib/data"
 import { useToast } from "@/shared/hooks/use-toast"
 import { ClientTable } from "./client-table"
 import { ClientPagination } from "@/features/clients/components/client-pagination"
 import { ClientActions } from "@/features/clients/components/client-actions"
 import { useSidebar } from "@/shared/components/ui/sidebar"
 import { ListLayout } from "@/shared/components/custom-ui/list-layout" 
+import { useClientStore } from "@/shared/store/clients.store"
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
@@ -36,7 +36,16 @@ const addClientFormSchema = z.object({
 export function ClientDashboard() {
   const { toast } = useToast()
   const { state: sidebarState } = useSidebar()
-  const [clients, setClients] = React.useState<Client[]>(defaultClients)
+  const { 
+    clients, 
+    isLoading, 
+    error, 
+    fetchClients, 
+    addClient, 
+    removeClient,
+    removeMultipleClients 
+  } = useClientStore()
+
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -44,6 +53,10 @@ export function ClientDashboard() {
   const [isAddClientDialogOpen, setAddClientDialogOpen] = React.useState(false)
 
   const isSidebarExpanded = sidebarState === 'expanded';
+
+  React.useEffect(() => {
+    fetchClients();
+  }, [fetchClients]);
 
   const addClientForm = useForm<z.infer<typeof addClientFormSchema>>({
     resolver: zodResolver(addClientFormSchema),
@@ -56,41 +69,61 @@ export function ClientDashboard() {
      },
   })
 
-  const handleAddClient = (values: z.infer<typeof addClientFormSchema>) => {
-    const newClient: Client = {
-      id: `client-${Date.now()}`,
+  const handleAddClient = async (values: z.infer<typeof addClientFormSchema>) => {
+    // Map form values to the type expected by the store/API
+    const newClientData = {
       name: values.name,
-      clientId: values.identifier,
-      status: "active",
+      clientId: values.identifier, // Assuming identifier is clientId
+      description: values.description,
+      logo: '/images/new-icon.png' // Placeholder logo
+    };
+
+    await addClient(newClientData);
+
+    if (!useClientStore.getState().error) {
+      setAddClientDialogOpen(false)
+      addClientForm.reset()
+      toast({
+        title: "Client added",
+        description: `${values.name} has been added to the client list.`,
+      })
     }
-    setClients((prev) => [newClient, ...prev])
-    setAddClientDialogOpen(false)
-    addClientForm.reset()
-    toast({
-      title: "Client added",
-      description: `${values.name} has been added to the client list.`,
-    })
   }
   
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     const selectedIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id);
-    setClients(prev => prev.filter(client => !selectedIds.includes(client.id)));
-    setRowSelection({});
-    toast({
-      title: "Clients deleted",
-      description: `${selectedIds.length} client(s) have been deleted.`,
-      variant: "destructive"
-    })
+    await removeMultipleClients(selectedIds);
+    
+    if (!useClientStore.getState().error) {
+      setRowSelection({});
+      toast({
+        title: "Clients deleted",
+        description: `${selectedIds.length} client(s) have been deleted.`,
+        variant: "destructive"
+      })
+    }
   }
   
-  const handleDeleteRow = (clientId: string) => {
-    setClients(prev => prev.filter(client => client.id !== clientId));
-     toast({
-      title: "Client deleted",
-      description: `The client has been deleted.`,
-      variant: "destructive"
-    })
+  const handleDeleteRow = async (clientId: string) => {
+    await removeClient(clientId);
+    if (!useClientStore.getState().error) {
+      toast({
+        title: "Client deleted",
+        description: `The client has been deleted.`,
+        variant: "destructive"
+      })
+    }
   }
+  
+  React.useEffect(() => {
+    if (error) {
+      toast({
+        title: "An error occurred",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   const columns: ColumnDef<Client>[] = [
     // Column definitions will be passed to ClientTable
@@ -123,10 +156,11 @@ export function ClientDashboard() {
   }, [table, columnFilters]);
 
   // Check if empty state
-  const isEmpty = clients.length === 0
+  const isEmpty = !isLoading && clients.length === 0
 
   return (
     <ListLayout
+      loading={isLoading}
       actions={
         <ClientActions 
           table={table}
@@ -135,6 +169,7 @@ export function ClientDashboard() {
           addClientForm={addClientForm}
           onAddClient={handleAddClient}
           onDeleteSelected={handleDeleteSelected}
+          onRefreshData={fetchClients}
           isSidebarExpanded={isSidebarExpanded}
         />
       }
