@@ -154,6 +154,7 @@ export function ClientDashboard() {
       actions={
         <ClientActions 
           table={table}
+          isLoading={isLoading}
           isAddClientDialogOpen={isAddClientDialogOpen}
           setAddClientDialogOpen={setAddClientDialogOpen}
           addClientForm={addClientForm}

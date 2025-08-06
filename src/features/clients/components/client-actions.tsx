@@ -30,7 +30,6 @@ import { ClientFilters } from "./client-filters"
 import AddClientDialog from '@/features/clients/components/add-client-dialog'
 import ActionBar from '@/shared/components/custom-ui/actions-bar'
 import { ActionItem } from '@/shared/components/custom-ui/hooks/use-responsive-actions'
-import { useClientStore } from "@/shared/store/clients.store"
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
@@ -42,6 +41,7 @@ const addClientFormSchema = z.object({
 
 interface ClientActionsProps {
   table: Table<Client>
+  isLoading: boolean;
   isAddClientDialogOpen: boolean
   isSidebarExpanded: boolean
   setAddClientDialogOpen: (isOpen: boolean) => void
@@ -53,6 +53,7 @@ interface ClientActionsProps {
 
 export function ClientActions({ 
   table,
+  isLoading,
   isAddClientDialogOpen,
   isSidebarExpanded,
   setAddClientDialogOpen,
@@ -61,7 +62,6 @@ export function ClientActions({
   onDeleteSelected,
   onRefreshData,
 }: ClientActionsProps) {
-  const isLoading = useClientStore((state) => state.isLoading);
   const [isMounted, setIsMounted] = React.useState(false)
   
   React.useEffect(() => {
@@ -219,7 +219,7 @@ export function ClientActions({
   ])
 
   // Show loading state during hydration to prevent flash
-  if (!isMounted) {
+  if (!isMounted || isLoading) {
     return (
       <Card>
         <CardHeader>
