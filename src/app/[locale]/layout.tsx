@@ -9,7 +9,6 @@ import {
 import { Header } from "@/shared/components/layout/header";
 import { SidebarNav } from "@/shared/components/layout/sidebar";
 import { cn } from "@/shared/lib/utils";
-import { ClientsProvider } from "@/shared/context/clients-context";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { state, isMobile, isTablet } = useSidebar();
@@ -54,9 +53,7 @@ export default function LocaleLayout({
 }) {
   return (
     <SidebarProvider>
-      <ClientsProvider>
-        <DashboardContent>{children}</DashboardContent>
-      </ClientsProvider>
+      <DashboardContent>{children}</DashboardContent>
     </SidebarProvider>
   );
 }
