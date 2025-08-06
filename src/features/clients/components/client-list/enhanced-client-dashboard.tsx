@@ -17,13 +17,13 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 
 import type { Client } from "@/features/clients/types/client.types"
-import { clients as defaultClients } from "@/features/clients/lib/data"
 import { useToast } from "@/shared/hooks/use-toast"
 import { EnhancedClientTable } from "./enhanced-client-table"
 import { ClientPagination } from "@/features/clients/components/client-pagination"
 import { ClientActions } from "@/features/clients/components/client-actions"
 import { useSidebar } from "@/shared/components/ui/sidebar"
 import { ListLayout } from "@/shared/components/custom-ui/list-layout"
+import { useClients } from "@/shared/context/clients-context" // Use the new context hook
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
@@ -36,24 +36,23 @@ const addClientFormSchema = z.object({
 export function EnhancedClientDashboard() {
   const { toast } = useToast()
   const { state: sidebarState } = useSidebar()
-  const [clients, setClients] = React.useState<Client[]>(defaultClients)
+  
+  // Get state and actions from the new context
+  const { state, addClient, removeClient, removeMultipleClients, fetchClients } = useClients()
+  const { clients, isLoading, error } = state
+
+  // Local UI state remains in the component
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [isAddClientDialogOpen, setAddClientDialogOpen] = React.useState(false)
 
-  const isSidebarExpanded = sidebarState === 'expanded'
+  const isSidebarExpanded = sidebarState === 'expanded';
 
-  // Add refresh function for ClientActions
-  const handleRefreshData = React.useCallback(() => {
-    // Reset to default data or refetch from API
-    setClients(defaultClients)
-    toast({
-      title: "Data refreshed",
-      description: "Client data has been refreshed successfully.",
-    })
-  }, [toast])
+  React.useEffect(() => {
+    fetchClients();
+  }, [fetchClients]);
 
   const addClientForm = useForm<z.infer<typeof addClientFormSchema>>({
     resolver: zodResolver(addClientFormSchema),
@@ -63,58 +62,63 @@ export function EnhancedClientDashboard() {
       description: "",
       homepageurl: "",
       logo: null,
-    },
+     },
   })
 
-  const handleAddClient = (values: z.infer<typeof addClientFormSchema>) => {
-    const newClient: Client = {
-      id: `client-${Date.now()}`,
+  const handleAddClient = async (values: z.infer<typeof addClientFormSchema>) => {
+    const newClientData = {
       name: values.name,
       clientId: values.identifier,
-      status: "active",
       description: values.description,
-      logo: values.logo || '/images/new-icon.png', // Default logo
+      logo: '/images/new-icon.png'
+    };
+
+    const success = await addClient(newClientData);
+
+    if (success) {
+      setAddClientDialogOpen(false)
+      addClientForm.reset()
+      toast({
+        title: "Client added",
+        description: `${values.name} has been added to the client list.`,
+      })
     }
-    setClients((prev) => [newClient, ...prev])
-    setAddClientDialogOpen(false)
-    addClientForm.reset()
-    toast({
-      title: "Client added",
-      description: `${values.name} has been added to the client list.`,
-    })
   }
   
-  const handleDeleteSelected = () => {
-    const selectedIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id)
-    const selectedCount = selectedIds.length
+  const handleDeleteSelected = async () => {
+    const selectedIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id);
+    const success = await removeMultipleClients(selectedIds);
     
-    if (selectedCount === 0) {
+    if (success) {
+      setRowSelection({});
       toast({
-        title: "No clients selected",
-        description: "Please select clients to delete.",
+        title: "Clients deleted",
+        description: `${selectedIds.length} client(s) have been deleted.`,
         variant: "destructive"
       })
-      return
     }
-
-    setClients(prev => prev.filter(client => !selectedIds.includes(client.id)))
-    setRowSelection({})
-    toast({
-      title: "Clients deleted",
-      description: `${selectedCount} client(s) have been deleted.`,
-      variant: "destructive"
-    })
   }
   
-  const handleDeleteRow = (clientId: string) => {
-    const deletedClient = clients.find(client => client.id === clientId)
-    setClients(prev => prev.filter(client => client.id !== clientId))
-    toast({
-      title: "Client deleted",
-      description: `${deletedClient?.name || 'The client'} has been deleted.`,
-      variant: "destructive"
-    })
+  const handleDeleteRow = async (clientId: string) => {
+    const success = await removeClient(clientId);
+    if (success) {
+      toast({
+        title: "Client deleted",
+        description: `The client has been deleted.`,
+        variant: "destructive"
+      })
+    }
   }
+  
+  React.useEffect(() => {
+    if (error) {
+      toast({
+        title: "An error occurred",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   // Create table with enhanced columns
   const table = useReactTable({
@@ -145,20 +149,22 @@ export function EnhancedClientDashboard() {
   }, [table, columnFilters])
 
   // Check if empty state
-  const isEmpty = clients.length === 0
+  const isEmpty = !isLoading && clients.length === 0
   const hasSelectedRows = Object.keys(rowSelection).length > 0
 
   return (
     <ListLayout
+      loading={isLoading}
       actions={
         <ClientActions 
           table={table}
+          isLoading={isLoading}
           isAddClientDialogOpen={isAddClientDialogOpen}
           setAddClientDialogOpen={setAddClientDialogOpen}
           addClientForm={addClientForm}
           onAddClient={handleAddClient}
           onDeleteSelected={handleDeleteSelected}
-          onRefreshData={handleRefreshData}
+          onRefreshData={fetchClients}
           isSidebarExpanded={isSidebarExpanded}
         />
       }
