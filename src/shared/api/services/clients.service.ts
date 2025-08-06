@@ -1,19 +1,26 @@
 import type { Client } from '@/features/clients/types/client.types';
-import api from '@/shared/api/axios-instance';
 import { clients as mockClients } from '@/features/clients/lib/data';
 
-// In a real application, these functions would make API calls.
-// For now, they simulate API calls with a delay and use mock data.
+// For development, we can point to a mock API or a real one.
+// In a real app, this would be in a .env file.
+const API_BASE_URL = 'https://jsonplaceholder.typicode.com'; // Example API
 
 const MOCK_API_DELAY = 500;
 
-export const getClients = async (): Promise<Client[]> => {
-  console.log('Fetching clients...');
-  // Simulate API call
-  // const response = await api.get<Client[]>('/clients');
-  // return response.data;
+// Helper function to handle fetch responses
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
+    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+}
 
-  // Mock implementation
+// --- MOCK API FUNCTIONS ---
+// These simulate API calls with a delay and use local mock data.
+
+const getMockClients = async (): Promise<Client[]> => {
+  console.log('Fetching mock clients...');
   return new Promise(resolve => {
     setTimeout(() => {
       resolve(mockClients);
@@ -21,51 +28,77 @@ export const getClients = async (): Promise<Client[]> => {
   });
 };
 
+const createMockClient = async (newClientData: Omit<Client, 'id' | 'status'>): Promise<Client> => {
+    console.log('Creating mock client...', newClientData);
+    const newClient: Client = {
+        id: `client-${Date.now()}`,
+        status: 'active',
+        ...newClientData,
+    };
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve(newClient);
+        }, MOCK_API_DELAY);
+    });
+};
+
+const deleteMockClient = async (clientId: string): Promise<{ id: string }> => {
+    console.log(`Deleting mock client with id: ${clientId}`);
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve({ id: clientId });
+        }, MOCK_API_DELAY);
+    });
+};
+
+const deleteMultipleMockClients = async (clientIds: string[]): Promise<{ ids: string[] }> => {
+    console.log(`Deleting mock clients with ids: ${clientIds.join(', ')}`);
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve({ ids: clientIds });
+        }, MOCK_API_DELAY);
+    });
+};
+
+
+// --- REAL API FUNCTIONS ---
+// These would be used in production to call a real backend.
+// Note: These are examples and will not work without a real API endpoint.
+
+export const getClients = async (): Promise<Client[]> => {
+  // Using mock for now, switch to real API when ready
+  return getMockClients();
+  // const response = await fetch(`${API_BASE_URL}/users`); // Example endpoint
+  // return handleResponse<Client[]>(response);
+};
+
 export const createClient = async (newClientData: Omit<Client, 'id' | 'status'>): Promise<Client> => {
-  console.log('Creating client...', newClientData);
-  // Simulate API call
-  // const response = await api.post<Client>('/clients', newClientData);
-  // return response.data;
-  
-  // Mock implementation
-  const newClient: Client = {
-    id: `client-${Date.now()}`,
-    name: newClientData.name,
-    clientId: newClientData.clientId,
-    description: newClientData.description,
-    logo: newClientData.logo,
-    status: 'active',
-  };
-
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(newClient);
-    }, MOCK_API_DELAY);
-  });
+  // Using mock for now
+  return createMockClient(newClientData);
+  // const response = await fetch(`${API_BASE_URL}/users`, {
+  //   method: 'POST',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify(newClientData),
+  // });
+  // return handleResponse<Client>(response);
 };
 
-export const deleteClient = async (clientId: string): Promise<void> => {
-    console.log(`Deleting client with id: ${clientId}`);
-    // Simulate API call
-    // await api.delete(`/clients/${clientId}`);
-
-    // Mock implementation
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve();
-        }, MOCK_API_DELAY);
-    });
+export const deleteClient = async (clientId: string): Promise<{ id: string }> => {
+  // Using mock for now
+  return deleteMockClient(clientId);
+  // const response = await fetch(`${API_BASE_URL}/users/${clientId}`, {
+  //   method: 'DELETE',
+  // });
+  // return handleResponse<{ id: string }>(response);
 };
 
-export const deleteMultipleClients = async (clientIds: string[]): Promise<void> => {
-    console.log(`Deleting clients with ids: ${clientIds.join(', ')}`);
-    // Simulate API call
-    // await api.post('/clients/batch-delete', { ids: clientIds });
-
-    // Mock implementation
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve();
-        }, MOCK_API_DELAY);
-    });
+export const deleteMultipleClients = async (clientIds: string[]): Promise<{ ids: string[] }> => {
+  // Using mock for now
+  return deleteMultipleMockClients(clientIds);
+  // const response = await fetch(`${API_BASE_URL}/users/batch-delete`, {
+  //   method: 'POST',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify({ ids: clientIds }),
+  // });
+  // return handleResponse<{ ids: string[] }>(response);
 };

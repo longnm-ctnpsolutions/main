@@ -22,8 +22,8 @@ import { ClientTable } from "./client-table"
 import { ClientPagination } from "@/features/clients/components/client-pagination"
 import { ClientActions } from "@/features/clients/components/client-actions"
 import { useSidebar } from "@/shared/components/ui/sidebar"
-import { ListLayout } from "@/shared/components/custom-ui/list-layout" 
-import { useClientStore } from "@/shared/store/clients.store"
+import { ListLayout } from "@/shared/components/custom-ui/list-layout"
+import { useClients } from "@/shared/context/clients-context" // Use the new context hook
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
@@ -36,16 +36,12 @@ const addClientFormSchema = z.object({
 export function ClientDashboard() {
   const { toast } = useToast()
   const { state: sidebarState } = useSidebar()
-  const { 
-    clients, 
-    isLoading, 
-    error, 
-    fetchClients, 
-    addClient, 
-    removeClient,
-    removeMultipleClients 
-  } = useClientStore()
+  
+  // Get state and actions from the new context
+  const { state, addClient, removeClient, removeMultipleClients, fetchClients } = useClients()
+  const { clients, isLoading, error } = state
 
+  // Local UI state remains in the component
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -70,17 +66,16 @@ export function ClientDashboard() {
   })
 
   const handleAddClient = async (values: z.infer<typeof addClientFormSchema>) => {
-    // Map form values to the type expected by the store/API
     const newClientData = {
       name: values.name,
-      clientId: values.identifier, // Assuming identifier is clientId
+      clientId: values.identifier,
       description: values.description,
-      logo: '/images/new-icon.png' // Placeholder logo
+      logo: '/images/new-icon.png'
     };
 
-    await addClient(newClientData);
+    const success = await addClient(newClientData);
 
-    if (!useClientStore.getState().error) {
+    if (success) {
       setAddClientDialogOpen(false)
       addClientForm.reset()
       toast({
@@ -92,9 +87,9 @@ export function ClientDashboard() {
   
   const handleDeleteSelected = async () => {
     const selectedIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id);
-    await removeMultipleClients(selectedIds);
+    const success = await removeMultipleClients(selectedIds);
     
-    if (!useClientStore.getState().error) {
+    if (success) {
       setRowSelection({});
       toast({
         title: "Clients deleted",
@@ -105,8 +100,8 @@ export function ClientDashboard() {
   }
   
   const handleDeleteRow = async (clientId: string) => {
-    await removeClient(clientId);
-    if (!useClientStore.getState().error) {
+    const success = await removeClient(clientId);
+    if (success) {
       toast({
         title: "Client deleted",
         description: `The client has been deleted.`,
@@ -124,10 +119,6 @@ export function ClientDashboard() {
       });
     }
   }, [error, toast]);
-
-  const columns: ColumnDef<Client>[] = [
-    // Column definitions will be passed to ClientTable
-  ]
 
   const table = useReactTable({
     data: clients,
@@ -155,7 +146,6 @@ export function ClientDashboard() {
     }
   }, [table, columnFilters]);
 
-  // Check if empty state
   const isEmpty = !isLoading && clients.length === 0
 
   return (
