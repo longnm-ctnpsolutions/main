@@ -37,7 +37,7 @@ export function SidebarNav() {
       <SidebarContent className="flex-1">
         {menuConfig.map((item, index) => (
           <React.Fragment key={item.id}>
-            <SidebarMenu className={cn("px-2", index === 0 && "pt-2")}>
+            <SidebarMenu className={cn("pr-4", index === 0 && "pt-2")}>
               <MenuItem
                 item={item}
                 openState={openState}
