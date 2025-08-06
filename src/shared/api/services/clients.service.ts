@@ -3,7 +3,7 @@ import { clients as mockClients } from '@/features/clients/lib/data';
 
 // For development, we can point to a mock API or a real one.
 // In a real app, this would be in a .env file.
-const API_BASE_URL = 'https://jsonplaceholder.typicode.com'; // Example API
+const API_BASE_URL = 'https://identity.dev.ctnp.com'; // Use the real API endpoint
 
 const MOCK_API_DELAY = 500;
 
@@ -66,10 +66,9 @@ const deleteMultipleMockClients = async (clientIds: string[]): Promise<{ ids: st
 // Note: These are examples and will not work without a real API endpoint.
 
 export const getClients = async (): Promise<Client[]> => {
-  // Using mock for now, switch to real API when ready
-  return getMockClients();
-  // const response = await fetch(`${API_BASE_URL}/users`); // Example endpoint
-  // return handleResponse<Client[]>(response);
+  // Using real API now
+  const response = await fetch(`${API_BASE_URL}/clients`); 
+  return handleResponse<Client[]>(response);
 };
 
 export const createClient = async (newClientData: Omit<Client, 'id' | 'status'>): Promise<Client> => {
