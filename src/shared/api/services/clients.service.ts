@@ -32,7 +32,7 @@ const createMockClient = async (newClientData: Omit<Client, 'id' | 'status'>): P
     console.log('Creating mock client...', newClientData);
     const newClient: Client = {
         id: `client-${Date.now()}`,
-        status: 'active',
+        status: 1,
         ...newClientData,
     };
     return new Promise(resolve => {

@@ -3,7 +3,7 @@ export type Client = {
   id: string;
   name: string;
   clientId: string;
-  status: 'active' | 'inactive';
+  status: 1 | 0;
   logo?: string;
   description?: string;
 };
