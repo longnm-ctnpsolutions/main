@@ -7,7 +7,7 @@ import {
   flexRender,
   Table as TableType,
 } from "@tanstack/react-table"
-import { MoreVertical, ArrowUpDown } from "lucide-react"
+import { MoreVertical, ArrowUpDown, Loader2 } from "lucide-react"
 
 import type { Client } from "@/features/clients/types/client.types"
 import { Button } from "@/shared/components/ui/button"
@@ -44,19 +44,48 @@ import {
   type ColumnConfig 
 } from "@/features/clients/hooks/use-responsive-columns"
 import { useRouter } from 'next/navigation'
+import { useClients } from '@/context/clients-context'
+
+// Skeleton component để tránh layout shift
+const TableSkeleton = () => (
+  <>
+    {Array(5).fill(0).map((_, index) => (
+      <TableRow key={`skeleton-${index}`}>
+        <TableCell className="px-3">
+          <div className="w-4 h-4 bg-gray-200 animate-pulse rounded"></div>
+        </TableCell>
+        <TableCell className="px-3">
+          <div className="w-8 h-8 bg-gray-200 animate-pulse rounded-md"></div>
+        </TableCell>
+        <TableCell className="px-3">
+          <div className="h-4 bg-gray-200 animate-pulse rounded w-32"></div>
+        </TableCell>
+        <TableCell className="px-3">
+          <div className="h-4 bg-gray-200 animate-pulse rounded w-48"></div>
+        </TableCell>
+        <TableCell className="px-3">
+          <div className="h-6 bg-gray-200 animate-pulse rounded-full w-16"></div>
+        </TableCell>
+        <TableCell className="px-3 text-right">
+          <div className="h-8 w-8 bg-gray-200 animate-pulse rounded ml-auto"></div>
+        </TableCell>
+      </TableRow>
+    ))}
+  </>
+)
 
 interface ClientTableProps {
   table: TableType<Client>;
   columns: ColumnDef<Client>[];
 }
 
-// Enhanced column configuration
+// Enhanced column configuration với fixed widths để tránh shift
 const CLIENT_TABLE_CONFIG: ColumnConfig[] = [
   createEnhancedColumnConfig('select', 1, 1, 50, 50, { alwaysVisible: true }),
   createEnhancedColumnConfig('logo', 2, 2, 60, 60, { alwaysVisible: true }),
-  createEnhancedColumnConfig('name', 3, 3, 120, 100, { flexGrow: 1, contentBased: true, alwaysVisible: true }),
-  createEnhancedColumnConfig('description', 4, 4, 200, 400, { flexGrow: 2, contentBased: true, hideAt: 'md' }),
-  createEnhancedColumnConfig('status', 5, 5, 100, 80, { contentBased: true, hideAt: 'sm' }),
+  createEnhancedColumnConfig('name', 3, 3, 180, 120, { flexGrow: 1, contentBased: false, alwaysVisible: true }),
+  createEnhancedColumnConfig('description', 4, 4, 300, 200, { flexGrow: 2, contentBased: false, hideAt: 'md' }),
+  createEnhancedColumnConfig('status', 5, 5, 120, 80, { contentBased: false, hideAt: 'sm' }),
   createEnhancedColumnConfig('actions', 6, 6, 80, 80, { alwaysVisible: true }),
 ]
 
@@ -79,6 +108,7 @@ export function EnhancedClientTable({ table, columns }: ClientTableProps) {
   })
 
   const debugInfo = getDebugInfo()
+  const [headerWidths, setHeaderWidths] = React.useState<Record<string, number>>({})
 
   // Measure content widths when data changes
   React.useEffect(() => {
@@ -87,6 +117,37 @@ export function EnhancedClientTable({ table, columns }: ClientTableProps) {
     }, 100)
     return () => clearTimeout(timer)
   }, [table.getRowModel().rows, measureContentWidths])
+
+  // Sync header widths after body renders
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      const bodyTable = document.querySelector('[data-table-body]')
+      const headerTable = document.querySelector('[data-table-header]')
+      
+      if (bodyTable && headerTable) {
+        const bodyCells = bodyTable.querySelectorAll('tbody tr:first-child td')
+        const headerCells = headerTable.querySelectorAll('thead tr th')
+        
+        const newWidths: Record<string, number> = {}
+        
+        bodyCells.forEach((cell, index) => {
+          const headerCell = headerCells[index] as HTMLElement
+          if (headerCell && cell) {
+            const width = cell.getBoundingClientRect().width
+            const columnId = headerCell.getAttribute('data-column-id')
+            if (columnId) {
+              newWidths[columnId] = width
+              headerCell.style.width = `${width}px`
+            }
+          }
+        })
+        
+        setHeaderWidths(newWidths)
+      }
+    }, 50)
+    
+    return () => clearTimeout(timer)
+  }, [table.getRowModel().rows])
 
   const registerContentRef = React.useCallback((columnId: string, element: HTMLElement | null) => {
     if (element) {
@@ -123,42 +184,47 @@ export function EnhancedClientTable({ table, columns }: ClientTableProps) {
         </div>
       )}
 
-      {/* Header container - không cuộn */}
-      <div className="sticky top-0 z-10 bg-background">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {getOrderedHeaders(headerGroup).map((header: any) => {
-                  const visibilityClass = getColumnVisibilityClass(header.id)
-                  const widthStyle = getColumnWidthStyle(header.id)
-                  
-                  if (!isColumnVisible(header.id)) return null
-                  
-                  return (
-                    <TableHead 
-                      key={header.id} 
-                      className={cn("bg-background border-b px-3", visibilityClass)}
-                      style={widthStyle}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-        </Table>
+      {/* Header Table - Fixed Position */}
+      <div className="sticky top-0 z-10 bg-background border-b">
+        <div style={{ overflowY: 'scroll', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div style={{ width: '100%', paddingRight: '15px' }}>
+            <Table data-table-header style={{ marginBottom: 0 }}>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {getOrderedHeaders(headerGroup).map((header: any) => {
+                      const visibilityClass = getColumnVisibilityClass(header.id)
+                      const widthStyle = getColumnWidthStyle(header.id)
+                      
+                      if (!isColumnVisible(header.id)) return null
+                      
+                      return (
+                        <TableHead 
+                          key={header.id}
+                          data-column-id={header.id}
+                          className={cn("bg-background border-b px-3", visibilityClass)}
+                          style={widthStyle}
+                        >
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                        </TableHead>
+                      )
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+            </Table>
+          </div>
+        </div>
       </div>
 
-      {/* Body container - có cuộn */}
+      {/* Body Table - Scrollable */}
       <div className="flex-1 overflow-auto">
-        <Table>
+        <Table data-table-body>
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
@@ -205,7 +271,7 @@ export function EnhancedClientTable({ table, columns }: ClientTableProps) {
   )
 }
 
-// Columns definition
+// Updated columns definition with better action handling
 EnhancedClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef<Client>[] => [
   {
     id: "select",
@@ -241,7 +307,6 @@ EnhancedClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef
             width={32}
             height={32}
             className="rounded-md"
-            data-ai-hint="logo"
           />
         ) : (
           <div className="w-8 h-8 bg-gray-100 rounded-md flex items-center justify-center">
@@ -268,7 +333,7 @@ EnhancedClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="font-medium truncate" data-content-width="auto">
+      <div className="font-medium truncate">
         {row.getValue("name")}
       </div>
     ),
@@ -286,39 +351,44 @@ EnhancedClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="text-muted-foreground text-sm leading-relaxed" data-content-width="auto">
+      <div className="text-muted-foreground text-sm leading-relaxed truncate">
         {row.getValue("description")}
       </div>
     ),
   },
   {
-  accessorKey: "status",
-  header: "Status",
-  cell: ({ row }) => {
-    const statusValue = row.getValue("status") 
-    
-    const status = (statusValue === 1 || statusValue === "1") ? 'active' : 'inactive'
-    const isActive = status === 'active'
-    
-    return (
-      <div className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold",
-        isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-      )} data-content-width="auto">
-        <span className={cn("mr-1.5 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
-        <span className="capitalize">{status}</span>
-      </div>
-    )
-  }
-},
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const statusValue = row.getValue("status") 
+      const status = (statusValue === 1 || statusValue === "1") ? 'active' : 'inactive'
+      const isActive = status === 'active'
+      
+      return (
+        <div className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold",
+          isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+        )}>
+          <span className={cn("mr-1.5 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
+          <span className="capitalize">{status}</span>
+        </div>
+      )
+    }
+  },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
       const client = row.original
       const router = useRouter()
+      
       const handleDetailsClick = () => {
         router.push(`/en/clients/${client.id}`)
       }
+      
+      const handleDeleteClick = async () => {
+        await handleDeleteRow(client.id)
+      }
+      
       return (
         <div className="text-right">
           <DropdownMenu>
@@ -329,10 +399,17 @@ EnhancedClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={handleDetailsClick}>Details</DropdownMenuItem>
+              <DropdownMenuItem onSelect={handleDetailsClick}>
+                Details
+              </DropdownMenuItem>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50">Delete</DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onSelect={(e) => e.preventDefault()} 
+                    className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50"
+                  >
+                    Delete
+                  </DropdownMenuItem>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
@@ -343,7 +420,12 @@ EnhancedClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleDeleteRow(client.id)} className="bg-red-600 hover:bg-red-700">Continue</AlertDialogAction>
+                    <AlertDialogAction 
+                      onClick={handleDeleteClick}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      Continue
+                    </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>

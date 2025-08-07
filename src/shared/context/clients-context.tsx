@@ -1,3 +1,4 @@
+// 1. Cải thiện Context để có better loading state
 "use client";
 
 import * as React from 'react';
@@ -9,10 +10,10 @@ import {
   deleteMultipleClients,
 } from '@/shared/api/services/clients.service';
 
-// 1. Define State and Action Types
 interface ClientsState {
   clients: Client[];
   isLoading: boolean;
+  isActionLoading: boolean; // Thêm state riêng cho actions
   error: string | null;
 }
 
@@ -24,9 +25,9 @@ type Action =
   | { type: 'REMOVE_SUCCESS'; payload: { id: string } }
   | { type: 'REMOVE_MULTIPLE_SUCCESS'; payload: { ids: string[] } }
   | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ACTION_LOADING'; payload: boolean } // New action
   | { type: 'SET_ERROR'; payload: string | null };
 
-// 2. Create a Reducer function
 const clientsReducer = (state: ClientsState, action: Action): ClientsState => {
   switch (action.type) {
     case 'FETCH_INIT':
@@ -41,22 +42,32 @@ const clientsReducer = (state: ClientsState, action: Action): ClientsState => {
       return {
         ...state,
         clients: state.clients.filter(client => client.id !== action.payload.id),
+        isActionLoading: false,
       };
     case 'REMOVE_MULTIPLE_SUCCESS':
        return {
         ...state,
         clients: state.clients.filter(client => !action.payload.ids.includes(client.id)),
+        isActionLoading: false,
       };
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
+    case 'SET_ACTION_LOADING':
+      return { ...state, isActionLoading: action.payload };
     case 'SET_ERROR':
-        return { ...state, error: action.payload, isLoading: false };
+        return { ...state, error: action.payload, isLoading: false, isActionLoading: false };
     default:
       return state;
   }
 };
 
-// 3. Create the Context
+const initialState: ClientsState = {
+  clients: [],
+  isLoading: false,
+  isActionLoading: false,
+  error: null,
+};
+
 interface ClientsContextType {
   state: ClientsState;
   fetchClients: () => Promise<void>;
@@ -66,13 +77,6 @@ interface ClientsContextType {
 }
 
 const ClientsContext = React.createContext<ClientsContextType | undefined>(undefined);
-
-// 4. Create a Provider Component
-const initialState: ClientsState = {
-  clients: [],
-  isLoading: false,
-  error: null,
-};
 
 export const ClientsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = React.useReducer(clientsReducer, initialState);
@@ -89,11 +93,11 @@ export const ClientsProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const addClient = async (newClientData: Omit<Client, 'id' | 'status'>) => {
-    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ACTION_LOADING', payload: true });
     try {
       const newClient = await createClient(newClientData);
       dispatch({ type: 'ADD_SUCCESS', payload: newClient });
-      dispatch({ type: 'SET_LOADING', payload: false });
+      dispatch({ type: 'SET_ACTION_LOADING', payload: false });
       return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unknown error occurred';
@@ -103,35 +107,42 @@ export const ClientsProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const removeClient = async (clientId: string) => {
-     // Note: No optimistic update here to keep it simple with context.
-     // Could be added by caching the state before dispatching.
-    dispatch({ type: 'SET_LOADING', payload: true });
+    // Optimistic update để tránh layout shift
+    const originalClients = state.clients;
+    dispatch({ type: 'REMOVE_SUCCESS', payload: { id: clientId } });
+    dispatch({ type: 'SET_ACTION_LOADING', payload: true });
+    
     try {
-        const result = await deleteClient(clientId);
-        dispatch({ type: 'REMOVE_SUCCESS', payload: { id: result.id } });
-        dispatch({ type: 'SET_LOADING', payload: false });
-        return true;
+      await deleteClient(clientId);
+      dispatch({ type: 'SET_ACTION_LOADING', payload: false });
+      return true;
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred';
-        dispatch({ type: 'SET_ERROR', payload: message });
-        return false;
+      // Rollback nếu thất bại
+      dispatch({ type: 'FETCH_SUCCESS', payload: originalClients });
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      dispatch({ type: 'SET_ERROR', payload: message });
+      return false;
     }
   };
   
   const removeMultipleClients = async (clientIds: string[]) => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-     try {
-        const result = await deleteMultipleClients(clientIds);
-        dispatch({ type: 'REMOVE_MULTIPLE_SUCCESS', payload: { ids: result.ids } });
-        dispatch({ type: 'SET_LOADING', payload: false });
-        return true;
+    // Optimistic update
+    const originalClients = state.clients;
+    dispatch({ type: 'REMOVE_MULTIPLE_SUCCESS', payload: { ids: clientIds } });
+    dispatch({ type: 'SET_ACTION_LOADING', payload: true });
+    
+    try {
+      await deleteMultipleClients(clientIds);
+      dispatch({ type: 'SET_ACTION_LOADING', payload: false });
+      return true;
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'An unknown error occurred';
-        dispatch({ type: 'SET_ERROR', payload: message });
-        return false;
+      // Rollback
+      dispatch({ type: 'FETCH_SUCCESS', payload: originalClients });
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      dispatch({ type: 'SET_ERROR', payload: message });
+      return false;
     }
   };
-
 
   const value = React.useMemo(() => ({
     state,
@@ -148,7 +159,6 @@ export const ClientsProvider: React.FC<{ children: React.ReactNode }> = ({ child
   );
 };
 
-// 5. Create a custom hook to use the context
 export const useClients = (): ClientsContextType => {
   const context = React.useContext(ClientsContext);
   if (context === undefined) {
