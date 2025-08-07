@@ -3,7 +3,7 @@ import { clients as mockClients } from '@/features/clients/lib/data';
 
 // For development, we can point to a mock API or a real one.
 // In a real app, this would be in a .env file.
-const API_BASE_URL = 'https://identity.dev.ctnp.com'; // Use the real API endpoint
+const API_BASE_URL = 'https://localhost:7060'; // Use the real API endpoint
 
 const MOCK_API_DELAY = 500;
 
@@ -66,9 +66,18 @@ const deleteMultipleMockClients = async (clientIds: string[]): Promise<{ ids: st
 // Note: These are examples and will not work without a real API endpoint.
 
 export const getClients = async (): Promise<Client[]> => {
-  // Using real API now
-  const response = await fetch(`${API_BASE_URL}/clients`); 
-  return handleResponse<Client[]>(response);
+  const response = await fetch(`${API_BASE_URL}/clients`, {
+    method: 'GET',
+    credentials: 'include', 
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  const data = await response.json();
+  
+  return data.value; 
 };
 
 export const createClient = async (newClientData: Omit<Client, 'id' | 'status'>): Promise<Client> => {

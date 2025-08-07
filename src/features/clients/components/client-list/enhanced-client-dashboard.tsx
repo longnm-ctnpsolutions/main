@@ -51,7 +51,10 @@ export function EnhancedClientDashboard() {
   const isSidebarExpanded = sidebarState === 'expanded';
 
   React.useEffect(() => {
-    fetchClients();
+    const timer = setTimeout(() => {
+      fetchClients();
+    }, 100);
+    return () => clearTimeout(timer);
   }, [fetchClients]);
 
   const addClientForm = useForm<z.infer<typeof addClientFormSchema>>({

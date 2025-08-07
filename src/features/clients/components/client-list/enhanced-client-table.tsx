@@ -292,21 +292,24 @@ EnhancedClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef
     ),
   },
   {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string
-      const isActive = status === 'active'
-      return (
-        <div className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold",
-          isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-        )} data-content-width="auto">
-          <span className={cn("mr-1.5 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
-          <span className="capitalize">{status}</span>
-        </div>
-      )
-    }
-  },
+  accessorKey: "status",
+  header: "Status",
+  cell: ({ row }) => {
+    const statusValue = row.getValue("status") 
+    
+    const status = (statusValue === 1 || statusValue === "1") ? 'active' : 'inactive'
+    const isActive = status === 'active'
+    
+    return (
+      <div className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold",
+        isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+      )} data-content-width="auto">
+        <span className={cn("mr-1.5 h-2 w-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-400")} />
+        <span className="capitalize">{status}</span>
+      </div>
+    )
+  }
+},
   {
     id: "actions",
     enableHiding: false,

@@ -41,7 +41,7 @@ const addClientFormSchema = z.object({
 
 interface ClientActionsProps {
   table: Table<Client>
-  isLoading: boolean;
+  isLoading?: boolean;
   isAddClientDialogOpen: boolean
   isSidebarExpanded: boolean
   setAddClientDialogOpen: (isOpen: boolean) => void
