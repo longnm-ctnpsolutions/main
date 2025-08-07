@@ -275,77 +275,74 @@ export default function ClientDetailTabs() {
               <Card className="flex flex-col flex-shrink-0 rounded-[8px] border pt-[20px] pb-[20px] px-[24px] space-y-4 shadow-lg border-gray-200 bg-white">
                 <div className="text-lg font-semibold flex-shrink-0">List of Permissions</div>
 
-                {/* Table container with synchronized column widths */}
-                <Card className="flex flex-col h-[350px] overflow-hidden shadow-md border-gray-100 mt-2">
-                  <CardContent className="flex-1 p-0 min-h-0 flex flex-col">
-                    {/* Table with fixed header and scrollable body */}
-                    <div className="border rounded-md flex flex-col h-full">
-                      {/* Fixed Header */}
-                      <div className="bg-muted/50 border-b flex-shrink-0">
-                        <table className="w-full border-collapse">
-                          <thead>
-                            {table.getHeaderGroups().map((headerGroup) => (
-                              <tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                  <th 
-                                    key={header.id}
-                                    className="h-12 px-4 text-left align-middle font-medium text-muted-foreground border-0"
-                                    style={{ 
-                                      width: header.id === 'permission' ? '40%' : header.id === 'description' ? '50%' : 'auto' 
-                                    }}
-                                  >
-                                    {header.isPlaceholder
-                                      ? null
-                                      : flexRender(header.column.columnDef.header, header.getContext())}
-                                  </th>
-                                ))}
-                                {/* Action column header - no title */}
-                                <th className="h-12 px-4 w-[60px] border-0"></th>
-                              </tr>
-                            ))}
-                          </thead>
-                        </table>
-                      </div>
-                      
-                      {/* Scrollable Body - takes remaining space */}
-                      <div className="flex-1 overflow-y-auto bg-white">
-                        <table className="w-full border-collapse">
-                          <tbody>
-                            {table.getRowModel().rows.map((row) => (
-                              <tr 
-                                key={row.id}
-                                className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
-                              >
-                                {row.getVisibleCells().map((cell) => (
-                                  <td 
-                                    key={cell.id}
-                                    className="p-4 align-middle border-0"
-                                    style={{ 
-                                      width: cell.column.id === 'permission' ? '40%' : cell.column.id === 'description' ? '50%' : 'auto' 
-                                    }}
-                                  >
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                  </td>
-                                ))}
-                                {/* Action column */}
-                                <td className="p-4 align-middle w-[60px] border-0">
-                                  <Button
-                                    size="icon"
-                                    variant="outline"
-                                    className="h-8 w-8"
-                                    // onClick={() => handleDelete(row.original)}
-                                  >
-                                    <Trash className="w-4 h-4" />
-                                  </Button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+ // Phần table được refactor để sử dụng shadcn Table components
+<Card className="flex flex-col h-[350px] overflow-hidden shadow-md border-gray-100 mt-2">
+  <CardContent className="flex-1 p-0 min-h-0 flex flex-col">
+    {/* Table với shadcn components */}
+    <div className="border rounded-md flex flex-col h-full">
+      {/* Fixed Header */}
+      <div className="bg-muted/50 border-b flex-shrink-0">
+        <Table className="border-collapse">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="border-0 hover:bg-transparent">
+                {headerGroup.headers.map((header) => (
+                  <TableHead 
+                    key={header.id}
+                    className="h-12 px-4 border-0"
+                    style={{ 
+                      width: header.id === 'permission' ? '40%' : header.id === 'description' ? '50%' : 'auto' 
+                    }}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+                <TableHead className="h-12 px-4 w-[60px] border-0"></TableHead>
+              </TableRow>
+            ))}
+          </TableHeader>
+        </Table>
+      </div>
+      
+      {/* Scrollable Body */}
+      <div className="flex-1 overflow-y-auto bg-white">
+        <Table className="border-collapse">
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow 
+                key={row.id}
+                className="border-b transition-colors hover:bg-muted/50"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell 
+                    key={cell.id}
+                    className="p-4 border-0"
+                    style={{ 
+                      width: cell.column.id === 'permission' ? '40%' : cell.column.id === 'description' ? '50%' : 'auto' 
+                    }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+                <TableCell className="p-4 w-[60px] border-0">
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="h-8 w-8"
+                  >
+                    <Trash className="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  </CardContent>
+</Card>
 
                 {/* Pagination thuộc về table, nằm trong card */}
                 <div className="flex-shrink-0">
