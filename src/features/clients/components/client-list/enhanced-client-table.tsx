@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -35,207 +36,96 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/shared/components/ui/alert-dialog"
+import { Skeleton } from "@/shared/components/ui/skeleton"
 import { cn } from "@/shared/lib/utils"
-import { 
-  useEnhancedResponsiveColumns, 
-  createEnhancedColumnConfig,
-  type ColumnConfig 
-} from "@/features/clients/hooks/use-responsive-columns"
 import { useRouter } from 'next/navigation'
-import { useClients } from '@/context/clients-context'
-
-// Skeleton component để tránh layout shift
-const TableSkeleton = () => (
-  <>
-    {Array(5).fill(0).map((_, index) => (
-      <TableRow key={`skeleton-${index}`}>
-        <TableCell className="px-3">
-          <div className="w-4 h-4 bg-gray-200 animate-pulse rounded"></div>
-        </TableCell>
-        <TableCell className="px-3">
-          <div className="w-8 h-8 bg-gray-200 animate-pulse rounded-md"></div>
-        </TableCell>
-        <TableCell className="px-3">
-          <div className="h-4 bg-gray-200 animate-pulse rounded w-32"></div>
-        </TableCell>
-        <TableCell className="px-3">
-          <div className="h-4 bg-gray-200 animate-pulse rounded w-48"></div>
-        </TableCell>
-        <TableCell className="px-3">
-          <div className="h-6 bg-gray-200 animate-pulse rounded-full w-16"></div>
-        </TableCell>
-        <TableCell className="px-3 text-right">
-          <div className="h-8 w-8 bg-gray-200 animate-pulse rounded ml-auto"></div>
-        </TableCell>
-      </TableRow>
-    ))}
-  </>
-)
 
 interface ClientTableProps {
   table: TableType<Client>;
   columns: ColumnDef<Client>[];
+  isLoading: boolean;
 }
 
-// Enhanced column configuration với fixed widths để tránh shift
-const CLIENT_TABLE_CONFIG: ColumnConfig[] = [
-  createEnhancedColumnConfig('select', 1, 1, 50, 50, { alwaysVisible: true }),
-  createEnhancedColumnConfig('logo', 2, 2, 60, 60, { alwaysVisible: true }),
-  createEnhancedColumnConfig('name', 3, 3, 180, 120, { flexGrow: 1, contentBased: false, alwaysVisible: true }),
-  createEnhancedColumnConfig('description', 4, 4, 300, 200, { flexGrow: 2, contentBased: false, hideAt: 'md' }),
-  createEnhancedColumnConfig('status', 5, 5, 120, 80, { contentBased: false, hideAt: 'sm' }),
-  createEnhancedColumnConfig('actions', 6, 6, 80, 80, { alwaysVisible: true }),
-]
-
-export function EnhancedClientTable({ table, columns }: ClientTableProps) {
-  const { 
-    containerRef, 
-    getColumnVisibilityClass, 
-    getColumnWidthStyle,
-    getOrderedColumnIds,
-    isColumnVisible,
-    registerContentElement,
-    measureContentWidths,
-    getDebugInfo 
-  } = useEnhancedResponsiveColumns({
-    configs: CLIENT_TABLE_CONFIG,
-    containerPadding: 24,
-    enableContentBased: true,
-    enableOrdering: true,
-    debugMode: process.env.NODE_ENV === 'development'
-  })
-
-  const debugInfo = getDebugInfo()
-  
-  // Tính toán tổng width của các cột visible
-  const totalColumnsWidth = React.useMemo(() => {
-    return debugInfo.totalUsedWidth
-  }, [debugInfo.totalUsedWidth])
-
-  // Measure content widths when data changes
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      measureContentWidths()
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [table.getRowModel().rows, measureContentWidths])
-
-  const registerContentRef = React.useCallback((columnId: string, element: HTMLElement | null) => {
-    if (element) {
-      registerContentElement(columnId, element)
-    }
-  }, [registerContentElement])
-
-  const getOrderedHeaders = (headerGroup: any) => {
-    const orderedColumnIds = getOrderedColumnIds()
-    return headerGroup.headers.sort((a: any, b: any) => {
-      const aIndex = orderedColumnIds.indexOf(a.id)
-      const bIndex = orderedColumnIds.indexOf(b.id)
-      return aIndex - bIndex
-    })
-  }
-
-  const getOrderedCells = (row: any) => {
-    const orderedColumnIds = getOrderedColumnIds()
-    return row.getVisibleCells().sort((a: any, b: any) => {
-      const aIndex = orderedColumnIds.indexOf(a.column.id)
-      const bIndex = orderedColumnIds.indexOf(b.column.id)
-      return aIndex - bIndex
-    })
-  }
-
+const TableSkeleton = ({ columns }: { columns: ColumnDef<Client>[] }) => {
   return (
-    <div className="flex flex-col h-full overflow-hidden" ref={containerRef}>
-      {/* Debug info in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="text-xs text-gray-500 p-2 bg-gray-50 border-b shrink-0">
-          Container: {debugInfo.containerWidth}px | 
-          Visible: {debugInfo.visibleColumns.join(', ')} | 
-          Used: {debugInfo.totalUsedWidth}px
-        </div>
-      )}
-
-      {/* Header Table - Fixed */}
-      <div className="shrink-0 overflow-hidden bg-background border-b">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {getOrderedHeaders(headerGroup).map((header: any) => {
-                  const visibilityClass = getColumnVisibilityClass(header.id)
-                  const widthStyle = getColumnWidthStyle(header.id)
-                  
-                  if (!isColumnVisible(header.id)) return null
-                  
-                  return (
-                    <TableHead 
-                      key={header.id}
-                      data-column-id={header.id}
-                      className={cn("bg-background border-b px-3", visibilityClass)}
-                      style={widthStyle}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
+    <>
+      {Array(10)
+        .fill(0)
+        .map((_, index) => (
+          <TableRow key={`skeleton-${index}`}>
+            {columns.map((column) => (
+              <TableCell key={column.id || index}>
+                <Skeleton className="h-5 w-full rounded" />
+              </TableCell>
             ))}
-          </TableHeader>
-        </Table>
-      </div>
+          </TableRow>
+        ))}
+    </>
+  );
+};
 
-      {/* Body Table - Scrollable */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        <Table>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {getOrderedCells(row).map((cell: any) => {
-                    const visibilityClass = getColumnVisibilityClass(cell.column.id)
-                    const widthStyle = getColumnWidthStyle(cell.column.id)
-                    
-                    if (!isColumnVisible(cell.column.id)) return null
-                    
-                    return (
-                      <TableCell 
-                        key={cell.id} 
-                        ref={(el) => registerContentRef(cell.column.id, el)}
-                        className={cn("px-3", visibilityClass)}
-                        style={widthStyle}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+
+export function EnhancedClientTable({ table, columns, isLoading }: ClientTableProps) {
+  
+  return (
+    <div className="overflow-auto h-full">
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <TableHead key={header.id} className={cn({
+                    'hidden lg:table-cell': header.id === 'description',
+                    'hidden md:table-cell': header.id === 'status'
+                  })}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
                         )}
-                      </TableCell>
-                    )
-                  })}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={debugInfo.visibleColumns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
+                  </TableHead>
+                )
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+           {isLoading ? (
+            <TableSkeleton columns={columns} />
+          ) : table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id} className={cn({
+                     'hidden lg:table-cell': cell.column.id === 'description',
+                     'hidden md:table-cell': cell.column.id === 'status'
+                  })}>
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
+                  </TableCell>
+                ))}
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="h-24 text-center"
+              >
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   )
 }

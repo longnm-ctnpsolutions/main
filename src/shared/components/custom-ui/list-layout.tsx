@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Card, CardContent } from "@/shared/components/ui/card"
@@ -22,7 +23,7 @@ export function ListLayout({
   loading = false,
   emptyState
 }: ListLayoutProps) {
-  const showEmptyState = !loading && emptyState
+  const showEmptyState = !loading && emptyState;
 
   return (
     <div className={cn("flex flex-col h-full w-full space-y-4", className)}>
@@ -34,14 +35,10 @@ export function ListLayout({
       )}
       
       {/* Scrollable Table Area */}
-    <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden">
         <Card className={cn("h-full flex flex-col", cardClassName)}>
           <CardContent className="p-0 h-full flex flex-col overflow-hidden">
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-muted-foreground">Loading...</div>
-              </div>
-            ) : showEmptyState ? (
+            {showEmptyState ? (
               <div className="flex items-center justify-center h-full">
                 {emptyState}
               </div>
@@ -53,7 +50,7 @@ export function ListLayout({
       </div>
 
       {/* Fixed Pagination Area */}
-      {pagination && !showEmptyState && (
+      {pagination && !showEmptyState && !loading && (
         <div className="flex-shrink-0">
           {pagination}
         </div>
@@ -61,4 +58,3 @@ export function ListLayout({
     </div>
   )
 }
-

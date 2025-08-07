@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -51,10 +52,7 @@ export function EnhancedClientDashboard() {
   const isSidebarExpanded = sidebarState === 'expanded';
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchClients();
-    }, 100);
-    return () => clearTimeout(timer);
+    fetchClients();
   }, [fetchClients]);
 
   const addClientForm = useForm<z.infer<typeof addClientFormSchema>>({
@@ -151,13 +149,10 @@ export function EnhancedClientDashboard() {
     }
   }, [table, columnFilters])
 
-  // Check if empty state
   const isEmpty = !isLoading && clients.length === 0
-  const hasSelectedRows = Object.keys(rowSelection).length > 0
 
   return (
     <ListLayout
-      loading={isLoading}
       actions={
         <ClientActions 
           table={table}
@@ -174,11 +169,12 @@ export function EnhancedClientDashboard() {
       tableContent={
         <EnhancedClientTable 
           table={table} 
-          columns={EnhancedClientTable.columns(handleDeleteRow)} 
+          columns={EnhancedClientTable.columns(handleDeleteRow)}
+          isLoading={isLoading} 
         />
       }
       pagination={
-        !isEmpty && <ClientPagination table={table} />
+        !isEmpty && !isLoading && <ClientPagination table={table} />
       }
       emptyState={
         isEmpty ? (
