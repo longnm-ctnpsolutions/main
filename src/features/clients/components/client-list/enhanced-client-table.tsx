@@ -52,10 +52,10 @@ const TableSkeleton = ({ columns }: { columns: ColumnDef<Client>[] }) => {
     <>
       {Array(10)
         .fill(0)
-        .map((_, index) => (
-          <TableRow key={`skeleton-${index}`}>
-            {columns.map((column) => (
-              <TableCell key={column.id || index}>
+        .map((_, rowIndex) => (
+          <TableRow key={`skeleton-row-${rowIndex}`}>
+            {columns.map((column, colIndex) => (
+              <TableCell key={`skeleton-cell-${rowIndex}-${column.id || colIndex}`}>
                 <Skeleton className="h-5 w-full rounded" />
               </TableCell>
             ))}
