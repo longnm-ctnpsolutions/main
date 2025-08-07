@@ -108,7 +108,11 @@ export function EnhancedClientTable({ table, columns }: ClientTableProps) {
   })
 
   const debugInfo = getDebugInfo()
-  const [headerWidths, setHeaderWidths] = React.useState<Record<string, number>>({})
+  
+  // Tính toán tổng width của các cột visible
+  const totalColumnsWidth = React.useMemo(() => {
+    return debugInfo.totalUsedWidth
+  }, [debugInfo.totalUsedWidth])
 
   // Measure content widths when data changes
   React.useEffect(() => {
@@ -117,37 +121,6 @@ export function EnhancedClientTable({ table, columns }: ClientTableProps) {
     }, 100)
     return () => clearTimeout(timer)
   }, [table.getRowModel().rows, measureContentWidths])
-
-  // Sync header widths after body renders
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      const bodyTable = document.querySelector('[data-table-body]')
-      const headerTable = document.querySelector('[data-table-header]')
-      
-      if (bodyTable && headerTable) {
-        const bodyCells = bodyTable.querySelectorAll('tbody tr:first-child td')
-        const headerCells = headerTable.querySelectorAll('thead tr th')
-        
-        const newWidths: Record<string, number> = {}
-        
-        bodyCells.forEach((cell, index) => {
-          const headerCell = headerCells[index] as HTMLElement
-          if (headerCell && cell) {
-            const width = cell.getBoundingClientRect().width
-            const columnId = headerCell.getAttribute('data-column-id')
-            if (columnId) {
-              newWidths[columnId] = width
-              headerCell.style.width = `${width}px`
-            }
-          }
-        })
-        
-        setHeaderWidths(newWidths)
-      }
-    }, 50)
-    
-    return () => clearTimeout(timer)
-  }, [table.getRowModel().rows])
 
   const registerContentRef = React.useCallback((columnId: string, element: HTMLElement | null) => {
     if (element) {
@@ -174,57 +147,53 @@ export function EnhancedClientTable({ table, columns }: ClientTableProps) {
   }
 
   return (
-    <div className="flex flex-col h-full" ref={containerRef}>
+    <div className="flex flex-col h-full overflow-hidden" ref={containerRef}>
       {/* Debug info in development */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="text-xs text-gray-500 p-2 bg-gray-50 border-b">
+        <div className="text-xs text-gray-500 p-2 bg-gray-50 border-b shrink-0">
           Container: {debugInfo.containerWidth}px | 
           Visible: {debugInfo.visibleColumns.join(', ')} | 
           Used: {debugInfo.totalUsedWidth}px
         </div>
       )}
 
-      {/* Header Table - Fixed Position */}
-      <div className="sticky top-0 z-10 bg-background border-b">
-        <div style={{ overflowY: 'scroll', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          <div style={{ width: '100%', paddingRight: '15px' }}>
-            <Table data-table-header style={{ marginBottom: 0 }}>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {getOrderedHeaders(headerGroup).map((header: any) => {
-                      const visibilityClass = getColumnVisibilityClass(header.id)
-                      const widthStyle = getColumnWidthStyle(header.id)
-                      
-                      if (!isColumnVisible(header.id)) return null
-                      
-                      return (
-                        <TableHead 
-                          key={header.id}
-                          data-column-id={header.id}
-                          className={cn("bg-background border-b px-3", visibilityClass)}
-                          style={widthStyle}
-                        >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                        </TableHead>
-                      )
-                    })}
-                  </TableRow>
-                ))}
-              </TableHeader>
-            </Table>
-          </div>
-        </div>
+      {/* Header Table - Fixed */}
+      <div className="shrink-0 overflow-hidden bg-background border-b">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {getOrderedHeaders(headerGroup).map((header: any) => {
+                  const visibilityClass = getColumnVisibilityClass(header.id)
+                  const widthStyle = getColumnWidthStyle(header.id)
+                  
+                  if (!isColumnVisible(header.id)) return null
+                  
+                  return (
+                    <TableHead 
+                      key={header.id}
+                      data-column-id={header.id}
+                      className={cn("bg-background border-b px-3", visibilityClass)}
+                      style={widthStyle}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+        </Table>
       </div>
 
       {/* Body Table - Scrollable */}
-      <div className="flex-1 overflow-auto">
-        <Table data-table-body>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <Table>
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (

@@ -88,22 +88,35 @@ export function useEnhancedResponsiveColumns({
   const [visibleColumns, setVisibleColumns] = useState<string[]>([])
   const contentRefs = useRef<Record<string, HTMLElement[]>>({})
 
-  // Measure container width
+  // Measure container width với buffer để tránh scroll ngang
   useEffect(() => {
     const updateContainerWidth = () => {
       if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth - containerPadding)
+        const rect = containerRef.current.getBoundingClientRect()
+        // Trừ padding và thêm buffer nhỏ để tránh scroll ngang
+        const availableWidth = rect.width - containerPadding - 2 // 2px buffer
+        setContainerWidth(Math.max(0, availableWidth))
       }
     }
 
     updateContainerWidth()
     
-    const resizeObserver = new ResizeObserver(updateContainerWidth)
+    const resizeObserver = new ResizeObserver(() => {
+      // Delay để đảm bảo DOM đã cập nhật
+      setTimeout(updateContainerWidth, 10)
+    })
+    
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current)
     }
 
-    return () => resizeObserver.disconnect()
+    // Thêm window resize listener để đảm bảo
+    window.addEventListener('resize', updateContainerWidth)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateContainerWidth)
+    }
   }, [containerPadding])
 
   // Measure content widths for content-based columns
@@ -131,7 +144,7 @@ export function useEnhancedResponsiveColumns({
     setContentWidths(newContentWidths)
   }, [configs, enableContentBased])
 
-  // Calculate which columns should be visible
+  // Calculate which columns should be visible - IMPROVED
   useEffect(() => {
     if (containerWidth === 0) return
 
@@ -159,7 +172,7 @@ export function useEnhancedResponsiveColumns({
       }
     })
 
-    // Second pass: Priority-based columns
+    // Second pass: Priority-based columns với check chặt chẽ hơn
     const remainingConfigs = sortedConfigs.filter(config => !config.alwaysVisible)
     remainingConfigs.sort((a, b) => a.priority - b.priority)
 
@@ -173,7 +186,8 @@ export function useEnhancedResponsiveColumns({
         ? Math.max(contentWidths[config.id], config.minWidth)
         : config.minWidth
 
-      if (usedWidth + width <= containerWidth) {
+      // Kiểm tra chặt chẽ hơn để tránh overflow
+      if (usedWidth + width <= containerWidth - 1) { // -1 buffer
         newColumnWidths[config.id] = width
         newVisibleColumns.push(config.id)
         usedWidth += width
@@ -182,7 +196,7 @@ export function useEnhancedResponsiveColumns({
 
     // Third pass: Distribute remaining space to flex columns
     const remainingWidth = containerWidth - usedWidth
-    if (remainingWidth > 0) {
+    if (remainingWidth > 5) { // Chỉ distribute nếu còn đủ space
       const flexColumns = newVisibleColumns.filter(id => {
         const config = configs.find(c => c.id === id)
         return config && config.flexGrow && config.flexGrow > 0
@@ -197,7 +211,7 @@ export function useEnhancedResponsiveColumns({
         flexColumns.forEach(id => {
           const config = configs.find(c => c.id === id)
           if (config && config.flexGrow) {
-            const additionalWidth = (remainingWidth * config.flexGrow) / totalFlexGrow
+            const additionalWidth = ((remainingWidth - 2) * config.flexGrow) / totalFlexGrow // -2 buffer
             const maxWidth = config.maxWidth || Infinity
             newColumnWidths[id] = Math.min(newColumnWidths[id] + additionalWidth, maxWidth)
           }
@@ -205,17 +219,30 @@ export function useEnhancedResponsiveColumns({
       }
     }
 
+    // Final validation: Đảm bảo total không vượt container
+    const finalTotalWidth = Object.values(newColumnWidths).reduce((sum, width) => sum + width, 0)
+    if (finalTotalWidth > containerWidth) {
+      // Scale down proportionally nếu vượt
+      const scale = (containerWidth - 2) / finalTotalWidth // -2 buffer
+      Object.keys(newColumnWidths).forEach(id => {
+        newColumnWidths[id] = Math.floor(newColumnWidths[id] * scale)
+      })
+    }
+
     setColumnWidths(newColumnWidths)
     setVisibleColumns(newVisibleColumns)
 
     if (debugMode) {
+      const finalTotal = Object.values(newColumnWidths).reduce((sum, width) => sum + width, 0)
       console.log('Enhanced Responsive Columns Debug:', {
         containerWidth,
         usedWidth,
-        remainingWidth: containerWidth - usedWidth,
+        finalTotalWidth: finalTotal,
+        remainingWidth: containerWidth - finalTotal,
         visibleColumns: newVisibleColumns,
         columnWidths: newColumnWidths,
-        contentWidths
+        contentWidths,
+        willOverflow: finalTotal > containerWidth
       })
     }
   }, [containerWidth, configs, contentWidths, enableOrdering, debugMode])
@@ -238,7 +265,7 @@ export function useEnhancedResponsiveColumns({
     return visibleColumns.includes(columnId) ? 'table-cell' : 'hidden'
   }, [visibleColumns])
 
-  // Get width style for a column
+  // Get width style for a column với box-sizing
   const getColumnWidthStyle = useCallback((columnId: string) => {
     const width = columnWidths[columnId]
     if (!width) return {}
@@ -246,7 +273,8 @@ export function useEnhancedResponsiveColumns({
     return {
       width: `${width}px`,
       minWidth: `${width}px`,
-      maxWidth: `${width}px`
+      maxWidth: `${width}px`,
+      boxSizing: 'border-box' as const
     }
   }, [columnWidths])
 
@@ -264,13 +292,18 @@ export function useEnhancedResponsiveColumns({
     return visibleColumns.includes(columnId)
   }, [visibleColumns])
 
-  const getDebugInfo = useCallback(() => ({
-    containerWidth,
-    visibleColumns,
-    columnWidths,
-    contentWidths,
-    totalUsedWidth: Object.values(columnWidths).reduce((sum, width) => sum + width, 0)
-  }), [containerWidth, visibleColumns, columnWidths, contentWidths])
+  const getDebugInfo = useCallback(() => {
+    const totalUsedWidth = Object.values(columnWidths).reduce((sum, width) => sum + width, 0)
+    return {
+      containerWidth,
+      visibleColumns,
+      columnWidths,
+      contentWidths,
+      totalUsedWidth,
+      remainingWidth: containerWidth - totalUsedWidth,
+      willOverflow: totalUsedWidth > containerWidth
+    }
+  }, [containerWidth, visibleColumns, columnWidths, contentWidths])
 
   return {
     containerRef,
