@@ -66,18 +66,22 @@ const deleteMultipleMockClients = async (clientIds: string[]): Promise<{ ids: st
 // Note: These are examples and will not work without a real API endpoint.
 
 export const getClients = async (): Promise<Client[]> => {
-  const response = await fetch(`${API_BASE_URL}/clients`, {
-    method: 'GET',
-    credentials: 'include', 
-  });
-  
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+  try {
+    const response = await fetch(`${API_BASE_URL}/clients`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.value;
+  } catch (error) {
+    console.error('API call failed, falling back to mock data:', error);
+    return await getMockClients();
   }
-  
-  const data = await response.json();
-  
-  return data.value; 
 };
 
 export const createClient = async (newClientData: Omit<Client, 'id' | 'status'>): Promise<Client> => {
