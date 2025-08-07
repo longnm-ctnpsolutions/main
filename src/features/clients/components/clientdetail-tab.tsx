@@ -9,7 +9,7 @@ import { Button } from "@/shared/components/ui/button"
 import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead, TableCaption, TableFooter } from "@/shared/components/ui/table"
 import { Pencil, RefreshCcw, Trash } from "lucide-react"
 import { useState } from "react";
-import { TablePagination } from "@/shared/components/table/pagination"
+import { TablePagination } from "@/shared/components/custom-ui/pagination"
 import {
   ColumnDef,
   ColumnFiltersState,
