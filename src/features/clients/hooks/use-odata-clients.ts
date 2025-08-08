@@ -79,35 +79,23 @@ const initialState: ODataClientsState = {
   hasMore: false,
 };
 
-// Custom debounce hook
-const useDebounce = <T>(value: T, delay: number): T => {
-  const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
-
-  React.useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-};
-
 export const useODataClients = (debounceDelay: number = 300) => {
   const [state, dispatch] = React.useReducer(odataClientsReducer, initialState);
   const [searchTerm, setSearchTerm] = React.useState('');
-  
-  // Use custom debounce hook
-  const debouncedSearchTerm = useDebounce(searchTerm, debounceDelay);
-  
-  // Store the current table state to re-fetch when search changes
   const [currentTableState, setCurrentTableState] = React.useState<TableState | null>(null);
+  
+  // Refs to avoid stale closure issues
+  const searchTermRef = React.useRef(searchTerm);
+  const fetchTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  
+  // Update ref when searchTerm changes
+  React.useEffect(() => {
+    searchTermRef.current = searchTerm;
+  }, [searchTerm]);
 
-  // Memoized fetch function that doesn't depend on debouncedSearchTerm directly
+  // Internal fetch function - stable, no external dependencies
   const fetchClientsInternal = React.useCallback(async (tableState: TableState, searchQuery: string) => {
+    console.log('🔥 fetchClientsInternal called with:', { tableState, searchQuery }); // Debug log
     dispatch({ type: 'FETCH_INIT' });
     try {
       const result = await getClientsWithOData(tableState, searchQuery);
@@ -118,18 +106,56 @@ export const useODataClients = (debounceDelay: number = 300) => {
     }
   }, []);
 
-  // Effect to handle debounced search
-  React.useEffect(() => {
-    if (currentTableState) {
-      fetchClientsInternal(currentTableState, debouncedSearchTerm);
-    }
-  }, [debouncedSearchTerm, currentTableState, fetchClientsInternal]);
-
-  // Main fetch function that updates table state and triggers fetch
+  // Main fetch function - STABLE, không depend vào searchTerm
   const fetchClients = React.useCallback(async (tableState: TableState) => {
+    console.log('📋 fetchClients called'); // Debug log
     setCurrentTableState(tableState);
-    await fetchClientsInternal(tableState, debouncedSearchTerm);
-  }, [fetchClientsInternal, debouncedSearchTerm]);
+    
+    // Clear existing timeout để tránh conflict
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
+    
+    // Use current searchTerm value
+    const currentSearch = searchTermRef.current;
+    await fetchClientsInternal(tableState, currentSearch);
+  }, [fetchClientsInternal]);
+
+  // Separate effect CHỈ để handle search thay đổi, KHÔNG chạy lần đầu
+  React.useEffect(() => {
+    // Bỏ qua lần đầu tiên khi currentTableState vừa được set
+    if (!currentTableState) return;
+    
+    // Chỉ trigger khi searchTerm thực sự thay đổi (không phải từ initial state)
+    const isInitialState = searchTerm === '';
+    if (isInitialState && !searchTermRef.current) return;
+    
+    // Clear existing timeout
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
+    
+    // Set new timeout for debounced search
+    fetchTimeoutRef.current = setTimeout(() => {
+      console.log('🔍 Debounced search triggered:', searchTerm);
+      fetchClientsInternal(currentTableState, searchTerm);
+    }, debounceDelay);
+    
+    return () => {
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+    };
+  }, [searchTerm]); // CHỈ depend vào searchTerm, bỏ currentTableState
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Clear search function
   const clearSearch = React.useCallback(() => {
@@ -205,10 +231,9 @@ export const useODataClients = (debounceDelay: number = 300) => {
     ...state,
     searchTerm,
     setSearchTerm,
-    debouncedSearchTerm,
     clearSearch,
     isSearching,
-    fetchClients,
+    fetchClients, // Giờ đây stable rồi!
     addClient,
     removeClient,
     removeMultipleClients,
