@@ -25,6 +25,9 @@
       "@/shared/*": ["./src/shared/*"],
       "@/hooks/*": ["./src/shared/hooks/*"],
       "@/context/*": ["./src/shared/context/*"],
+      "@/types/*": ["./src/shared/types/*"],
+      "@/lib/*": ["./src/shared/lib/*"],
+      "@/services/*": ["./src/shared/api/services/*"],
       "@/layout/hooks/*": ["./src/shared/components/layout/hooks/*"],
       "@/layout/types/*": ["./src/shared/components/layout/types/*"]
     }

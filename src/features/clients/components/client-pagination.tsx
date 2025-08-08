@@ -11,13 +11,26 @@ import { cn } from "@/shared/lib/utils"
 interface ClientPaginationProps {
   table: Table<Client>;
   pageSizeOptions?: number[];
+  totalCount?: number; // Add totalCount for OData server-side pagination
 }
 
-export function ClientPagination({ table, pageSizeOptions = [5, 10, 20] }: ClientPaginationProps) {
+export function ClientPagination({ 
+  table, 
+  pageSizeOptions = [5, 10, 20],
+  totalCount 
+}: ClientPaginationProps) {
   const currentPage = table.getState().pagination.pageIndex
-  const totalPages = table.getPageCount()
+  const pageSize = table.getState().pagination.pageSize
+  
+  // Use totalCount from OData instead of client-side table data
+  const actualTotalCount = totalCount ?? table.getFilteredRowModel().rows.length
+  const totalPages = Math.ceil(actualTotalCount / pageSize)
+  
+  // Calculate correct page info for server-side pagination
+  const startItem = actualTotalCount === 0 ? 0 : currentPage * pageSize + 1
+  const endItem = Math.min((currentPage + 1) * pageSize, actualTotalCount)
 
-  // Memoize page numbers
+  // Memoize page numbers with correct totalPages
   const pageNumbers = useMemo(() => {
     const pages = []
     const maxVisiblePages = 5
@@ -39,6 +52,10 @@ export function ClientPagination({ table, pageSizeOptions = [5, 10, 20] }: Clien
     return pages
   }, [currentPage, totalPages])
 
+  // Check if we can navigate (based on server-side pagination)
+  const canPreviousPage = currentPage > 0
+  const canNextPage = currentPage < totalPages - 1
+
   if (totalPages === 0) {
     return (
       <div className="flex items-center justify-center p-2 text-sm text-muted-foreground">
@@ -49,35 +66,57 @@ export function ClientPagination({ table, pageSizeOptions = [5, 10, 20] }: Clien
 
   return (
     <div className="flex items-center justify-between p-2 text-sm">
+      {/* Page Size Options - Left Side */}
       <div className="flex items-center gap-4 text-muted-foreground">
-        {pageSizeOptions.map((pageSize) => (
+        {pageSizeOptions.map((pageSizeOption) => (
           <Button
-            key={pageSize}
-            variant={table.getState().pagination.pageSize === pageSize ? "default" : "ghost"}
-            onClick={() => table.setPageSize(pageSize)}
+            key={pageSizeOption}
+            variant={pageSize === pageSizeOption ? "default" : "ghost"}
+            onClick={() => {
+              // Use custom setPageSize for server-side pagination
+              if ('setPageSize' in table && typeof table.setPageSize === 'function') {
+                (table as any).setPageSize(pageSizeOption)
+              } else {
+                table.setPageSize(pageSizeOption)
+              }
+            }}
             className={cn(
               "h-8 w-8 p-0",
-              table.getState().pagination.pageSize === pageSize ? "rounded-full" : ""
+              pageSize === pageSizeOption ? "rounded-full" : ""
             )}
-            aria-label={`Show ${pageSize} items per page`}
+            aria-label={`Show ${pageSizeOption} items per page`}
           >
-            {pageSize}
+            {pageSizeOption}
           </Button>
         ))}
       </div>
 
+      {/* Pagination Info and Controls - Right Side */}
       <div className="flex items-center gap-4">
+        {/* Page Info */}
         <div className="text-muted-foreground hidden sm:block">
-          Page {currentPage + 1} of {totalPages} ({table.getFilteredRowModel().rows.length} items)
+          {actualTotalCount === 0 ? (
+            "No items"
+          ) : (
+            <>Page {currentPage + 1} of {totalPages} ({actualTotalCount} items)</>
+          )}
         </div>
 
+        {/* Pagination Controls */}
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => {
+              // Use custom setPageIndex for server-side pagination
+              if ('setPageIndex' in table && typeof table.setPageIndex === 'function') {
+                (table as any).setPageIndex(currentPage - 1)
+              } else {
+                table.previousPage()
+              }
+            }}
+            disabled={!canPreviousPage}
             aria-label="Go to previous page"
             title="Previous page"
           >
@@ -101,7 +140,14 @@ export function ClientPagination({ table, pageSizeOptions = [5, 10, 20] }: Clien
                   "h-8 w-8 p-0",
                   currentPage === pageIndex ? "rounded-full" : ""
                 )}
-                onClick={() => table.setPageIndex(pageIndex)}
+                onClick={() => {
+                  // Use custom setPageIndex for server-side pagination
+                  if ('setPageIndex' in table && typeof table.setPageIndex === 'function') {
+                    (table as any).setPageIndex(pageIndex)
+                  } else {
+                    table.setPageIndex(pageIndex)
+                  }
+                }}
                 aria-label={`Go to page ${pageIndex + 1}`}
               >
                 {pageIndex + 1}
@@ -113,8 +159,15 @@ export function ClientPagination({ table, pageSizeOptions = [5, 10, 20] }: Clien
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => {
+              // Use custom setPageIndex for server-side pagination
+              if ('setPageIndex' in table && typeof table.setPageIndex === 'function') {
+                (table as any).setPageIndex(currentPage + 1)
+              } else {
+                table.nextPage()
+              }
+            }}
+            disabled={!canNextPage}
             aria-label="Go to next page"
             title="Next page"
           >
