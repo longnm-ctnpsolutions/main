@@ -1,13 +1,10 @@
 import type { Client } from '@/features/clients/types/client.types';
 import { clients as mockClients } from '@/features/clients/lib/data';
 
-// For development, we can point to a mock API or a real one.
-// In a real app, this would be in a .env file.
-const API_BASE_URL = 'https://localhost:7060'; // Use the real API endpoint
+const API_BASE_URL = 'https://api.identity.dev.ctnp.com';
 
 const MOCK_API_DELAY = 500;
 
-// Helper function to handle fetch responses
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
@@ -15,9 +12,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
   }
   return response.json();
 }
-
-// --- MOCK API FUNCTIONS ---
-// These simulate API calls with a delay and use local mock data.
 
 const getMockClients = async (): Promise<Client[]> => {
   console.log('Fetching mock clients...');

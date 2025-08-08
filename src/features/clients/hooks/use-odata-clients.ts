@@ -1,12 +1,12 @@
 import * as React from 'react';
 import type { Client } from '@/features/clients/types/client.types';
 import type { TableState } from '@/types/odata.types';
-import { getClientsWithOData, type ClientsQueryResult } from "@/services/clients-odata.service";
+import { getClientsWithOData, type ClientsQueryResult } from "@/shared/api/services/clients/clients-odata.service";
 import {
   createClient,
   deleteClient,
   deleteMultipleClients,
-} from '@/shared/api/services/clients.service';
+} from '@/shared/api/services/clients/clients.service';
 
 interface ODataClientsState {
   clients: Client[];

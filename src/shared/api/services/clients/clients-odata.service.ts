@@ -16,14 +16,9 @@ export const getClientsWithOData = async (
 ): Promise<ClientsQueryResult> => {
   try {
     const queryBuilder = new ODataQueryBuilder();
-    
-    // Select specific fields (optional - remove if you want all fields)
-    // queryBuilder.select(['id', 'name', 'clientId', 'status', 'logo', 'description']);
-    
-    // Build filter conditions
+
     const filterConditions: string[] = [];
-    
-    // Global search across multiple fields
+
     if (searchTerm && searchTerm.trim()) {
       const searchConditions = [        
         ODataQueryBuilder.equals('id', searchTerm), 
@@ -36,7 +31,7 @@ export const getClientsWithOData = async (
         filterConditions.push(`(${searchConditions.join(' or ')})`);
       }
     }
-    // Column-specific filters
+
     tableState.columnFilters.forEach(filter => {
       switch (filter.id) {
         case 'name':
@@ -54,23 +49,20 @@ export const getClientsWithOData = async (
             filterConditions.push(ODataQueryBuilder.contains('description', filter.value));
           }
           break;
-        // Add more column filters as needed
+
       }
     });
     
     queryBuilder.filter(filterConditions);
-    
-    // Sorting
+
     if (tableState.sorting.length > 0) {
-      const sort = tableState.sorting[0]; // Take first sort only
+      const sort = tableState.sorting[0]; 
       queryBuilder.orderBy(sort.id, sort.desc ? 'desc' : 'asc');
     }
-    
-    // Pagination
+
     const skip = tableState.pagination.pageIndex * tableState.pagination.pageSize;
     queryBuilder.skip(skip).top(tableState.pagination.pageSize);
     
-    // Include total count
     queryBuilder.count(true);
     
     const queryString = queryBuilder.build();

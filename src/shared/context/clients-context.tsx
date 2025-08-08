@@ -8,7 +8,7 @@ import {
   createClient,
   deleteClient,
   deleteMultipleClients,
-} from '@/shared/api/services/clients.service';
+} from '@/shared/api/services/clients/clients.service';
 
 interface ClientsState {
   clients: Client[];
