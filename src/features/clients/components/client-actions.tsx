@@ -49,6 +49,9 @@ interface ClientActionsProps {
   onAddClient: (values: z.infer<typeof addClientFormSchema>) => void
   onDeleteSelected: () => void
   onRefreshData?: () => void
+  // OData search props
+  searchTerm: string
+  setSearchTerm: (term: string) => void
 }
 
 export function ClientActions({ 
@@ -61,6 +64,9 @@ export function ClientActions({
   onAddClient,
   onDeleteSelected,
   onRefreshData,
+  // OData search props
+  searchTerm,
+  setSearchTerm,
 }: ClientActionsProps) {
   const [isMounted, setIsMounted] = React.useState(false)
   
@@ -230,7 +236,7 @@ export function ClientActions({
             </div>
             
             <div className="flex items-center gap-2">
-              {/* Search Input */}
+              {/* Search Input - Loading State */}
               <div className="relative flex-1 md:grow-0">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -268,15 +274,13 @@ export function ClientActions({
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Search Input */}
+            {/* OData Search Input */}
             <div className="relative flex-1 md:grow-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Client Search"
-                value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-                onChange={(event) =>
-                  table.getColumn("name")?.setFilterValue(event.target.value)
-                }
+                placeholder="Search clients..."
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
                 className="pl-9 w-full md:w-[150px] lg:w-[250px]"
               />
             </div>

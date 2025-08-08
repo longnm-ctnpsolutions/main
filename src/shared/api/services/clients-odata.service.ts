@@ -2,7 +2,7 @@ import type { Client } from '@/features/clients/types/client.types';
 import type { ODataResponse, TableState } from '@/types/odata.types';
 import { ODataQueryBuilder } from '@/lib/odata-builder';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:7060';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.identity.dev.ctnp.com';
 
 export interface ClientsQueryResult {
   clients: Client[];
@@ -25,17 +25,17 @@ export const getClientsWithOData = async (
     
     // Global search across multiple fields
     if (searchTerm && searchTerm.trim()) {
-      const searchConditions = [
+      const searchConditions = [        
+        ODataQueryBuilder.equals('id', searchTerm), 
         ODataQueryBuilder.contains('name', searchTerm),
         ODataQueryBuilder.contains('description', searchTerm),
-        ODataQueryBuilder.contains('clientId', searchTerm)
+
       ].filter(Boolean);
       
       if (searchConditions.length > 0) {
         filterConditions.push(`(${searchConditions.join(' or ')})`);
       }
     }
-    
     // Column-specific filters
     tableState.columnFilters.forEach(filter => {
       switch (filter.id) {

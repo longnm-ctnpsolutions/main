@@ -224,6 +224,8 @@ export function EnhancedClientDashboard() {
           isAddClientDialogOpen={isAddClientDialogOpen}
           setAddClientDialogOpen={setAddClientDialogOpen}
           addClientForm={addClientForm}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
           onAddClient={handleAddClient}
           onDeleteSelected={handleDeleteSelected}
           onRefreshData={handleRefreshData}

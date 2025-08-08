@@ -79,33 +79,69 @@ const initialState: ODataClientsState = {
   hasMore: false,
 };
 
-export const useODataClients = () => {
+// Custom debounce hook
+const useDebounce = <T>(value: T, delay: number): T => {
+  const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
+
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+export const useODataClients = (debounceDelay: number = 300) => {
   const [state, dispatch] = React.useReducer(odataClientsReducer, initialState);
   const [searchTerm, setSearchTerm] = React.useState('');
   
-  // Debounced search
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = React.useState('');
+  // Use custom debounce hook
+  const debouncedSearchTerm = useDebounce(searchTerm, debounceDelay);
   
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
-    
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+  // Store the current table state to re-fetch when search changes
+  const [currentTableState, setCurrentTableState] = React.useState<TableState | null>(null);
 
-  const fetchClients = React.useCallback(async (tableState: TableState) => {
+  // Memoized fetch function that doesn't depend on debouncedSearchTerm directly
+  const fetchClientsInternal = React.useCallback(async (tableState: TableState, searchQuery: string) => {
     dispatch({ type: 'FETCH_INIT' });
     try {
-      const result = await getClientsWithOData(tableState, debouncedSearchTerm);
+      const result = await getClientsWithOData(tableState, searchQuery);
       dispatch({ type: 'FETCH_SUCCESS', payload: result });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unknown error occurred';
       dispatch({ type: 'FETCH_FAILURE', payload: message });
     }
-  }, [debouncedSearchTerm]);
+  }, []);
 
-  const addClient = async (newClientData: Omit<Client, 'id' | 'status'>) => {
+  // Effect to handle debounced search
+  React.useEffect(() => {
+    if (currentTableState) {
+      fetchClientsInternal(currentTableState, debouncedSearchTerm);
+    }
+  }, [debouncedSearchTerm, currentTableState, fetchClientsInternal]);
+
+  // Main fetch function that updates table state and triggers fetch
+  const fetchClients = React.useCallback(async (tableState: TableState) => {
+    setCurrentTableState(tableState);
+    await fetchClientsInternal(tableState, debouncedSearchTerm);
+  }, [fetchClientsInternal, debouncedSearchTerm]);
+
+  // Clear search function
+  const clearSearch = React.useCallback(() => {
+    setSearchTerm('');
+  }, []);
+
+  // Check if search is active
+  const isSearching = React.useMemo(() => {
+    return searchTerm.trim().length > 0;
+  }, [searchTerm]);
+
+  const addClient = React.useCallback(async (newClientData: Omit<Client, 'id' | 'status'>) => {
     dispatch({ type: 'SET_ACTION_LOADING', payload: true });
     try {
       const newClient = await createClient(newClientData);
@@ -117,9 +153,9 @@ export const useODataClients = () => {
       dispatch({ type: 'SET_ERROR', payload: message });
       return false;
     }
-  };
+  }, []);
 
-  const removeClient = async (clientId: string) => {
+  const removeClient = React.useCallback(async (clientId: string) => {
     // Optimistic update
     const originalState = { ...state };
     dispatch({ type: 'REMOVE_SUCCESS', payload: { id: clientId } });
@@ -140,9 +176,9 @@ export const useODataClients = () => {
       dispatch({ type: 'SET_ERROR', payload: message });
       return false;
     }
-  };
+  }, [state]);
   
-  const removeMultipleClients = async (clientIds: string[]) => {
+  const removeMultipleClients = React.useCallback(async (clientIds: string[]) => {
     // Optimistic update
     const originalState = { ...state };
     dispatch({ type: 'REMOVE_MULTIPLE_SUCCESS', payload: { ids: clientIds } });
@@ -163,12 +199,15 @@ export const useODataClients = () => {
       dispatch({ type: 'SET_ERROR', payload: message });
       return false;
     }
-  };
+  }, [state]);
 
   return {
     ...state,
     searchTerm,
     setSearchTerm,
+    debouncedSearchTerm,
+    clearSearch,
+    isSearching,
     fetchClients,
     addClient,
     removeClient,
