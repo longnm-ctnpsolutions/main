@@ -83,6 +83,14 @@ body {
     --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-ring: 207 85% 65%;
   }
+
+  .no-ring-select:focus,
+  .no-ring-select:focus-visible,
+  .no-ring-select[data-state="open"] {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important; /* Tắt ring (thường là box-shadow) */
+  }
 }
 
 @layer base {

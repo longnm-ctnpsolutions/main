@@ -1,46 +1,45 @@
+"use client";
 
-"use client"
-
-import * as React from "react"
-import { Table } from "@tanstack/react-table"
-import { RefreshCw } from "lucide-react"
-
-import type { Client } from "@/features/clients/types/client.types"
+import * as React from "react";
+import { Table } from "@tanstack/react-table";
+import { RefreshCw } from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/ui/select"
-import { Button } from "@/shared/components/ui/button"
+} from "@/shared/components/ui/select";
+import { Button } from "@/shared/components/ui/button";
+import { Client } from "../types/client.types";
 
 interface ClientFiltersProps {
-  table: Table<Client>
+  table: Table<Client>;
 }
 
 export function ClientFilters({ table }: ClientFiltersProps) {
   return (
-    <>
-      <Select 
-        defaultValue="all"
-        onValueChange={(value) => {
-            if (value === 'all') {
-                table.getColumn("status")?.setFilterValue(undefined);
-            } else {
-                table.getColumn("status")?.setFilterValue(value);
-            }
-        }}
-      >
-        <SelectTrigger className="w-auto gap-1 border-0 bg-transparent hover:bg-accent focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All</SelectItem>
-          <SelectItem value="active">Active</SelectItem>
-          <SelectItem value="inactive">Inactive</SelectItem>
-        </SelectContent>
-      </Select>
-    </>
-  )
+    <Select
+      onValueChange={(value) => {
+        if (value === "all") {
+          table.getColumn("status")?.setFilterValue(undefined);
+        } else {
+          // Map 'Active' to 1 and 'Inactive' to 0
+          const statusValue = value === "Active" ? "1" : "0";
+          table.getColumn("status")?.setFilterValue(statusValue);
+        }
+      }}
+    >
+    <SelectTrigger
+  className="no-ring-select w-auto gap-1 border-none bg-transparent hover:bg-accent outline-none"
+>
+  <SelectValue placeholder="Filter by status" />
+</SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">All</SelectItem>
+        <SelectItem value="Active">Active</SelectItem>
+        <SelectItem value="Inactive">Inactive</SelectItem>
+      </SelectContent>
+    </Select>
+  );
 }
