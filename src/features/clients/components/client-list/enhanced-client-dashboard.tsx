@@ -53,7 +53,7 @@ export function EnhancedClientDashboard() {
     removeMultipleClients,
   } = useClientsActions()
 
-  // Table state
+  // ✅ STABLE TABLE STATE
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -62,11 +62,52 @@ export function EnhancedClientDashboard() {
     pageIndex: 0,
     pageSize: 10,
   })
-  const [isAddClientDialogOpen, setAddClientDialogOpen] = React.useState(false)
 
+  // ✅ SEPARATED LOADING STATES
+  const [isTableDataLoading, setIsTableDataLoading] = React.useState(false)
+  const [stablePaginationData, setStablePaginationData] = React.useState({
+    totalCount: 0,
+    currentPage: 0,
+    pageSize: 10
+  })
+
+  // ✅ UI STATE - TÁCH RIÊNG KHỎI DATA LOADING
+  const [isAddClientDialogOpen, setAddClientDialogOpen] = React.useState(false)
+  const [isMounted, setIsMounted] = React.useState(false)
   const isSidebarExpanded = sidebarState === 'expanded'
 
-  // ✅ Memoize table state với proper dependencies
+  // ✅ MOUNT STATE
+  React.useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // ✅ UPDATE STABLE PAGINATION DATA khi data load xong
+  React.useEffect(() => {
+    if (!isLoading) {
+      setStablePaginationData({
+        totalCount,
+        currentPage: pagination.pageIndex,
+        pageSize: pagination.pageSize
+      })
+      setIsTableDataLoading(false)
+    } else {
+      setIsTableDataLoading(true)
+    }
+  }, [isLoading, totalCount, pagination.pageIndex, pagination.pageSize])
+
+  // ✅ STABLE FORM INSTANCE
+  const addClientForm = useForm<z.infer<typeof addClientFormSchema>>({
+    resolver: zodResolver(addClientFormSchema),
+    defaultValues: { 
+      name: "",
+      identifier: "",
+      description: "",
+      homepageurl: "",
+      logo: null,
+    },
+  })
+
+  // ✅ MEMOIZED TABLE STATE
   const tableState = React.useMemo(() => ({
     pagination,
     sorting,
@@ -74,12 +115,11 @@ export function EnhancedClientDashboard() {
     globalFilter: searchTerm,
   }), [pagination, sorting, columnFilters, searchTerm])
 
-  // ✅ SINGLE useEffect với better duplicate prevention
+  // ✅ DATA FETCHING LOGIC
   const hasInitialized = React.useRef(false);
   const lastTableStateRef = React.useRef<string>('');
 
   React.useEffect(() => {
-    // ✅ Ensure component is fully initialized trước khi fetch
     if (!hasInitialized.current) {
       hasInitialized.current = true;
       console.log('🚀 Dashboard initialized, fetching initial data...');
@@ -87,13 +127,10 @@ export function EnhancedClientDashboard() {
       return;
     }
 
-    // ✅ Prevent duplicate calls bằng cách so sánh JSON serialized state
-    // CHỈ compare non-search related changes để avoid conflict với search debounce
     const tableStateForComparison = {
       pagination,
       sorting,
       columnFilters,
-      // KHÔNG include globalFilter/searchTerm ở đây vì search đã có debounce riêng
     };
     
     const currentStateStr = JSON.stringify(tableStateForComparison);
@@ -109,18 +146,8 @@ export function EnhancedClientDashboard() {
     }
   }, [fetchClients, pagination, sorting, columnFilters, tableState]);
 
-  const addClientForm = useForm<z.infer<typeof addClientFormSchema>>({
-    resolver: zodResolver(addClientFormSchema),
-    defaultValues: { 
-      name: "",
-      identifier: "",
-      description: "",
-      homepageurl: "",
-      logo: null,
-    },
-  })
-
-  const handleAddClient = async (values: z.infer<typeof addClientFormSchema>) => {
+  // ✅ STABLE CRUD HANDLERS
+  const handleAddClient = React.useCallback(async (values: z.infer<typeof addClientFormSchema>) => {
     const newClientData = {
       name: values.name,
       clientId: values.identifier,
@@ -138,23 +165,9 @@ export function EnhancedClientDashboard() {
         description: `${values.name} has been added to the client list.`,
       })
     }
-  }
+  }, [addClient, addClientForm, toast])
   
-  const handleDeleteSelected = async () => {
-    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id)
-    const success = await removeMultipleClients(selectedIds)
-    
-    if (success) {
-      setRowSelection({})
-      toast({
-        title: "Clients deleted",
-        description: `${selectedIds.length} client(s) have been deleted.`,
-        variant: "destructive"
-      })
-    }
-  }
-  
-  const handleDeleteRow = async (clientId: string) => {
+  const handleDeleteRow = React.useCallback(async (clientId: string) => {
     const success = await removeClient(clientId)
     if (success) {
       toast({
@@ -163,20 +176,19 @@ export function EnhancedClientDashboard() {
         variant: "destructive"
       })
     }
-  }
+  }, [removeClient, toast])
 
-  // ✅ Memoized refresh handler để prevent unnecessary re-renders
   const handleRefreshData = React.useCallback(() => {
     console.log('🔄 Manual refresh triggered')
     fetchClients(tableState)
   }, [fetchClients, tableState])
 
-  // ✅ Stable search term handler
   const handleSearchTermChange = React.useCallback((newSearchTerm: string) => {
     console.log('🔍 Search term changing from Dashboard:', newSearchTerm)
     setSearchTerm(newSearchTerm)
   }, [setSearchTerm])
-  
+
+  // ✅ ERROR HANDLING
   React.useEffect(() => {
     if (error) {
       toast({
@@ -187,19 +199,27 @@ export function EnhancedClientDashboard() {
     }
   }, [error, toast])
 
-  // Custom pagination handlers that work with server-side pagination
+  // ✅ STABLE PAGINATION HANDLERS với immediate UI update
   const handlePaginationChange = React.useCallback((updater: any) => {
     setPagination(prev => {
       const newPagination = typeof updater === 'function' ? updater(prev) : updater
+      
+      // ✅ CẬP NHẬT NGAY pagination UI (không đợi data load)
+      setStablePaginationData(current => ({
+        ...current,
+        currentPage: newPagination.pageIndex,
+        pageSize: newPagination.pageSize
+      }))
+      
       return newPagination
     })
   }, [])
 
-  // Create table with server-side processing
+  // ✅ CREATE TABLE INSTANCE
   const table = useReactTable({
     data: clients,
     columns: EnhancedClientTable.columns(handleDeleteRow),
-    pageCount: Math.ceil(totalCount / pagination.pageSize),
+    pageCount: Math.ceil(stablePaginationData.totalCount / stablePaginationData.pageSize),
     state: {
       sorting,
       columnFilters,
@@ -217,110 +237,198 @@ export function EnhancedClientDashboard() {
     manualSorting: true,
     manualFiltering: true,
     autoResetPageIndex: false,
-    // Override pagination methods to work with server-side pagination
     meta: {
       setPageIndex: (pageIndex: number) => {
-        setPagination(prev => ({ ...prev, pageIndex }))
+        setPagination(prev => {
+          const newPagination = { ...prev, pageIndex }
+          // ✅ CẬP NHẬT NGAY pagination UI
+          setStablePaginationData(current => ({
+            ...current,
+            currentPage: pageIndex
+          }))
+          return newPagination
+        })
       },
       setPageSize: (pageSize: number) => {
-        setPagination(prev => ({ ...prev, pageSize, pageIndex: 0 }))
+        setPagination(prev => {
+          const newPagination = { ...prev, pageSize, pageIndex: 0 }
+          // ✅ CẬP NHẬT NGAY pagination UI
+          setStablePaginationData(current => ({
+            ...current,
+            pageSize,
+            currentPage: 0
+          }))
+          return newPagination
+        })
       },
     },
   })
 
-  // Extend table with custom pagination methods
+  // ✅ HANDLE DELETE SELECTED
+  const handleDeleteSelected = React.useCallback(async () => {
+    const selectedIds = table.getSelectedRowModel().rows.map(row => row.original.id)
+    const success = await removeMultipleClients(selectedIds)
+    
+    if (success) {
+      setRowSelection({})
+      toast({
+        title: "Clients deleted",
+        description: `${selectedIds.length} client(s) have been deleted.`,
+        variant: "destructive"
+      })
+    }
+  }, [removeMultipleClients, toast, table])
+
+  // ✅ EXTENDED TABLE with stable pagination data
   const extendedTable = React.useMemo(() => ({
     ...table,
     setPageIndex: (pageIndex: number) => {
-      setPagination(prev => ({ ...prev, pageIndex }))
+      setPagination(prev => {
+        const newPagination = { ...prev, pageIndex }
+        setStablePaginationData(current => ({
+          ...current,
+          currentPage: pageIndex
+        }))
+        return newPagination
+      })
     },
     setPageSize: (pageSize: number) => {
-      setPagination(prev => ({ ...prev, pageSize, pageIndex: 0 }))
+      setPagination(prev => {
+        const newPagination = { ...prev, pageSize, pageIndex: 0 }
+        setStablePaginationData(current => ({
+          ...current,
+          pageSize,
+          currentPage: 0
+        }))
+        return newPagination
+      })
     },
-    // Override getFilteredRowModel to show correct count
     getFilteredRowModel: () => ({
       ...table.getFilteredRowModel(),
       rows: table.getFilteredRowModel().rows.map((row, index) => ({
         ...row,
-        // Add global index for display purposes
-        globalIndex: pagination.pageIndex * pagination.pageSize + index
+        globalIndex: stablePaginationData.currentPage * stablePaginationData.pageSize + index
       }))
     })
-  }), [table, pagination, setPagination])
+  }), [table, stablePaginationData])
 
-  const isEmpty = !isLoading && clients.length === 0 && totalCount === 0
+  // ✅ COMPUTED VALUES
+  const isEmpty = React.useMemo(() => 
+    !isLoading && clients.length === 0 && totalCount === 0, 
+    [isLoading, clients.length, totalCount]
+  )
+
+  // ✅ CLIENT ACTIONS - CHỈ re-render khi UI state thay đổi
+  const clientActionsComponent = React.useMemo(() => {
+    const shouldShowLoading = !isMounted || isActionLoading;
+    
+    return (
+      <ClientActions 
+        table={table}
+        isLoading={shouldShowLoading}
+        isAddClientDialogOpen={isAddClientDialogOpen}
+        setAddClientDialogOpen={setAddClientDialogOpen}
+        addClientForm={addClientForm}
+        searchTerm={searchTerm}
+        setSearchTerm={handleSearchTermChange}
+        onAddClient={handleAddClient}
+        onDeleteSelected={handleDeleteSelected}
+        onRefreshData={handleRefreshData}
+        isSidebarExpanded={isSidebarExpanded}
+      />
+    );
+  }, [
+    isMounted,
+    isActionLoading,
+    table,
+    isAddClientDialogOpen,
+    addClientForm,
+    searchTerm,
+    handleSearchTermChange,
+    handleAddClient,
+    handleDeleteSelected,
+    handleRefreshData,
+    isSidebarExpanded
+  ])
+
+  // ✅ TABLE CONTENT - CHỈ re-render khi table data loading
+  const tableContentComponent = React.useMemo(() => (
+    <EnhancedClientTable 
+      table={table} 
+      columns={EnhancedClientTable.columns(handleDeleteRow)}
+      isLoading={isTableDataLoading} // ✅ Sử dụng separated loading state
+    />
+  ), [table, handleDeleteRow, isTableDataLoading])
+
+  // ✅ STABLE PAGINATION - CHỈ dùng stable data, KHÔNG phụ thuộc isLoading
+  const paginationComponent = React.useMemo(() => {
+    if (isEmpty) return null;
+    
+    return (
+      <ClientPagination 
+        table={extendedTable as any}
+        totalCount={stablePaginationData.totalCount}
+        isTableLoading={isTableDataLoading} // ✅ Pass loading state for visual feedback
+      />
+    );
+  }, [
+    isEmpty,
+    stablePaginationData.totalCount, // ✅ Stable total count
+    stablePaginationData.currentPage, // ✅ Stable current page  
+    stablePaginationData.pageSize,   // ✅ Stable page size
+    extendedTable.getState,           // ✅ For handlers
+    isTableDataLoading               // ✅ For visual feedback only
+  ])
+
+  // ✅ EMPTY STATE
+  const emptyStateComponent = React.useMemo(() => {
+    if (!isEmpty) return undefined;
+
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="mx-auto max-w-md">
+          <svg
+            className="mx-auto h-12 w-12 text-gray-400"
+            stroke="currentColor"
+            fill="none"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M34 40h10v-4a6 6 0 00-10.712-3.714M34 40H14m20 0v-4a9.971 9.971 0 00-.712-3.714M14 40H4v-4a6 6 0 0110.712-3.714M14 40v-4a9.971 9.971 0 01.712-3.714M34 40v-4a9.971 9.971 0 01-.712-3.714M14 40v-4a9.971 9.971 0 00-.712-3.714"
+            />
+          </svg>
+          <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
+            No clients found
+          </h3>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            {isSearching || columnFilters.length > 0 
+              ? "Try adjusting your search or filters to find what you're looking for."
+              : "Get started by adding your first client to the system."
+            }
+          </p>
+          {(!isSearching && columnFilters.length === 0) && (
+            <button 
+              onClick={() => setAddClientDialogOpen(true)}
+              className="mt-4 inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              Add your first client
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }, [isEmpty, isSearching, columnFilters.length])
 
   return (
     <ListLayout
-      actions={
-        <ClientActions 
-          table={table}
-          isLoading={isLoading || isActionLoading}
-          isAddClientDialogOpen={isAddClientDialogOpen}
-          setAddClientDialogOpen={setAddClientDialogOpen}
-          addClientForm={addClientForm}
-          searchTerm={searchTerm}
-          setSearchTerm={handleSearchTermChange}
-          onAddClient={handleAddClient}
-          onDeleteSelected={handleDeleteSelected}
-          onRefreshData={handleRefreshData}
-          isSidebarExpanded={isSidebarExpanded}
-        />
-      }
-      tableContent={
-        <EnhancedClientTable 
-          table={table} 
-          columns={EnhancedClientTable.columns(handleDeleteRow)}
-          isLoading={isLoading} 
-        />
-      }
-      pagination={
-        !isEmpty && !isLoading && (
-          <ClientPagination 
-            table={extendedTable as any}
-            totalCount={totalCount}
-          />
-        )
-      }
-      emptyState={
-        isEmpty ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="mx-auto max-w-md">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M34 40h10v-4a6 6 0 00-10.712-3.714M34 40H14m20 0v-4a9.971 9.971 0 00-.712-3.714M14 40H4v-4a6 6 0 0110.712-3.714M14 40v-4a9.971 9.971 0 01.712-3.714M34 40v-4a9.971 9.971 0 01-.712-3.714M14 40v-4a9.971 9.971 0 00-.712-3.714"
-                />
-              </svg>
-              <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                No clients found
-              </h3>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                {isSearching || columnFilters.length > 0 
-                  ? "Try adjusting your search or filters to find what you're looking for."
-                  : "Get started by adding your first client to the system."
-                }
-              </p>
-              {(!isSearching && columnFilters.length === 0) && (
-                <button 
-                  onClick={() => setAddClientDialogOpen(true)}
-                  className="mt-4 inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                >
-                  Add your first client
-                </button>
-              )}
-            </div>
-          </div>
-        ) : undefined
-      }
+      actions={clientActionsComponent}
+      tableContent={tableContentComponent}
+      pagination={paginationComponent}
+      emptyState={emptyStateComponent}
     />
   )
 }

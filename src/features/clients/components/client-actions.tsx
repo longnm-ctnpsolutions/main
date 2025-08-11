@@ -49,12 +49,13 @@ interface ClientActionsProps {
   onAddClient: (values: z.infer<typeof addClientFormSchema>) => void
   onDeleteSelected: () => void
   onRefreshData?: () => void
-  // OData search props - ✅ SIMPLIFIED
+  // OData search props
   searchTerm: string
   setSearchTerm: (term: string) => void
 }
 
-export function ClientActions({ 
+// ✅ MEMOIZED COMPONENT để prevent unnecessary re-renders
+export const ClientActions = React.memo(function ClientActions({ 
   table,
   isLoading,
   isAddClientDialogOpen,
@@ -64,7 +65,6 @@ export function ClientActions({
   onAddClient,
   onDeleteSelected,
   onRefreshData,
-  // OData search props
   searchTerm,
   setSearchTerm,
 }: ClientActionsProps) {
@@ -74,15 +74,14 @@ export function ClientActions({
     setIsMounted(true)
   }, [])
 
-  // ✅ LOẠI BỎ double debounce - CHỈ sync trực tiếp với context
-  // Context đã có debounce logic rồi, không cần debounce ở đây nữa
+  // ✅ STABLE SEARCH HANDLER
   const handleSearchChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     console.log('🔍 ClientActions search input changed:', value);
     setSearchTerm(value);
   }, [setSearchTerm])
 
-  // Memoize ColumnChooserContent to prevent unnecessary re-renders
+  // ✅ STABLE COLUMN CHOOSER - memoized with proper dependencies
   const ColumnChooserContent = React.useMemo(() => (
     <>
       <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
@@ -112,7 +111,25 @@ export function ClientActions({
     </>
   ), [table])
 
-  // Memoize actions to prevent unnecessary re-renders
+  // ✅ STABLE EXPORT HANDLERS - không thay đổi reference
+  const exportHandlers = React.useMemo(() => ({
+    exportAllExcel: () => console.log('Export all to Excel'),
+    exportSelectedExcel: () => console.log('Export selected to Excel'),
+    exportAllPdf: () => console.log('Export all to PDF'),
+    exportSelectedPdf: () => console.log('Export selected to PDF'),
+  }), [])
+
+  // ✅ STABLE DIALOG COMPONENT - chỉ re-create khi props thay đổi
+  const addClientDialogComponent = React.useMemo(() => (
+    <AddClientDialog
+      isOpen={isAddClientDialogOpen}
+      onOpenChange={setAddClientDialogOpen}
+      form={addClientForm}
+      onSubmit={onAddClient}
+    />
+  ), [isAddClientDialogOpen, setAddClientDialogOpen, addClientForm, onAddClient])
+
+  // ✅ HIGHLY STABLE ACTIONS ARRAY - chỉ thay đổi khi thực sự cần
   const actions: ActionItem[] = React.useMemo(() => [
     {
       id: 'add-client',
@@ -127,14 +144,7 @@ export function ClientActions({
           return windowWidth < threshold
         }
       },
-      component: (
-        <AddClientDialog
-          isOpen={isAddClientDialogOpen}
-          onOpenChange={setAddClientDialogOpen}
-          form={addClientForm}
-          onSubmit={onAddClient}
-        />
-      )
+      component: addClientDialogComponent
     },
     {
       id: 'delete',
@@ -146,7 +156,7 @@ export function ClientActions({
       onClick: onDeleteSelected,
       priority: 4,
       hideAt: { 
-        minWidth: 1024, // lg breakpoint
+        minWidth: 1024,
         condition: ({ windowWidth }) => windowWidth < 1024
       }
     },
@@ -160,7 +170,7 @@ export function ClientActions({
       onClick: onRefreshData,
       priority: 1,
       hideAt: { 
-        minWidth: 640, // sm breakpoint
+        minWidth: 640,
         condition: ({ windowWidth }) => windowWidth < 640
       }
     },
@@ -173,7 +183,7 @@ export function ClientActions({
       size: 'icon',
       priority: 2,
       hideAt: { 
-        minWidth: 768, // md breakpoint
+        minWidth: 768,
         condition: ({ windowWidth }) => windowWidth < 768
       },
       children: [
@@ -200,41 +210,39 @@ export function ClientActions({
           id: 'export-all-excel',
           label: 'Export all data to Excel',
           icon: FileSpreadsheet,
-          onClick: () => console.log('Export all to Excel')
+          onClick: exportHandlers.exportAllExcel
         },
         {
           id: 'export-selected-excel',
           label: 'Export selected rows to Excel',
           icon: FileSpreadsheet,
-          onClick: () => console.log('Export selected to Excel')
+          onClick: exportHandlers.exportSelectedExcel
         },
         {
           id: 'export-all-pdf',
           label: 'Export all data to PDF',
           icon: FileText,
-          onClick: () => console.log('Export all to PDF')
+          onClick: exportHandlers.exportAllPdf
         },
         {
           id: 'export-selected-pdf',
           label: 'Export selected rows to PDF',
           icon: FileText,
-          onClick: () => console.log('Export selected to PDF')
+          onClick: exportHandlers.exportSelectedPdf
         }
       ]
     }
   ], [
-    table, 
-    onRefreshData, 
-    ColumnChooserContent, 
-    onDeleteSelected, 
-    isAddClientDialogOpen, 
-    setAddClientDialogOpen, 
-    addClientForm, 
-    onAddClient, 
+    addClientDialogComponent,
+    table,
+    onDeleteSelected,
+    onRefreshData,
+    ColumnChooserContent,
+    exportHandlers,
     isSidebarExpanded
   ])
 
-  // Show loading state during hydration to prevent flash
+  // ✅ LOADING STATE - chỉ hiển thị khi thực sự cần (initial mount hoặc action loading)
   if (!isMounted || isLoading) {
     return (
       <Card>
@@ -246,24 +254,23 @@ export function ClientActions({
             </div>
             
             <div className="flex items-center gap-2">
-              {/* Search Input - Loading State */}
               <div className="relative flex-1 md:grow-0">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Client Search"
+                  placeholder="Search clients..."
                   value=""
                   className="pl-9 w-full md:w-[150px] lg:w-[250px]"
                   disabled
                 />
               </div>
               
-              {/* Filters - Hidden on mobile */}
               <div className="items-center gap-2 hidden sm:flex">
-                <ClientFilters table={table} />
+                {/* Placeholder for filters */}
+                <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
               </div>
 
-              {/* Loading placeholder */}
               <div className="flex gap-2">
+                <div className="w-10 h-10 bg-gray-200 rounded animate-pulse"></div>
                 <div className="w-10 h-10 bg-gray-200 rounded animate-pulse"></div>
                 <div className="w-10 h-10 bg-gray-200 rounded animate-pulse"></div>
               </div>
@@ -284,7 +291,7 @@ export function ClientActions({
           </div>
           
           <div className="flex items-center gap-2">
-            {/* ✅ SIMPLIFIED Search Input - no local state, no debounce */}
+            {/* ✅ STABLE SEARCH INPUT */}
             <div className="relative flex-1 md:grow-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -295,17 +302,17 @@ export function ClientActions({
               />
             </div>
             
-            {/* Filters - Hidden on mobile */}
+            {/* ✅ STABLE FILTERS */}
             <div className="items-center gap-2 hidden sm:flex">
               <ClientFilters table={table} />
             </div>
 
-            {/* Single Action Bar - Responsive */}
+            {/* ✅ STABLE ACTION BAR - với memoized actions */}
             <ActionBar 
               actions={actions}
               isSidebarExpanded={isSidebarExpanded}
               enableDropdown={true}
-              dropdownThreshold={1} // Show dropdown when at least 1 action is hidden
+              dropdownThreshold={1}
               spacing="md"
             />
           </div>
@@ -313,4 +320,7 @@ export function ClientActions({
       </CardHeader>
     </Card>
   )
-}
+})
+
+// ✅ DISPLAY NAME for debugging
+ClientActions.displayName = 'ClientActions'
