@@ -72,6 +72,9 @@ export const ClientActions = React.memo(function ClientActions({
 }: ClientActionsProps) {
   const [isMounted, setIsMounted] = React.useState(false)
   
+  // 🔥 THÊM: State cho Export Dialog (controlled mode)
+  const [exportDialogOpen, setExportDialogOpen] = React.useState(false)
+  
   React.useEffect(() => {
     setIsMounted(true)
   }, [])
@@ -82,6 +85,12 @@ export const ClientActions = React.memo(function ClientActions({
     console.log('🔍 ClientActions search input changed:', value);
     setSearchTerm(value);
   }, [setSearchTerm])
+
+  // 🔥 THÊM: Export click handler cho dropdown
+  const handleExportClick = React.useCallback(() => {
+    console.log('🔥 Export clicked from dropdown')
+    setExportDialogOpen(true)
+  }, [])
 
   // Column chooser content
   const ColumnChooserContent = React.useMemo(() => (
@@ -123,21 +132,20 @@ export const ClientActions = React.memo(function ClientActions({
     />
   ), [isAddClientDialogOpen, setAddClientDialogOpen, addClientForm, onAddClient])
 
-  // 🔥 CHỈ GIỮ LẠI EXPORT DIALOG MỚI
-  const exportDialogComponent = React.useMemo(() => (
+  // 🔥 EXPORT DIALOG CHO DESKTOP: Với trigger (uncontrolled)
+  const exportDialogForDesktop = React.useMemo(() => (
     <ExportDialog 
       table={table} 
       data={exportData}
       trigger={
-        <span className="flex items-center gap-2 text-sm">
+        <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10">
           <Download className="h-4 w-4" />
-          Export
-        </span>
+        </button>
       }
     />
   ), [table, exportData])
 
-  // 🔥 ACTIONS CHỈ CÒN: Add, Delete, Refresh, Column Chooser, Export Dialog
+  // 🔥 ACTIONS: Tách Export thành 2 modes
   const actions: ActionItem[] = React.useMemo(() => [
     {
       id: 'add-client',
@@ -202,28 +210,28 @@ export const ClientActions = React.memo(function ClientActions({
         }
       ]
     },
-    // 🔥 CHỈ CÒN EXPORT DIALOG - VÀO DROPDOWN KHI MÀN HÌNH NHỎ
+    // 🔥 EXPORT FOR DROPDOWN: Button với click handler
     {
-      id: 'export',
-      label: 'Export',
+      id: 'export-dropdown',
+      label: 'Export Data',
       icon: Download,
-      type: 'custom',
-      variant: 'ghost',
+      type: 'button',
+      onClick: handleExportClick,
       priority: 3,
       hideAt: { 
         minWidth: 900,
-        condition: ({ windowWidth }) => windowWidth < 900
-      },
-      component: exportDialogComponent
+        condition: ({ windowWidth }) => windowWidth < 900 // CHỈ VÀO DROPDOWN khi nhỏ hơn 900px
+      }
     }
   ], [
     addClientDialogComponent,
-    exportDialogComponent,
+    exportDialogForDesktop,
     table,
     onDeleteSelected,
     onRefreshData,
     ColumnChooserContent,
-    isSidebarExpanded
+    isSidebarExpanded,
+    handleExportClick
   ])
 
   // Loading state
@@ -290,7 +298,7 @@ export const ClientActions = React.memo(function ClientActions({
               <ClientFilters table={table} />
             </div>
 
-            {/* 🔥 CLEAN ACTION BAR - CHỈ CÒN 5 ACTIONS */}
+            {/* 🔥 ACTION BAR với 2 modes cho Export */}
             <ActionBar 
               actions={actions}
               isSidebarExpanded={isSidebarExpanded}
@@ -301,6 +309,14 @@ export const ClientActions = React.memo(function ClientActions({
           </div>
         </div>
       </CardHeader>
+
+      {/* 🔥 EXPORT DIALOG CHO DROPDOWN: Controlled mode */}
+      <ExportDialog 
+        table={table} 
+        data={exportData}
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+      />
     </Card>
   )
 })

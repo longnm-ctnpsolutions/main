@@ -45,17 +45,26 @@ interface ExportDialogProps<T extends Record<string, any>> {
   table: Table<T>
   data?: T[]
   trigger?: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export function ExportDialog<T extends Record<string, any>>({ 
   table, 
   data,
-  trigger 
+  trigger,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange
 }: ExportDialogProps<T>) {
   const { exportData, isExporting, error } = useUniversalExport(table, data)
   const { toast } = useToast()
   
-  const [open, setOpen] = React.useState(false)
+  // Smart state: Controlled or uncontrolled
+  const [internalOpen, setInternalOpen] = React.useState(false)
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : internalOpen
+  const setOpen = isControlled ? controlledOnOpenChange! : setInternalOpen
+  
   const [format, setFormat] = React.useState<ExportFormat>('excel')
   const [scope, setScope] = React.useState<ExportScope>('all')
   const [filename, setFilename] = React.useState('')
@@ -134,15 +143,15 @@ export function ExportDialog<T extends Record<string, any>>({
       await exportData(options)
       
       toast({
-        title: "Export thành công",
-        description: `Dữ liệu đã được xuất dưới dạng ${format.toUpperCase()} thành công.`,
+        title: "Export successful",
+        description: `Data has been successfully exported as ${format.toUpperCase()}.`,
       })
       
       setOpen(false)
     } catch (err) {
       toast({
-        title: "Export thất bại",
-        description: error || "Đã xảy ra lỗi trong quá trình xuất dữ liệu.",
+        title: "Export failed",
+        description: error || "An error occurred during data export.",
         variant: "destructive",
       })
     }
@@ -153,249 +162,259 @@ export function ExportDialog<T extends Record<string, any>>({
   const totalRowsCount = table.getCoreRowModel().rows.length
   const filteredRowsCount = table.getFilteredRowModel().rows.length
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Xuất dữ liệu
-          </Button>
-        )}
-      </DialogTrigger>
-      
-      {/* 🔥 FIX: Fullscreen trên mobile dưới 765px */}
-      <DialogContent className="w-[100vw] h-[100vh] max-w-none max-h-none rounded-none p-4 md:w-[95vw] md:max-w-lg md:max-h-[90vh] md:rounded-lg md:h-auto overflow-y-auto">
-        <DialogHeader>
-          <DialogDescription className="text-sm">
-            Cấu hình cài đặt xuất dữ liệu và tải xuống dữ liệu của bạn.
-          </DialogDescription>
-        </DialogHeader>
+  // Conditional rendering: With or without trigger
+  const dialogContent = (
+    <DialogContent className="w-[100vw] h-[100vh] max-w-none max-h-none rounded-none p-4 md:w-[95vw] md:max-w-lg md:max-h-[90vh] md:rounded-lg md:h-auto overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle>Export Data</DialogTitle>
+        <DialogDescription className="text-sm">
+          Configure export settings and download your data.
+        </DialogDescription>
+      </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          {/* Format Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="format" className="text-sm font-medium">Định dạng xuất</Label>
-            <Select value={format} onValueChange={(value: ExportFormat) => setFormat(value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="excel">
-                  <div className="flex items-center gap-2">
-                    <FileSpreadsheet className="h-4 w-4 text-green-600" />
-                    Excel (.xlsx)
-                  </div>
-                </SelectItem>
-                <SelectItem value="csv">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-blue-600" />
-                    CSV (.csv)
-                  </div>
-                </SelectItem>
-                <SelectItem value="pdf">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-red-600" />
-                    PDF (.pdf)
-                  </div>
-                </SelectItem>
-                <SelectItem value="json">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-orange-600" />
-                    JSON (.json)
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Scope Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="scope" className="text-sm font-medium">Phạm vi dữ liệu</Label>
-            <Select value={scope} onValueChange={(value: ExportScope) => setScope(value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">
-                  Tất cả dữ liệu ({totalRowsCount} hàng)
-                </SelectItem>
-                <SelectItem value="filtered">
-                  Dữ liệu đã lọc ({filteredRowsCount} hàng)
-                </SelectItem>
-                <SelectItem value="selected" disabled={selectedRowsCount === 0}>
-                  Các hàng đã chọn ({selectedRowsCount} hàng)
-                </SelectItem>
-                <SelectItem value="visible">
-                  Dữ liệu hiển thị (trang hiện tại)
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Filename */}
-          <div className="space-y-2">
-            <Label htmlFor="filename" className="text-sm font-medium">Tên file (tùy chọn)</Label>
-            <Input
-              id="filename"
-              value={filename}
-              onChange={(e) => setFilename(e.target.value)}
-              placeholder="Để trống để tự động tạo tên"
-              className="w-full"
-            />
-          </div>
-
-          {/* Column Selection - Improved for mobile */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Các cột để xuất</Label>
-            <div className="border rounded-lg p-3 max-h-28 overflow-y-auto">
-              <div className="grid grid-cols-1 gap-2">
-                {availableColumns.map((column) => (
-                  <div key={column.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`col-${column.id}`}
-                      checked={selectedColumns.includes(column.id)}
-                      onCheckedChange={() => handleColumnToggle(column.id)}
-                    />
-                    <Label 
-                      htmlFor={`col-${column.id}`} 
-                      className="text-sm font-normal cursor-pointer flex-1"
-                    >
-                      {column.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* General Options */}
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="includeHeaders"
-                checked={includeHeaders}
-                onCheckedChange={(checked: CheckedState) => {
-                  if (checked !== 'indeterminate') {
-                    setIncludeHeaders(checked)
-                  }
-                }}
-              />
-              <Label htmlFor="includeHeaders" className="text-sm">
-                Bao gồm tiêu đề
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="boldHeaders"
-                checked={boldHeaders}
-                onCheckedChange={(checked: CheckedState) => {
-                  if (checked !== 'indeterminate') {
-                    setBoldHeaders(checked)
-                  }
-                }}
-              />
-              <Label htmlFor="boldHeaders" className="text-sm">
-                In đậm tiêu đề
-              </Label>
-            </div>
-          </div>
-
-          {/* Format-specific options */}
-          {format === 'excel' && (
-            <>
-              <Separator />
-              <div className="space-y-3">
-                <Label className="text-sm font-semibold">Tùy chọn Excel</Label>
-                <div className="space-y-3">
-                  <div>
-                    <Label htmlFor="sheetName" className="text-sm">Tên sheet</Label>
-                    <Input
-                      id="sheetName"
-                      value={sheetName}
-                      onChange={(e) => setSheetName(e.target.value)}
-                      className="mt-1 w-full"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="timestamp"
-                      checked={addTimestamp}
-                      onCheckedChange={(checked: CheckedState) => {
-                        if (checked !== 'indeterminate') {
-                          setAddTimestamp(checked)
-                        }
-                      }}
-                    />
-                    <Label htmlFor="timestamp" className="text-sm">
-                      Thêm dấu thời gian vào tên file
-                    </Label>
-                  </div>
+      <div className="space-y-4 py-2">
+        {/* Format Selection */}
+        <div className="space-y-2">
+          <Label htmlFor="format" className="text-sm font-medium">Export Format</Label>
+          <Select value={format} onValueChange={(value: ExportFormat) => setFormat(value)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="excel">
+                <div className="flex items-center gap-2">
+                  <FileSpreadsheet className="h-4 w-4 text-green-600" />
+                  Excel (.xlsx)
                 </div>
-              </div>
-            </>
-          )}
-
-          {format === 'pdf' && (
-            <>
-              <Separator />
-              <div className="space-y-3">
-                <Label className="text-sm font-semibold">Tùy chọn PDF</Label>
-                <div className="space-y-3">
-                  <div>
-                    <Label htmlFor="pdfTitle" className="text-sm">Tiêu đề tài liệu</Label>
-                    <Input
-                      id="pdfTitle"
-                      value={pdfTitle}
-                      onChange={(e) => setPdfTitle(e.target.value)}
-                      placeholder="Tiêu đề tài liệu (tùy chọn)"
-                      className="mt-1 w-full"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="orientation" className="text-sm">Hướng trang</Label>
-                    <Select 
-                      value={pdfOrientation} 
-                      onValueChange={(value: 'portrait' | 'landscape') => setPdfOrientation(value)}
-                    >
-                      <SelectTrigger className="mt-1 w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="portrait">Dọc</SelectItem>
-                        <SelectItem value="landscape">Ngang</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+              </SelectItem>
+              <SelectItem value="csv">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-blue-600" />
+                  CSV (.csv)
                 </div>
-              </div>
-            </>
-          )}
+              </SelectItem>
+              <SelectItem value="pdf">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-red-600" />
+                  PDF (.pdf)
+                </div>
+              </SelectItem>
+              <SelectItem value="json">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-orange-600" />
+                  JSON (.json)
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">
-            Hủy
-          </Button>
-          <Button 
-            onClick={handleExport} 
-            disabled={isExporting || selectedColumns.length === 0}
-            className="w-full sm:w-auto"
-          >
-            {isExporting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Đang xuất...
-              </>
-            ) : (
-              <>
-                <Download className="mr-2 h-4 w-4" />
-                Xuất dữ liệu
-              </>
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        {/* Scope Selection */}
+        <div className="space-y-2">
+          <Label htmlFor="scope" className="text-sm font-medium">Data Scope</Label>
+          <Select value={scope} onValueChange={(value: ExportScope) => setScope(value)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                All data ({totalRowsCount} rows)
+              </SelectItem>
+              <SelectItem value="filtered">
+                Filtered data ({filteredRowsCount} rows)
+              </SelectItem>
+              <SelectItem value="selected" disabled={selectedRowsCount === 0}>
+                Selected rows ({selectedRowsCount} rows)
+              </SelectItem>
+              <SelectItem value="visible">
+                Visible data (current page)
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Filename */}
+        <div className="space-y-2">
+          <Label htmlFor="filename" className="text-sm font-medium">Filename (optional)</Label>
+          <Input
+            id="filename"
+            value={filename}
+            onChange={(e) => setFilename(e.target.value)}
+            placeholder="Leave blank for auto-generated name"
+            className="w-full"
+          />
+        </div>
+
+        {/* Column Selection - Improved for mobile */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Columns to Export</Label>
+          <div className="border rounded-lg p-3 max-h-28 overflow-y-auto">
+            <div className="grid grid-cols-1 gap-2">
+              {availableColumns.map((column) => (
+                <div key={column.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`col-${column.id}`}
+                    checked={selectedColumns.includes(column.id)}
+                    onCheckedChange={() => handleColumnToggle(column.id)}
+                  />
+                  <Label 
+                    htmlFor={`col-${column.id}`} 
+                    className="text-sm font-normal cursor-pointer flex-1"
+                  >
+                    {column.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* General Options */}
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="includeHeaders"
+              checked={includeHeaders}
+              onCheckedChange={(checked: CheckedState) => {
+                if (checked !== 'indeterminate') {
+                  setIncludeHeaders(checked)
+                }
+              }}
+            />
+            <Label htmlFor="includeHeaders" className="text-sm">
+              Include headers
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="boldHeaders"
+              checked={boldHeaders}
+              onCheckedChange={(checked: CheckedState) => {
+                if (checked !== 'indeterminate') {
+                  setBoldHeaders(checked)
+                }
+              }}
+            />
+            <Label htmlFor="boldHeaders" className="text-sm">
+              Bold headers
+            </Label>
+          </div>
+        </div>
+
+        {/* Format-specific options */}
+        {format === 'excel' && (
+          <>
+            <Separator />
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">Excel Options</Label>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="sheetName" className="text-sm">Sheet Name</Label>
+                  <Input
+                    id="sheetName"
+                    value={sheetName}
+                    onChange={(e) => setSheetName(e.target.value)}
+                    className="mt-1 w-full"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="timestamp"
+                    checked={addTimestamp}
+                    onCheckedChange={(checked: CheckedState) => {
+                      if (checked !== 'indeterminate') {
+                        setAddTimestamp(checked)
+                      }
+                    }}
+                  />
+                  <Label htmlFor="timestamp" className="text-sm">
+                    Add timestamp to filename
+                  </Label>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {format === 'pdf' && (
+          <>
+            <Separator />
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">PDF Options</Label>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="pdfTitle" className="text-sm">Document Title</Label>
+                  <Input
+                    id="pdfTitle"
+                    value={pdfTitle}
+                    onChange={(e) => setPdfTitle(e.target.value)}
+                    placeholder="Document title (optional)"
+                    className="mt-1 w-full"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="orientation" className="text-sm">Page Orientation</Label>
+                  <Select 
+                    value={pdfOrientation} 
+                    onValueChange={(value: 'portrait' | 'landscape') => setPdfOrientation(value)}
+                  >
+                    <SelectTrigger className="mt-1 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="portrait">Portrait</SelectItem>
+                      <SelectItem value="landscape">Landscape</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+        <Button variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">
+          Cancel
+        </Button>
+        <Button 
+          onClick={handleExport} 
+          disabled={isExporting || selectedColumns.length === 0}
+          className="w-full sm:w-auto"
+        >
+          {isExporting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Exporting...
+            </>
+          ) : (
+            <>
+              <Download className="mr-2 h-4 w-4" />
+              Export Data
+            </>
+          )}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   )
+
+  // Render: With trigger (uncontrolled) or without trigger (controlled)
+  if (trigger) {
+    // Uncontrolled mode with trigger
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+        {dialogContent}
+      </Dialog>
+    )
+  } else {
+    // Controlled mode without trigger
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        {dialogContent}
+      </Dialog>
+    )
+  }
 }
