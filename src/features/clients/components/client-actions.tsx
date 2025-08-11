@@ -72,57 +72,23 @@ export const ClientActions = React.memo(function ClientActions({
 }: ClientActionsProps) {
   const [isMounted, setIsMounted] = React.useState(false)
   
-  // 🔥 THÊM: State cho Export Dialog (controlled mode)
   const [exportDialogOpen, setExportDialogOpen] = React.useState(false)
   
   React.useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Stable search handler
   const handleSearchChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     console.log('🔍 ClientActions search input changed:', value);
     setSearchTerm(value);
   }, [setSearchTerm])
 
-  // 🔥 THÊM: Export click handler cho dropdown
   const handleExportClick = React.useCallback(() => {
     console.log('🔥 Export clicked from dropdown')
     setExportDialogOpen(true)
   }, [])
 
-  // Column chooser content
-  const ColumnChooserContent = React.useMemo(() => (
-    <>
-      <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      {table
-        .getAllColumns()
-        .filter((column) => column.getCanHide())
-        .map((column) => (
-          <DropdownMenuItem 
-            key={column.id} 
-            onSelect={(e) => e.preventDefault()} 
-            className="gap-2"
-          >
-            <Checkbox
-              id={`col-toggle-${column.id}`}
-              checked={column.getIsVisible()}
-              onCheckedChange={(value) => column.toggleVisibility(!!value)}
-            />
-            <Label 
-              htmlFor={`col-toggle-${column.id}`} 
-              className="capitalize cursor-pointer w-full"
-            >
-              {column.id}
-            </Label>
-          </DropdownMenuItem>
-        ))}
-    </>
-  ), [table])
-
-  // Add client dialog component
   const addClientDialogComponent = React.useMemo(() => (
     <AddClientDialog
       isOpen={isAddClientDialogOpen}
@@ -132,7 +98,6 @@ export const ClientActions = React.memo(function ClientActions({
     />
   ), [isAddClientDialogOpen, setAddClientDialogOpen, addClientForm, onAddClient])
 
-  // 🔥 EXPORT DIALOG CHO DESKTOP: Với trigger (uncontrolled)
   const exportDialogForDesktop = React.useMemo(() => (
     <ExportDialog 
       table={table} 
@@ -145,7 +110,6 @@ export const ClientActions = React.memo(function ClientActions({
     />
   ), [table, exportData])
 
-  // 🔥 ACTIONS: Tách Export thành 2 modes
   const actions: ActionItem[] = React.useMemo(() => [
     {
       id: 'add-client',
@@ -204,13 +168,36 @@ export const ClientActions = React.memo(function ClientActions({
       },
       children: [
         {
-          id: 'column-chooser-content',
-          label: 'Column Chooser',
-          component: ColumnChooserContent
-        }
+          id: 'column-chooser-label',
+          type: 'custom',
+          component: <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
+        },
+        {
+          id: 'column-chooser-separator',
+          type: 'custom',
+          component: <DropdownMenuSeparator />
+        },
+        ...table.getAllColumns()
+          .filter((column) => column.getCanHide())
+          .map((column) => ({
+            id: `toggle-${column.id}`,
+            label: column.id,
+            type: 'custom',
+            component: (
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="gap-2">
+                <Checkbox
+                  id={`col-toggle-${column.id}`}
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                />
+                <Label htmlFor={`col-toggle-${column.id}`} className="capitalize cursor-pointer w-full">
+                  {column.id}
+                </Label>
+              </DropdownMenuItem>
+            )
+          }))
       ]
     },
-    // 🔥 EXPORT FOR DROPDOWN: Button với click handler
     {
       id: 'export-dropdown',
       label: 'Export Data',
@@ -220,21 +207,18 @@ export const ClientActions = React.memo(function ClientActions({
       priority: 3,
       hideAt: { 
         minWidth: 900,
-        condition: ({ windowWidth }) => windowWidth < 900 // CHỈ VÀO DROPDOWN khi nhỏ hơn 900px
+        condition: ({ windowWidth }) => windowWidth < 900
       }
     }
   ], [
     addClientDialogComponent,
-    exportDialogForDesktop,
     table,
     onDeleteSelected,
     onRefreshData,
-    ColumnChooserContent,
     isSidebarExpanded,
     handleExportClick
   ])
 
-  // Loading state
   if (!isMounted || isLoading) {
     return (
       <Card>
@@ -282,7 +266,6 @@ export const ClientActions = React.memo(function ClientActions({
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Search Input */}
             <div className="relative flex-1 md:grow-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -293,12 +276,10 @@ export const ClientActions = React.memo(function ClientActions({
               />
             </div>
             
-            {/* Filters */}
             <div className="items-center gap-2 hidden sm:flex">
               <ClientFilters table={table} />
             </div>
 
-            {/* 🔥 ACTION BAR với 2 modes cho Export */}
             <ActionBar 
               actions={actions}
               isSidebarExpanded={isSidebarExpanded}
@@ -310,7 +291,6 @@ export const ClientActions = React.memo(function ClientActions({
         </div>
       </CardHeader>
 
-      {/* 🔥 EXPORT DIALOG CHO DROPDOWN: Controlled mode */}
       <ExportDialog 
         table={table} 
         data={exportData}

@@ -82,12 +82,7 @@ const ActionDropdown: React.FC<{ action: ActionItem }> = ({ action }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {action.children?.map((child, index) => (
-          <DropdownMenuItem key={`${child.id}-${index}`} onClick={child.onClick}>
-            {child.icon && <child.icon className="mr-2 h-4 w-4" />}
-            <span>{child.label}</span>
-          </DropdownMenuItem>
-        ))}
+        {action.children?.map((child, index) => renderDropdownItem(child, `${child.id}-${index}`))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -137,7 +132,7 @@ const renderAction = (action: ActionItem, key: string) => {
     case 'dialog':
       return <ActionDialog key={key} action={action} />
     case 'custom':
-      return <ActionButton key={key} action={action} />
+      return <div key={key}>{action.component}</div>
     default:
       return <ActionButton key={key} action={action} />
   }
@@ -146,6 +141,10 @@ const renderAction = (action: ActionItem, key: string) => {
 // Render dropdown menu item
 const renderDropdownItem = (action: ActionItem, key: string) => {
   const Icon = action.icon
+
+  if (action.type === 'custom' && action.component) {
+    return <React.Fragment key={key}>{action.component}</React.Fragment>
+  }
 
   if (action.type === 'dropdown' && action.children) {
     return (
@@ -156,10 +155,7 @@ const renderDropdownItem = (action: ActionItem, key: string) => {
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent>
           {action.children.map((child, index) => (
-            <DropdownMenuItem key={`${child.id}-${index}`} onClick={child.onClick}>
-              {child.icon && <child.icon className="mr-2 h-4 w-4" />}
-              <span>{child.label}</span>
-            </DropdownMenuItem>
+            renderDropdownItem(child, `${child.id}-${index}`)
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
@@ -233,12 +229,10 @@ export const ActionBar: React.FC<ActionBarProps> = ({
 
   return (
     <div className={`flex items-center ${spacingClasses[spacing]} ${className}`}>
-      {/* Visible Actions */}
       {visibleActions.map((action) => 
         renderAction(action, `visible-${action.id}`)
       )}
 
-      {/* Responsive Dropdown */}
       {shouldShowDropdown && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -246,7 +240,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
               <DropdownIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align={dropdownAlign} className="w-48">
+          <DropdownMenuContent align={dropdownAlign} className="w-56">
             {hiddenActions.map((action) => 
               renderDropdownItem(action, `hidden-${action.id}`)
             )}
