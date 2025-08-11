@@ -38,6 +38,7 @@ import {
   AlertDialogTrigger,
 } from "@/shared/components/ui/alert-dialog"
 import { Skeleton } from "@/shared/components/ui/skeleton"
+import { ScrollArea } from "@/shared/components/ui/scroll-area"
 import { cn } from "@/shared/lib/utils"
 import { 
   useEnhancedResponsiveColumns, 
@@ -46,7 +47,7 @@ import {
 } from "@/features/clients/hooks/use-responsive-columns"
 import { useRouter } from 'next/navigation'
 
-// Skeleton component với skeleton từ UI library
+// Skeleton component
 const TableSkeleton = ({ columns }: { columns: ColumnDef<Client>[] }) => {
   return (
     <>
@@ -71,7 +72,6 @@ interface ClientTableProps {
   isLoading: boolean;
 }
 
-// Enhanced column configuration với fixed widths để tránh shift
 const CLIENT_TABLE_CONFIG: ColumnConfig[] = [
   createEnhancedColumnConfig('select', 1, 1, 50, 50, { alwaysVisible: true }),
   createEnhancedColumnConfig('logo', 2, 2, 60, 60, { alwaysVisible: true }),
@@ -100,13 +100,7 @@ export function EnhancedClientTable({ table, columns, isLoading }: ClientTablePr
   })
 
   const debugInfo = getDebugInfo()
-  
-  // Tính toán tổng width của các cột visible
-  const totalColumnsWidth = React.useMemo(() => {
-    return debugInfo.totalUsedWidth
-  }, [debugInfo.totalUsedWidth])
 
-  // Measure content widths when data changes
   React.useEffect(() => {
     const timer = setTimeout(() => {
       measureContentWidths()
@@ -149,7 +143,7 @@ export function EnhancedClientTable({ table, columns, isLoading }: ClientTablePr
         </div>
       )}
 
-      {/* Header Table - Fixed */}
+      {/* ✅ STICKY HEADER - FIXED POSITION */}
       <div className="shrink-0 overflow-hidden bg-background border-b">
         <Table>
           <TableHeader>
@@ -183,8 +177,8 @@ export function EnhancedClientTable({ table, columns, isLoading }: ClientTablePr
         </Table>
       </div>
 
-      {/* Body Table - Scrollable */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+      {/* ✅ SCROLLABLE BODY với SCROLLAREA - THIN SCROLLBAR */}
+      <ScrollArea className="flex-1 w-full">
         <Table>
           <TableBody>
             {isLoading ? (
@@ -194,6 +188,7 @@ export function EnhancedClientTable({ table, columns, isLoading }: ClientTablePr
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="hover:bg-muted/50"
                 >
                   {getOrderedCells(row).map((cell: any) => {
                     const visibilityClass = getColumnVisibilityClass(cell.column.id)
@@ -229,12 +224,12 @@ export function EnhancedClientTable({ table, columns, isLoading }: ClientTablePr
             )}
           </TableBody>
         </Table>
-      </div>
+      </ScrollArea>
     </div>
   )
 }
 
-// Updated columns definition with better action handling
+// Columns definition remains the same
 EnhancedClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef<Client>[] => [
   {
     id: "select",
