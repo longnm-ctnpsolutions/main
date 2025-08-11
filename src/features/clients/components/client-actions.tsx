@@ -13,6 +13,8 @@ import {
   FileText, 
   Search,
   RefreshCw,
+  Download,
+  Loader2,
 } from "lucide-react"
 
 import type { Client } from "@/features/clients/types/client.types"
@@ -20,16 +22,23 @@ import { Input } from "@/shared/components/ui/input"
 import { Card, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card"
 import { Checkbox } from "@/shared/components/ui/checkbox"
 import { Label } from "@/shared/components/ui/label"
+import { Button } from "@/shared/components/ui/button"
 import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel, 
   DropdownMenuSeparator,
-  DropdownMenuItem
+  DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu"
+import { useToast } from "@/shared/hooks/use-toast"
 
 import { ClientFilters } from "./client-filters"
 import AddClientDialog from '@/features/clients/components/add-client-dialog'
 import ActionBar from '@/shared/components/custom-ui/actions-bar'
 import { ActionItem } from '@/shared/components/custom-ui/hooks/use-responsive-actions'
+import { ExportDialog } from "@/shared/components/custom-ui/export-dialog"
+import { useUniversalExport } from "@/hooks/use-export"
 
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
@@ -49,12 +58,12 @@ interface ClientActionsProps {
   onAddClient: (values: z.infer<typeof addClientFormSchema>) => void
   onDeleteSelected: () => void
   onRefreshData?: () => void
-  // OData search props
   searchTerm: string
   setSearchTerm: (term: string) => void
+  // Optional: External data for export if different from table data
+  exportData?: Client[]
 }
 
-// ✅ MEMOIZED COMPONENT để prevent unnecessary re-renders
 export const ClientActions = React.memo(function ClientActions({ 
   table,
   isLoading,
@@ -67,21 +76,147 @@ export const ClientActions = React.memo(function ClientActions({
   onRefreshData,
   searchTerm,
   setSearchTerm,
+  exportData,
 }: ClientActionsProps) {
+  const { toast } = useToast()
   const [isMounted, setIsMounted] = React.useState(false)
+  
+  // Universal export hook
+  const { exportData: performExport, isExporting } = useUniversalExport(table, exportData)
   
   React.useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // ✅ STABLE SEARCH HANDLER
+  // Stable search handler
   const handleSearchChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     console.log('🔍 ClientActions search input changed:', value);
     setSearchTerm(value);
   }, [setSearchTerm])
 
-  // ✅ STABLE COLUMN CHOOSER - memoized with proper dependencies
+  // Quick export handlers
+  const quickExportHandlers = React.useMemo(() => ({
+    exportAllExcel: async () => {
+      try {
+        await performExport({
+          format: 'excel',
+          scope: 'all',
+          filename: 'clients_all',
+          excelOptions: {
+            sheetName: 'Clients',
+            addTimestamp: true
+          }
+        })
+        toast({
+          title: "Export successful",
+          description: "All clients exported to Excel successfully.",
+        })
+      } catch (error) {
+        toast({
+          title: "Export failed",
+          description: "Failed to export clients to Excel.",
+          variant: "destructive",
+        })
+      }
+    },
+    
+    exportSelectedExcel: async () => {
+      const selectedCount = table.getSelectedRowModel().rows.length
+      if (selectedCount === 0) {
+        toast({
+          title: "No selection",
+          description: "Please select at least one row to export.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      try {
+        await performExport({
+          format: 'excel',
+          scope: 'selected',
+          filename: 'clients_selected',
+          excelOptions: {
+            sheetName: 'Selected Clients',
+            addTimestamp: true
+          }
+        })
+        toast({
+          title: "Export successful",
+          description: `${selectedCount} selected clients exported to Excel successfully.`,
+        })
+      } catch (error) {
+        toast({
+          title: "Export failed",
+          description: "Failed to export selected clients to Excel.",
+          variant: "destructive",
+        })
+      }
+    },
+    
+    exportAllPdf: async () => {
+      try {
+        await performExport({
+          format: 'pdf',
+          scope: 'all',
+          filename: 'clients_all',
+          pdfOptions: {
+            title: 'Client List',
+            subtitle: 'All Clients Report',
+            orientation: 'landscape'
+          }
+        })
+        toast({
+          title: "Export successful",
+          description: "All clients exported to PDF successfully.",
+        })
+      } catch (error) {
+        toast({
+          title: "Export failed",
+          description: "Failed to export clients to PDF.",
+          variant: "destructive",
+        })
+      }
+    },
+    
+    exportSelectedPdf: async () => {
+      const selectedCount = table.getSelectedRowModel().rows.length
+      if (selectedCount === 0) {
+        toast({
+          title: "No selection",
+          description: "Please select at least one row to export.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      try {
+        await performExport({
+          format: 'pdf',
+          scope: 'selected',
+          filename: 'clients_selected',
+          pdfOptions: {
+            title: 'Selected Clients',
+            subtitle: `${selectedCount} Selected Clients Report`,
+            orientation: 'landscape'
+          }
+        })
+        toast({
+          title: "Export successful",
+          description: `${selectedCount} selected clients exported to PDF successfully.`,
+        })
+      } catch (error) {
+        toast({
+          title: "Export failed",
+          description: "Failed to export selected clients to PDF.",
+          variant: "destructive",
+        })
+      }
+    },
+  }), [performExport, table, toast])
+
+  // Column chooser content
   const ColumnChooserContent = React.useMemo(() => (
     <>
       <DropdownMenuLabel className="font-bold">Column Chooser</DropdownMenuLabel>
@@ -111,15 +246,7 @@ export const ClientActions = React.memo(function ClientActions({
     </>
   ), [table])
 
-  // ✅ STABLE EXPORT HANDLERS - không thay đổi reference
-  const exportHandlers = React.useMemo(() => ({
-    exportAllExcel: () => console.log('Export all to Excel'),
-    exportSelectedExcel: () => console.log('Export selected to Excel'),
-    exportAllPdf: () => console.log('Export all to PDF'),
-    exportSelectedPdf: () => console.log('Export selected to PDF'),
-  }), [])
-
-  // ✅ STABLE DIALOG COMPONENT - chỉ re-create khi props thay đổi
+  // Add client dialog component
   const addClientDialogComponent = React.useMemo(() => (
     <AddClientDialog
       isOpen={isAddClientDialogOpen}
@@ -129,7 +256,24 @@ export const ClientActions = React.memo(function ClientActions({
     />
   ), [isAddClientDialogOpen, setAddClientDialogOpen, addClientForm, onAddClient])
 
-  // ✅ HIGHLY STABLE ACTIONS ARRAY - chỉ thay đổi khi thực sự cần
+  // Export dialog component
+  const exportDialogComponent = React.useMemo(() => (
+    <ExportDialog 
+      table={table} 
+      data={exportData}
+      trigger={
+        <Button variant="ghost" size="icon" disabled={isExporting}>
+          {isExporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileUp className="h-4 w-4" />
+          )}
+        </Button>
+      }
+    />
+  ), [table, exportData, isExporting])
+
+  // Actions array for ActionBar
   const actions: ActionItem[] = React.useMemo(() => [
     {
       id: 'add-client',
@@ -195,8 +339,21 @@ export const ClientActions = React.memo(function ClientActions({
       ]
     },
     {
+      id: 'export-advanced',
+      label: 'Export (Advanced)',
+      icon: Download,
+      type: 'custom',
+      variant: 'ghost',
+      priority: 3,
+      hideAt: { 
+        minWidth: 900,
+        condition: ({ windowWidth }) => windowWidth < 900
+      },
+      component: exportDialogComponent
+    },
+    {
       id: 'export',
-      label: 'Export',
+      label: 'Quick Export',
       icon: FileUp,
       type: 'dropdown',
       variant: 'ghost',
@@ -210,39 +367,45 @@ export const ClientActions = React.memo(function ClientActions({
           id: 'export-all-excel',
           label: 'Export all data to Excel',
           icon: FileSpreadsheet,
-          onClick: exportHandlers.exportAllExcel
+          onClick: quickExportHandlers.exportAllExcel,
+          disabled: isExporting
         },
         {
           id: 'export-selected-excel',
           label: 'Export selected rows to Excel',
           icon: FileSpreadsheet,
-          onClick: exportHandlers.exportSelectedExcel
+          onClick: quickExportHandlers.exportSelectedExcel,
+          disabled: isExporting || table.getFilteredSelectedRowModel().rows.length === 0
         },
         {
           id: 'export-all-pdf',
           label: 'Export all data to PDF',
           icon: FileText,
-          onClick: exportHandlers.exportAllPdf
+          onClick: quickExportHandlers.exportAllPdf,
+          disabled: isExporting
         },
         {
           id: 'export-selected-pdf',
           label: 'Export selected rows to PDF',
           icon: FileText,
-          onClick: exportHandlers.exportSelectedPdf
+          onClick: quickExportHandlers.exportSelectedPdf,
+          disabled: isExporting || table.getFilteredSelectedRowModel().rows.length === 0
         }
       ]
     }
   ], [
     addClientDialogComponent,
+    exportDialogComponent,
     table,
     onDeleteSelected,
     onRefreshData,
     ColumnChooserContent,
-    exportHandlers,
-    isSidebarExpanded
+    quickExportHandlers,
+    isSidebarExpanded,
+    isExporting
   ])
 
-  // ✅ LOADING STATE - chỉ hiển thị khi thực sự cần (initial mount hoặc action loading)
+  // Loading state
   if (!isMounted || isLoading) {
     return (
       <Card>
@@ -265,7 +428,6 @@ export const ClientActions = React.memo(function ClientActions({
               </div>
               
               <div className="items-center gap-2 hidden sm:flex">
-                {/* Placeholder for filters */}
                 <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
               </div>
 
@@ -291,7 +453,7 @@ export const ClientActions = React.memo(function ClientActions({
           </div>
           
           <div className="flex items-center gap-2">
-            {/* ✅ STABLE SEARCH INPUT */}
+            {/* Search Input */}
             <div className="relative flex-1 md:grow-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -302,12 +464,12 @@ export const ClientActions = React.memo(function ClientActions({
               />
             </div>
             
-            {/* ✅ STABLE FILTERS */}
+            {/* Filters */}
             <div className="items-center gap-2 hidden sm:flex">
               <ClientFilters table={table} />
             </div>
 
-            {/* ✅ STABLE ACTION BAR - với memoized actions */}
+            {/* Action Bar */}
             <ActionBar 
               actions={actions}
               isSidebarExpanded={isSidebarExpanded}
@@ -322,5 +484,5 @@ export const ClientActions = React.memo(function ClientActions({
   )
 })
 
-// ✅ DISPLAY NAME for debugging
+// Display name for debugging
 ClientActions.displayName = 'ClientActions'
