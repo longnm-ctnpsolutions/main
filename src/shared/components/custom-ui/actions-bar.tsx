@@ -4,17 +4,14 @@ import * as React from "react"
 import { MoreVertical, ChevronDown } from "lucide-react"
 
 import { Button } from "@/shared/components/ui/button"
-import { Checkbox } from "@/shared/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
-  DropdownMenuSubContent
+  DropdownMenuSubContent,
+  DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu"
 import {
   AlertDialog,
@@ -27,7 +24,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/shared/components/ui/alert-dialog"
-import { Label } from "@/shared/components/ui/label"
 
 import { useResponsiveActions, ActionItem } from '@/shared/components/custom-ui/hooks/use-responsive-actions'
 
