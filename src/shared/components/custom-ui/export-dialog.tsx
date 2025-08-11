@@ -39,7 +39,6 @@ import {
   ExportOptions 
 } from "@/hooks/use-export"
 
-// Định nghĩa type CheckedState thủ công
 type CheckedState = boolean | "indeterminate"
 
 interface ExportDialogProps<T extends Record<string, any>> {
@@ -131,7 +130,7 @@ export function ExportDialog<T extends Record<string, any>>({
         } : undefined
       }
 
-      console.log('Export options:', options) // Debug log
+      console.log('Export options:', options)
       await exportData(options)
       
       toast({
@@ -165,23 +164,20 @@ export function ExportDialog<T extends Record<string, any>>({
         )}
       </DialogTrigger>
       
-      <DialogContent className="w-full sm:max-w-lg max-h-[70vh] overflow-y-auto">
+      {/* 🔥 FIX: Fullscreen trên mobile dưới 765px */}
+      <DialogContent className="w-[100vw] h-[100vh] max-w-none max-h-none rounded-none p-4 md:w-[95vw] md:max-w-lg md:max-h-[90vh] md:rounded-lg md:h-auto overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Tùy chọn xuất dữ liệu
-          </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm">
             Cấu hình cài đặt xuất dữ liệu và tải xuống dữ liệu của bạn.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3">
+        <div className="space-y-4 py-2">
           {/* Format Selection */}
-          <div className="space-y-1">
-            <Label htmlFor="format">Định dạng xuất</Label>
+          <div className="space-y-2">
+            <Label htmlFor="format" className="text-sm font-medium">Định dạng xuất</Label>
             <Select value={format} onValueChange={(value: ExportFormat) => setFormat(value)}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -214,10 +210,10 @@ export function ExportDialog<T extends Record<string, any>>({
           </div>
 
           {/* Scope Selection */}
-          <div className="space-y-1">
-            <Label htmlFor="scope">Phạm vi dữ liệu</Label>
+          <div className="space-y-2">
+            <Label htmlFor="scope" className="text-sm font-medium">Phạm vi dữ liệu</Label>
             <Select value={scope} onValueChange={(value: ExportScope) => setScope(value)}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -238,40 +234,43 @@ export function ExportDialog<T extends Record<string, any>>({
           </div>
 
           {/* Filename */}
-          <div className="space-y-1">
-            <Label htmlFor="filename">Tên file (tùy chọn)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="filename" className="text-sm font-medium">Tên file (tùy chọn)</Label>
             <Input
               id="filename"
               value={filename}
               onChange={(e) => setFilename(e.target.value)}
               placeholder="Để trống để tự động tạo tên"
+              className="w-full"
             />
           </div>
 
-          {/* Column Selection */}
-          <div className="space-y-1">
-            <Label>Các cột để xuất</Label>
-            <div className="border rounded-lg p-2 max-h-24 overflow-y-auto">
-              {availableColumns.map((column) => (
-                <div key={column.id} className="flex items-center space-x-2 py-0.5">
-                  <Checkbox
-                    id={`col-${column.id}`}
-                    checked={selectedColumns.includes(column.id)}
-                    onCheckedChange={() => handleColumnToggle(column.id)}
-                  />
-                  <Label 
-                    htmlFor={`col-${column.id}`} 
-                    className="text-sm font-normal cursor-pointer"
-                  >
-                    {column.label}
-                  </Label>
-                </div>
-              ))}
+          {/* Column Selection - Improved for mobile */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Các cột để xuất</Label>
+            <div className="border rounded-lg p-3 max-h-28 overflow-y-auto">
+              <div className="grid grid-cols-1 gap-2">
+                {availableColumns.map((column) => (
+                  <div key={column.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`col-${column.id}`}
+                      checked={selectedColumns.includes(column.id)}
+                      onCheckedChange={() => handleColumnToggle(column.id)}
+                    />
+                    <Label 
+                      htmlFor={`col-${column.id}`} 
+                      className="text-sm font-normal cursor-pointer flex-1"
+                    >
+                      {column.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* General Options */}
-          <div className="space-y-1">
+          <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="includeHeaders"
@@ -306,16 +305,16 @@ export function ExportDialog<T extends Record<string, any>>({
           {format === 'excel' && (
             <>
               <Separator />
-              <div className="space-y-1">
+              <div className="space-y-3">
                 <Label className="text-sm font-semibold">Tùy chọn Excel</Label>
-                <div className="space-y-1">
+                <div className="space-y-3">
                   <div>
                     <Label htmlFor="sheetName" className="text-sm">Tên sheet</Label>
                     <Input
                       id="sheetName"
                       value={sheetName}
                       onChange={(e) => setSheetName(e.target.value)}
-                      className="mt-0.5"
+                      className="mt-1 w-full"
                     />
                   </div>
                   <div className="flex items-center space-x-2">
@@ -340,9 +339,9 @@ export function ExportDialog<T extends Record<string, any>>({
           {format === 'pdf' && (
             <>
               <Separator />
-              <div className="space-y-1">
+              <div className="space-y-3">
                 <Label className="text-sm font-semibold">Tùy chọn PDF</Label>
-                <div className="space-y-1">
+                <div className="space-y-3">
                   <div>
                     <Label htmlFor="pdfTitle" className="text-sm">Tiêu đề tài liệu</Label>
                     <Input
@@ -350,7 +349,7 @@ export function ExportDialog<T extends Record<string, any>>({
                       value={pdfTitle}
                       onChange={(e) => setPdfTitle(e.target.value)}
                       placeholder="Tiêu đề tài liệu (tùy chọn)"
-                      className="mt-0.5"
+                      className="mt-1 w-full"
                     />
                   </div>
                   <div>
@@ -359,7 +358,7 @@ export function ExportDialog<T extends Record<string, any>>({
                       value={pdfOrientation} 
                       onValueChange={(value: 'portrait' | 'landscape') => setPdfOrientation(value)}
                     >
-                      <SelectTrigger className="mt-0.5">
+                      <SelectTrigger className="mt-1 w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -374,13 +373,14 @@ export function ExportDialog<T extends Record<string, any>>({
           )}
         </div>
 
-        <DialogFooter className="mt-3">
-          <Button variant="outline" onClick={() => setOpen(false)}>
+        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+          <Button variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">
             Hủy
           </Button>
           <Button 
             onClick={handleExport} 
             disabled={isExporting || selectedColumns.length === 0}
+            className="w-full sm:w-auto"
           >
             {isExporting ? (
               <>
