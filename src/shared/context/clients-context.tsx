@@ -93,7 +93,7 @@ const initialState: ClientsState = {
   searchTerm: '',
 };
 
-// 🔥 TÁCH RIÊNG STATE VÀ DISPATCH CONTEXTS
+// TÁCH RIÊNG STATE VÀ DISPATCH CONTEXTS
 const ClientsStateContext = React.createContext<ClientsState | undefined>(undefined);
 const ClientsDispatchContext = React.createContext<React.Dispatch<ClientsAction> | undefined>(undefined);
 
@@ -118,7 +118,7 @@ export const ClientsProvider: React.FC<ClientsProviderProps> = ({
   );
 };
 
-// 🔥 HOOKS ĐỂ ACCESS RIÊNG BIỆT STATE VÀ DISPATCH
+// HOOKS ĐỂ ACCESS RIÊNG BIỆT STATE VÀ DISPATCH
 export const useClientsState = (): ClientsState => {
   const context = React.useContext(ClientsStateContext);
   if (context === undefined) {
@@ -135,23 +135,29 @@ export const useClientsDispatch = (): React.Dispatch<ClientsAction> => {
   return context;
 };
 
-// 🔥 CUSTOM HOOK VỚI BUSINESS LOGIC - SỬ DỤNG HOOKS RIÊNG BIỆT
+// ✅ CUSTOM HOOK VỚI BUSINESS LOGIC - ĐÃ FIX DOUBLE API CALLS
 export const useClientsActions = (debounceDelay: number = 300) => {
   const state = useClientsState();
   const dispatch = useClientsDispatch();
   
-  const [currentTableState, setCurrentTableState] = React.useState<TableState | null>(null);
+  // ✅ Sử dụng refs để track state và prevent unnecessary calls
+  const currentTableStateRef = React.useRef<TableState | null>(null);
   const fetchTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-  const searchTermRef = React.useRef(state.searchTerm);
+  const isInitializedRef = React.useRef(false);
+  const lastFetchParamsRef = React.useRef<string>('');
   
-  // Update search term ref
-  React.useEffect(() => {
-    searchTermRef.current = state.searchTerm;
-  }, [state.searchTerm]);
-
-  // Internal fetch function - CHỈ 1 NƠI DUY NHẤT
+  // ✅ Stable fetch function với ref để prevent recreation
   const fetchClientsInternal = React.useCallback(async (tableState: TableState, searchQuery: string) => {
+    // ✅ Prevent duplicate calls bằng cách compare parameters
+    const currentParams = JSON.stringify({ tableState, searchQuery });
+    if (lastFetchParamsRef.current === currentParams) {
+      console.log('🚫 Duplicate API call prevented');
+      return;
+    }
+    
     console.log('🔥 fetchClientsInternal called with:', { tableState, searchQuery });
+    lastFetchParamsRef.current = currentParams;
+    
     dispatch({ type: 'FETCH_INIT' });
     try {
       const result = await getClientsWithOData(tableState, searchQuery);
@@ -159,23 +165,46 @@ export const useClientsActions = (debounceDelay: number = 300) => {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unknown error occurred';
       dispatch({ type: 'FETCH_FAILURE', payload: message });
+    } finally {
+      // Reset after a short delay để allow cho next legitimate call
+      setTimeout(() => {
+        lastFetchParamsRef.current = '';
+      }, 100);
     }
   }, [dispatch]);
 
-  // Handle search changes with debounce
-  React.useEffect(() => {
-    if (!currentTableState) return;
+  // ✅ Main fetch function - CHỈ update ref, KHÔNG trigger search effect
+  const fetchClients = React.useCallback(async (tableState: TableState) => {
+    console.log('📋 fetchClients called');
     
-    const isInitialState = state.searchTerm === '';
-    if (isInitialState && !searchTermRef.current) return;
-    
+    // Clear existing timeout
     if (fetchTimeoutRef.current) {
       clearTimeout(fetchTimeoutRef.current);
     }
     
+    // Update ref KHÔNG trigger re-render
+    currentTableStateRef.current = tableState;
+    
+    // ✅ Call immediately cho non-search requests
+    await fetchClientsInternal(tableState, state.searchTerm);
+  }, [fetchClientsInternal, state.searchTerm]);
+
+  // ✅ SINGLE useEffect cho debounced search - CHỈ handle search term changes
+  React.useEffect(() => {
+    // Skip nếu chưa có table state hoặc chưa initialized
+    if (!currentTableStateRef.current || !isInitializedRef.current) return;
+    
+    console.log('🔍 Search term changed, setting up debounce:', state.searchTerm);
+    
+    // Clear existing timeout
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
+    
+    // Set up debounced search
     fetchTimeoutRef.current = setTimeout(() => {
       console.log('🔍 Debounced search triggered:', state.searchTerm);
-      fetchClientsInternal(currentTableState, state.searchTerm);
+      fetchClientsInternal(currentTableStateRef.current!, state.searchTerm);
     }, debounceDelay);
     
     return () => {
@@ -183,7 +212,15 @@ export const useClientsActions = (debounceDelay: number = 300) => {
         clearTimeout(fetchTimeoutRef.current);
       }
     };
-  }, [state.searchTerm, fetchClientsInternal, currentTableState, debounceDelay]);
+  }, [state.searchTerm, fetchClientsInternal, debounceDelay]);
+
+  // ✅ Initialization effect - CHỈ chạy 1 lần
+  React.useEffect(() => {
+    if (!isInitializedRef.current) {
+      isInitializedRef.current = true;
+      console.log('✅ ClientsActions initialized');
+    }
+  }, []);
 
   // Cleanup on unmount
   React.useEffect(() => {
@@ -194,20 +231,9 @@ export const useClientsActions = (debounceDelay: number = 300) => {
     };
   }, []);
 
-  // Main fetch function
-  const fetchClients = React.useCallback(async (tableState: TableState) => {
-    console.log('📋 fetchClients called');
-    setCurrentTableState(tableState);
-    
-    if (fetchTimeoutRef.current) {
-      clearTimeout(fetchTimeoutRef.current);
-    }
-    
-    await fetchClientsInternal(tableState, state.searchTerm);
-  }, [fetchClientsInternal, state.searchTerm]);
-
   // Search actions
   const setSearchTerm = React.useCallback((term: string) => {
+    console.log('🔍 Setting search term:', term);
     dispatch({ type: 'SET_SEARCH_TERM', payload: term });
   }, [dispatch]);
 
@@ -293,7 +319,7 @@ export const useClientsActions = (debounceDelay: number = 300) => {
   };
 };
 
-// 🔥 CONVENIENCE HOOK CHO NHỮNG COMPONENT CHỈ CẦN READ STATE
+// CONVENIENCE HOOK CHO NHỮNG COMPONENT CHỈ CẦN READ STATE
 export const useClientsData = () => {
   const state = useClientsState();
   

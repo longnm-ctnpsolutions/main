@@ -31,23 +31,6 @@ import AddClientDialog from '@/features/clients/components/add-client-dialog'
 import ActionBar from '@/shared/components/custom-ui/actions-bar'
 import { ActionItem } from '@/shared/components/custom-ui/hooks/use-responsive-actions'
 
-// Custom hook for debounced search
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = React.useState<T>(value)
-
-  React.useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-
-    return () => {
-      clearTimeout(handler)
-    }
-  }, [value, delay])
-
-  return debouncedValue
-}
-
 const addClientFormSchema = z.object({
   name: z.string().min(1, { message: "Please enter a client name." }),
   identifier: z.string().min(1, { message: "Please enter a client identifier." }),
@@ -66,7 +49,7 @@ interface ClientActionsProps {
   onAddClient: (values: z.infer<typeof addClientFormSchema>) => void
   onDeleteSelected: () => void
   onRefreshData?: () => void
-  // OData search props
+  // OData search props - ✅ SIMPLIFIED
   searchTerm: string
   setSearchTerm: (term: string) => void
 }
@@ -86,27 +69,18 @@ export function ClientActions({
   setSearchTerm,
 }: ClientActionsProps) {
   const [isMounted, setIsMounted] = React.useState(false)
-  // Local state for input value to maintain focus
-  const [localSearchTerm, setLocalSearchTerm] = React.useState(searchTerm)
-  
-  // Debounce the search term
-  const debouncedSearchTerm = useDebounce(localSearchTerm, 500) // 500ms delay
   
   React.useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Sync local search term with prop when it changes externally
-  React.useEffect(() => {
-    setLocalSearchTerm(searchTerm)
-  }, [searchTerm])
-
-  // Update parent search term only when debounced value changes
-  React.useEffect(() => {
-    if (debouncedSearchTerm !== searchTerm) {
-      setSearchTerm(debouncedSearchTerm)
-    }
-  }, [debouncedSearchTerm, searchTerm, setSearchTerm])
+  // ✅ LOẠI BỎ double debounce - CHỈ sync trực tiếp với context
+  // Context đã có debounce logic rồi, không cần debounce ở đây nữa
+  const handleSearchChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    console.log('🔍 ClientActions search input changed:', value);
+    setSearchTerm(value);
+  }, [setSearchTerm])
 
   // Memoize ColumnChooserContent to prevent unnecessary re-renders
   const ColumnChooserContent = React.useMemo(() => (
@@ -260,11 +234,6 @@ export function ClientActions({
     isSidebarExpanded
   ])
 
-  // Handle input change with local state
-  const handleSearchChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalSearchTerm(event.target.value)
-  }, [])
-
   // Show loading state during hydration to prevent flash
   if (!isMounted || isLoading) {
     return (
@@ -315,21 +284,15 @@ export function ClientActions({
           </div>
           
           <div className="flex items-center gap-2">
-            {/* OData Search Input with local state */}
+            {/* ✅ SIMPLIFIED Search Input - no local state, no debounce */}
             <div className="relative flex-1 md:grow-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search clients..."
-                value={localSearchTerm}
+                value={searchTerm}
                 onChange={handleSearchChange}
                 className="pl-9 w-full md:w-[150px] lg:w-[250px]"
               />
-              {/* Loading indicator when searching */}
-              {localSearchTerm !== searchTerm && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
-                </div>
-              )}
             </div>
             
             {/* Filters - Hidden on mobile */}

@@ -36,7 +36,6 @@ export function EnhancedClientDashboard() {
   const { toast } = useToast()
   const { state: sidebarState } = useSidebar()
   
-
   const {
     clients,
     isLoading,
@@ -67,7 +66,7 @@ export function EnhancedClientDashboard() {
 
   const isSidebarExpanded = sidebarState === 'expanded'
 
-  // Create table state for OData queries
+  // ✅ Memoize table state với proper dependencies
   const tableState = React.useMemo(() => ({
     pagination,
     sorting,
@@ -75,33 +74,40 @@ export function EnhancedClientDashboard() {
     globalFilter: searchTerm,
   }), [pagination, sorting, columnFilters, searchTerm])
 
-  // Use ref to track if this is the initial render
-  const isInitialRender = React.useRef(true)
-  const previousTableState = React.useRef(tableState)
+  // ✅ SINGLE useEffect với better duplicate prevention
+  const hasInitialized = React.useRef(false);
+  const lastTableStateRef = React.useRef<string>('');
 
-  // Fetch data when table state changes (with duplicate prevention)
   React.useEffect(() => {
-    // Skip initial render to prevent double API call
-    if (isInitialRender.current) {
-      isInitialRender.current = false
-      previousTableState.current = tableState
-      fetchClients(tableState)
-      return
+    // ✅ Ensure component is fully initialized trước khi fetch
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      console.log('🚀 Dashboard initialized, fetching initial data...');
+      fetchClients(tableState);
+      return;
     }
 
-    // Compare current state with previous state to prevent duplicate calls
-    const currentState = JSON.stringify(tableState)
-    const prevState = JSON.stringify(previousTableState.current)
+    // ✅ Prevent duplicate calls bằng cách so sánh JSON serialized state
+    // CHỈ compare non-search related changes để avoid conflict với search debounce
+    const tableStateForComparison = {
+      pagination,
+      sorting,
+      columnFilters,
+      // KHÔNG include globalFilter/searchTerm ở đây vì search đã có debounce riêng
+    };
     
-    if (currentState !== prevState) {
-      console.log('Table state changed, fetching clients...', {
-        current: tableState,
-        previous: previousTableState.current
-      })
-      previousTableState.current = tableState
-      fetchClients(tableState)
+    const currentStateStr = JSON.stringify(tableStateForComparison);
+    
+    if (lastTableStateRef.current !== currentStateStr) {
+      console.log('📊 Table state changed (non-search):', {
+        previous: lastTableStateRef.current,
+        current: currentStateStr
+      });
+      
+      lastTableStateRef.current = currentStateStr;
+      fetchClients(tableState);
     }
-  }, [fetchClients, tableState])
+  }, [fetchClients, pagination, sorting, columnFilters, tableState]);
 
   const addClientForm = useForm<z.infer<typeof addClientFormSchema>>({
     resolver: zodResolver(addClientFormSchema),
@@ -159,14 +165,15 @@ export function EnhancedClientDashboard() {
     }
   }
 
+  // ✅ Memoized refresh handler để prevent unnecessary re-renders
   const handleRefreshData = React.useCallback(() => {
-    console.log('Manual refresh triggered')
+    console.log('🔄 Manual refresh triggered')
     fetchClients(tableState)
   }, [fetchClients, tableState])
 
-  // Memoized search term handler to prevent unnecessary re-renders
+  // ✅ Stable search term handler
   const handleSearchTermChange = React.useCallback((newSearchTerm: string) => {
-    console.log('Search term changing from ClientActions:', newSearchTerm)
+    console.log('🔍 Search term changing from Dashboard:', newSearchTerm)
     setSearchTerm(newSearchTerm)
   }, [setSearchTerm])
   
@@ -253,14 +260,11 @@ export function EnhancedClientDashboard() {
           setAddClientDialogOpen={setAddClientDialogOpen}
           addClientForm={addClientForm}
           searchTerm={searchTerm}
-          setSearchTerm={handleSearchTermChange} // Use memoized handler
+          setSearchTerm={handleSearchTermChange}
           onAddClient={handleAddClient}
           onDeleteSelected={handleDeleteSelected}
           onRefreshData={handleRefreshData}
           isSidebarExpanded={isSidebarExpanded}
-          // ✅ REMOVED: These props don't exist in ClientActionsProps yet
-          // clearSearch={clearSearch}
-          // isSearching={isSearching}
         />
       }
       tableContent={
