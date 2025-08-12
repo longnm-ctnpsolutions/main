@@ -156,3 +156,35 @@ export const updateClientStatus = async (
     throw error;
   }
 };
+
+export const getClientById = async (clientId: string): Promise<Client> => {
+  try {
+    console.log(`🔍 Gọi API tới ${API_BASE_URL}/clients/${clientId}`);
+    const response = await fetch(`${API_BASE_URL}/clients/${clientId}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("✅ API trả về client:", data);
+    return data;
+  } catch (error) {
+    console.error("❌ Get client by ID failed:", error);
+    console.log("🔧 Falling back to mock data...");
+    const mockClient = mockClients.find(client => client.id === clientId);
+    if (!mockClient) {
+      console.log("❌ Mock client not found for ID:", clientId);
+      throw new Error("Client not found");
+    }
+    console.log("✅ Sử dụng mock client:", mockClient);
+    await new Promise(resolve => setTimeout(resolve, MOCK_API_DELAY));
+    return mockClient;
+  }
+};

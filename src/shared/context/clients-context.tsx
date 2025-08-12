@@ -9,14 +9,18 @@ import {
   deleteClient,
   deleteMultipleClients,
   updateClientStatus, 
+  getClientById,
 } from '@/shared/api/services/clients/clients.service';
 
 // State interface
 interface ClientsState {
   clients: Client[];
+  selectedClient: Client | null; 
   isLoading: boolean;
   isActionLoading: boolean;
+  isDetailLoading: boolean; 
   error: string | null;
+  detailError: string | null; 
   totalCount: number;
   hasMore: boolean;
   searchTerm: string;
@@ -34,13 +38,18 @@ type ClientsAction =
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'SET_SEARCH_TERM'; payload: string }
   | { type: 'CLEAR_SEARCH' }
-  | { type: 'UPDATE_STATUS_SUCCESS'; payload: { client: Client } };
+  | { type: 'UPDATE_STATUS_SUCCESS'; payload: { client: Client } }
+  | { type: 'FETCH_DETAIL_INIT' }
+  | { type: 'FETCH_DETAIL_SUCCESS'; payload: Client }
+  | { type: 'FETCH_DETAIL_FAILURE'; payload: string }
+  | { type: 'CLEAR_SELECTED_CLIENT' };
 
 // Reducer
 const clientsReducer = (state: ClientsState, action: ClientsAction): ClientsState => {
   switch (action.type) {
     case 'FETCH_INIT':
       return { ...state, isLoading: true, error: null };
+      
     case 'FETCH_SUCCESS':
       return { 
         ...state, 
@@ -49,36 +58,49 @@ const clientsReducer = (state: ClientsState, action: ClientsAction): ClientsStat
         totalCount: action.payload.totalCount,
         hasMore: action.payload.hasMore
       };
+      
     case 'FETCH_FAILURE':
       return { ...state, isLoading: false, error: action.payload };
+      
     case 'ADD_SUCCESS':
       return { 
         ...state, 
         clients: [action.payload, ...state.clients],
         totalCount: state.totalCount + 1 
       };
+      
     case 'REMOVE_SUCCESS':
       return {
         ...state,
         clients: state.clients.filter(client => client.id !== action.payload.id),
         totalCount: state.totalCount - 1,
         isActionLoading: false,
+        selectedClient: state.selectedClient?.id === action.payload.id ? null : state.selectedClient
       };
+      
     case 'REMOVE_MULTIPLE_SUCCESS':
       return {
         ...state,
         clients: state.clients.filter(client => !action.payload.ids.includes(client.id)),
         totalCount: state.totalCount - action.payload.ids.length,
         isActionLoading: false,
+        selectedClient: state.selectedClient && action.payload.ids.includes(state.selectedClient.id) 
+        ? null 
+        : state.selectedClient
       };
+      
     case 'SET_ACTION_LOADING':
       return { ...state, isActionLoading: action.payload };
+      
     case 'SET_ERROR':
       return { ...state, error: action.payload, isLoading: false, isActionLoading: false };
+      
     case 'SET_SEARCH_TERM':
       return { ...state, searchTerm: action.payload };
+      
     case 'CLEAR_SEARCH':
       return { ...state, searchTerm: '' };
+      
     case 'UPDATE_STATUS_SUCCESS':
       return {
         ...state,
@@ -87,8 +109,44 @@ const clientsReducer = (state: ClientsState, action: ClientsAction): ClientsStat
             ? action.payload.client 
             : client
         ),
+        selectedClient: state.selectedClient?.id === action.payload.client.id 
+          ? action.payload.client 
+          : state.selectedClient,
         isActionLoading: false,
       };
+
+    // ✅ DETAIL ACTIONS - MỚI THÊM
+    case 'FETCH_DETAIL_INIT':
+      return { 
+        ...state, 
+        isDetailLoading: true, 
+        detailError: null 
+      };
+
+    case 'FETCH_DETAIL_SUCCESS':
+      return { 
+        ...state, 
+        isDetailLoading: false, 
+        selectedClient: action.payload,
+        detailError: null 
+      };
+
+    case 'FETCH_DETAIL_FAILURE':
+      return { 
+        ...state, 
+        isDetailLoading: false, 
+        detailError: action.payload,
+        selectedClient: null 
+      };
+
+    case 'CLEAR_SELECTED_CLIENT':
+      return { 
+        ...state, 
+        selectedClient: null,
+        detailError: null,
+        isDetailLoading: false
+      };
+      
     default:
       return state;
   }
@@ -97,9 +155,12 @@ const clientsReducer = (state: ClientsState, action: ClientsAction): ClientsStat
 // Initial state
 const initialState: ClientsState = {
   clients: [],
+  selectedClient: null, 
   isLoading: false,
   isActionLoading: false,
+  isDetailLoading: false, 
   error: null,
+  detailError: null, 
   totalCount: 0,
   hasMore: false,
   searchTerm: '',
@@ -354,6 +415,41 @@ export const useClientsActions = (debounceDelay: number = 300) => {
     }
   }, [state.clients, dispatch]);
 
+
+  // ✅ Thêm client detail actions
+  const fetchClientById = React.useCallback(async (clientId: string) => {
+    dispatch({ type: 'FETCH_DETAIL_INIT' });
+    
+    try {
+      const client = await getClientById(clientId);
+      dispatch({ type: 'FETCH_DETAIL_SUCCESS', payload: client });
+      return client;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      dispatch({ type: 'FETCH_DETAIL_FAILURE', payload: message });
+      throw error;
+    }
+  }, [dispatch]);
+
+  const clearSelectedClient = React.useCallback(() => {
+    dispatch({ type: 'CLEAR_SELECTED_CLIENT' });
+  }, [dispatch]);
+
+  // ✅ Get client from cache hoặc fetch
+  const getClientDetails = React.useCallback(async (clientId: string) => {
+    // Kiểm tra xem client đã có trong cache chưa
+    const cachedClient = state.clients.find(client => client.id === clientId);
+    
+    if (cachedClient) {
+      // Nếu có trong cache, dùng luôn
+      dispatch({ type: 'FETCH_DETAIL_SUCCESS', payload: cachedClient });
+      return cachedClient;
+    }
+    
+    // Nếu không có, fetch từ API
+    return await fetchClientById(clientId);
+  }, [state.clients, fetchClientById, dispatch]);
+
   return {
     // State (for easy access)
     ...state,
@@ -368,7 +464,12 @@ export const useClientsActions = (debounceDelay: number = 300) => {
     addClient,
     removeClient,
     removeMultipleClients,
-    updateStatus
+    updateStatus,
+
+    // ✅ Detail actions
+    fetchClientById,
+    getClientDetails,
+    clearSelectedClient,
   };
 };
 
@@ -387,3 +488,14 @@ export const useClientsData = () => {
     isSearching: state.searchTerm.trim().length > 0,
   };
 };
+
+export const useClientDetail = () => {
+  const state = useClientsState();
+  
+  return {
+    selectedClient: state.selectedClient,
+    isDetailLoading: state.isDetailLoading,
+    detailError: state.detailError,
+  };
+};
+

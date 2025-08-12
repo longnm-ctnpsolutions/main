@@ -46,7 +46,7 @@ import {
   type ColumnConfig 
 } from "@/features/clients/hooks/use-responsive-columns"
 import { useRouter } from 'next/navigation'
-
+import { useClientsActions } from "@/shared/context/clients-context"
 // Skeleton component
 const TableSkeleton = ({ columns }: { columns: ColumnDef<Client>[] }) => {
   return (
@@ -113,6 +113,7 @@ export function EnhancedClientTable({ table, columns, isLoading }: ClientTablePr
       registerContentElement(columnId, element)
     }
   }, [registerContentElement])
+
 
   const getOrderedHeaders = (headerGroup: any) => {
     const orderedColumnIds = getOrderedColumnIds()
@@ -339,10 +340,18 @@ EnhancedClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef
     const client = row.original
     const router = useRouter()
     const [isDeleting, setIsDeleting] = React.useState(false)
-    
-    const handleDetailsClick = () => {
-      router.push(`/en/clients/${client.id}`)
-    }
+    const { getClientDetails } = useClientsActions();
+    const handleDetailsClick = async () => {
+  try {
+    // ✅ Fetch client details trước khi navigate
+    await getClientDetails(client.id);
+    router.push(`/en/clients/${client.id}`);
+  } catch (error) {
+    console.error('Failed to fetch client details:', error);
+    // Vẫn navigate, để detail page tự handle error
+    router.push(`/en/clients/${client.id}`);
+  }
+}
     
     const handleDeleteClick = async () => {
       setIsDeleting(true)

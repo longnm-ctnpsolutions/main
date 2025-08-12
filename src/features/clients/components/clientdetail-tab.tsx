@@ -275,7 +275,6 @@ export default function ClientDetailTabs() {
               <Card className="flex flex-col flex-shrink-0 rounded-[8px] border pt-[20px] pb-[20px] px-[24px] space-y-4 shadow-lg border-gray-200 bg-white">
                 <div className="text-lg font-semibold flex-shrink-0">List of Permissions</div>
 
- // Phần table được refactor để sử dụng shadcn Table components
 <Card className="flex flex-col h-[350px] overflow-hidden shadow-md border-gray-100 mt-2">
   <CardContent className="flex-1 p-0 min-h-0 flex flex-col">
     {/* Table với shadcn components */}
