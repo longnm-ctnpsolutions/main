@@ -333,64 +333,92 @@ EnhancedClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef
     }
   },
   {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const client = row.original
-      const router = useRouter()
-      
-      const handleDetailsClick = () => {
-        router.push(`/en/clients/${client.id}`)
-      }
-      
-      const handleDeleteClick = async () => {
+  id: "actions",
+  enableHiding: false,
+  cell: ({ row }) => {
+    const client = row.original
+    const router = useRouter()
+    const [isDeleting, setIsDeleting] = React.useState(false)
+    
+    const handleDetailsClick = () => {
+      router.push(`/en/clients/${client.id}`)
+    }
+    
+    const handleDeleteClick = async () => {
+      setIsDeleting(true)
+      try {
         await handleDeleteRow(client.id)
+      } catch (error) {
+        console.error('Delete failed:', error)
+      } finally {
+        setIsDeleting(false)
       }
-      
-      return (
-        <div className="text-right">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
+    }
+    
+    return (
+      <div className="text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0" disabled={isDeleting}>
+              <span className="sr-only">Open menu</span>
+              {isDeleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
                 <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={handleDetailsClick}>
-                Details
-              </DropdownMenuItem>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem 
-                    onSelect={(e) => e.preventDefault()} 
-                    className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50"
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={handleDetailsClick}>
+              Details
+            </DropdownMenuItem>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem 
+                  onSelect={(e) => e.preventDefault()} 
+                  className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/50"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the client "{client.name}".
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDeleteClick}
+                    className="bg-red-600 hover:bg-red-700"
+                    disabled={isDeleting}
                   >
-                    Delete
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete this client.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={handleDeleteClick}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      Continue
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )
-    },
+                    {isDeleting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      "Continue"
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    )
   },
+}
 ]
