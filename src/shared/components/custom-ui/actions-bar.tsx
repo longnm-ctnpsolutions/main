@@ -4,14 +4,17 @@ import * as React from "react"
 import { MoreVertical, ChevronDown } from "lucide-react"
 
 import { Button } from "@/shared/components/ui/button"
+import { Checkbox } from "@/shared/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-  DropdownMenuTrigger,
+  DropdownMenuSubContent
 } from "@/shared/components/ui/dropdown-menu"
 import {
   AlertDialog,
@@ -24,6 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/shared/components/ui/alert-dialog"
+import { Label } from "@/shared/components/ui/label"
 
 import { useResponsiveActions, ActionItem } from '@/shared/components/custom-ui/hooks/use-responsive-actions'
 
@@ -78,7 +82,12 @@ const ActionDropdown: React.FC<{ action: ActionItem }> = ({ action }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {action.children?.map((child, index) => renderDropdownItem(child, `${child.id}-${index}`))}
+        {action.children?.map((child, index) => (
+          <DropdownMenuItem key={`${child.id}-${index}`} onClick={child.onClick}>
+            {child.icon && <child.icon className="mr-2 h-4 w-4" />}
+            <span>{child.label}</span>
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -128,7 +137,7 @@ const renderAction = (action: ActionItem, key: string) => {
     case 'dialog':
       return <ActionDialog key={key} action={action} />
     case 'custom':
-      return <div key={key}>{action.component}</div>
+      return <ActionButton key={key} action={action} />
     default:
       return <ActionButton key={key} action={action} />
   }
@@ -137,10 +146,6 @@ const renderAction = (action: ActionItem, key: string) => {
 // Render dropdown menu item
 const renderDropdownItem = (action: ActionItem, key: string) => {
   const Icon = action.icon
-
-  if (action.type === 'custom' && action.component) {
-    return <React.Fragment key={key}>{action.component}</React.Fragment>
-  }
 
   if (action.type === 'dropdown' && action.children) {
     return (
@@ -151,7 +156,10 @@ const renderDropdownItem = (action: ActionItem, key: string) => {
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent>
           {action.children.map((child, index) => (
-            renderDropdownItem(child, `${child.id}-${index}`)
+            <DropdownMenuItem key={`${child.id}-${index}`} onClick={child.onClick}>
+              {child.icon && <child.icon className="mr-2 h-4 w-4" />}
+              <span>{child.label}</span>
+            </DropdownMenuItem>
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
@@ -225,10 +233,12 @@ export const ActionBar: React.FC<ActionBarProps> = ({
 
   return (
     <div className={`flex items-center ${spacingClasses[spacing]} ${className}`}>
+      {/* Visible Actions */}
       {visibleActions.map((action) => 
         renderAction(action, `visible-${action.id}`)
       )}
 
+      {/* Responsive Dropdown */}
       {shouldShowDropdown && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -236,7 +246,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
               <DropdownIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align={dropdownAlign} className="w-56">
+          <DropdownMenuContent align={dropdownAlign} className="w-48">
             {hiddenActions.map((action) => 
               renderDropdownItem(action, `hidden-${action.id}`)
             )}
