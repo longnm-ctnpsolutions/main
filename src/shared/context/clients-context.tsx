@@ -8,6 +8,7 @@ import {
   createClient,
   deleteClient,
   deleteMultipleClients,
+  updateClientStatus, 
 } from '@/shared/api/services/clients/clients.service';
 
 // State interface
@@ -32,7 +33,8 @@ type ClientsAction =
   | { type: 'SET_ACTION_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'SET_SEARCH_TERM'; payload: string }
-  | { type: 'CLEAR_SEARCH' };
+  | { type: 'CLEAR_SEARCH' }
+  | { type: 'UPDATE_STATUS_SUCCESS'; payload: { client: Client } };
 
 // Reducer
 const clientsReducer = (state: ClientsState, action: ClientsAction): ClientsState => {
@@ -77,6 +79,16 @@ const clientsReducer = (state: ClientsState, action: ClientsAction): ClientsStat
       return { ...state, searchTerm: action.payload };
     case 'CLEAR_SEARCH':
       return { ...state, searchTerm: '' };
+    case 'UPDATE_STATUS_SUCCESS':
+      return {
+        ...state,
+        clients: state.clients.map(client => 
+          client.id === action.payload.client.id 
+            ? action.payload.client 
+            : client
+        ),
+        isActionLoading: false,
+      };
     default:
       return state;
   }
@@ -302,6 +314,46 @@ export const useClientsActions = (debounceDelay: number = 300) => {
     }
   }, [state, dispatch]);
 
+    const updateStatus = React.useCallback(async (clientId: string, newStatus: number) => {
+    // Store original client for rollback
+    const originalClient = state.clients.find(client => client.id === clientId);
+    
+    if (!originalClient) {
+      dispatch({ type: 'SET_ERROR', payload: 'Client not found' });
+      return false;
+    }
+
+    // Optimistic update - cập nhật UI ngay lập tức
+    const optimisticClient: Client = {
+      ...originalClient,
+      status: newStatus
+    };
+    
+    dispatch({ type: 'UPDATE_STATUS_SUCCESS', payload: { client: optimisticClient } });
+    dispatch({ type: 'SET_ACTION_LOADING', payload: true });
+    
+    try {
+      // Call API
+      const updatedClient = await updateClientStatus(clientId, newStatus);
+      
+      // Update với data thật từ server
+      dispatch({ type: 'UPDATE_STATUS_SUCCESS', payload: { client: updatedClient } });
+      dispatch({ type: 'SET_ACTION_LOADING', payload: false });
+      
+      console.log('✅ Client status updated successfully:', updatedClient);
+      return true;
+    } catch (error) {
+      // Rollback về trạng thái ban đầu
+      dispatch({ type: 'UPDATE_STATUS_SUCCESS', payload: { client: originalClient } });
+      
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      dispatch({ type: 'SET_ERROR', payload: message });
+      
+      console.error('❌ Update client status failed:', error);
+      return false;
+    }
+  }, [state.clients, dispatch]);
+
   return {
     // State (for easy access)
     ...state,
@@ -316,6 +368,7 @@ export const useClientsActions = (debounceDelay: number = 300) => {
     addClient,
     removeClient,
     removeMultipleClients,
+    updateStatus
   };
 };
 

@@ -89,22 +89,70 @@ export const createClient = async (newClientData: Omit<Client, 'id' | 'status'>)
   // return handleResponse<Client>(response);
 };
 
-export const deleteClient = async (clientId: string): Promise<{ id: string }> => {
-  // Using mock for now
-  return deleteMockClient(clientId);
-  // const response = await fetch(`${API_BASE_URL}/users/${clientId}`, {
-  //   method: 'DELETE',
-  // });
-  // return handleResponse<{ id: string }>(response);
+export const deleteClient = async (clientId: string): Promise<void> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/clients/${clientId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Delete client failed:', error);
+    throw error;
+  }
 };
 
-export const deleteMultipleClients = async (clientIds: string[]): Promise<{ ids: string[] }> => {
-  // Using mock for now
-  return deleteMultipleMockClients(clientIds);
-  // const response = await fetch(`${API_BASE_URL}/users/batch-delete`, {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ ids: clientIds }),
-  // });
-  // return handleResponse<{ ids: string[] }>(response);
+export const deleteMultipleClients = async (clientIds: string[]): Promise<void> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/clients/batch-delete`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ids: clientIds }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Delete multiple clients failed:', error);
+    throw error;
+  }
+};
+
+
+export const updateClientStatus = async (
+  clientId: string, 
+  status: number
+): Promise<Client> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/clients/${clientId}/status`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: clientId,
+        status: status,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Update client status failed:', error);
+    throw error;
+  }
 };
