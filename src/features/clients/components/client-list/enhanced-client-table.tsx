@@ -268,11 +268,13 @@ EnhancedClientTable.columns = (handleDeleteRow: (id: string) => void): ColumnDef
             className="rounded-md"
           />
         ) : (
-          <div className="w-8 h-8 bg-gray-100 rounded-md flex items-center justify-center">
-            <span className="text-xs text-gray-400 font-medium">
-              {String(row.getValue("name")).charAt(0).toUpperCase()}
-            </span>
-          </div>
+           <Image 
+            src= "/images/new-icon.png" 
+            alt={`${row.getValue("name")} logo`}
+            width={32}
+            height={32}
+            className="rounded-md"
+          />
         )}
       </div>
     ),

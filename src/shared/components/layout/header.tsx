@@ -16,9 +16,9 @@ export function Header({
   const { menuState, menuActions } = useMenuState(user);
 
   return (
-    <header className="flex h-16 w-full shrink-0 items-center gap-4 border-b bg-sidebar pr-6 pl-[10px]">
+    <header className="flex h-[68px] w-full shrink-0 items-center gap-4 border-b bg-sidebar pr-6 pl-[10px]">
       <SidebarTrigger />
-      
+
       <AppLogo 
         appName={appName}
         logoSrc={logoSrc}

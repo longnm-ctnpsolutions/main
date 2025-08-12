@@ -22,28 +22,37 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
     router.push('/en/clients');
   };
 
-  const isActive = client.status === 'active';
+  const isActive = client.status === 1;
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={handleBackClick}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             
             <div className="flex items-center gap-4">
-              {client.logo && (
-                <Image
-                  src={client.logo}
-                  alt={`${client.name} logo`}
-                  width={48}
-                  height={48}
-                  className="rounded-md"
-                  data-ai-hint="logo"
-                />
-              )}
+              {client.logo ? (
+  <Image
+    src={client.logo}
+    alt={`${client.name} logo`}
+    width={48}
+    height={48}
+    className="rounded-md"
+    data-ai-hint="logo"
+  />
+) : (
+  <Image
+    src="/images/new-icon.png"
+    alt="Default logo"
+    width={48}
+    height={48}
+    className="rounded-md"
+  />
+)}
+
               <div>
                 <h2 className="text-xl font-semibold">{client.name}</h2>
                 {client.description && (
@@ -67,7 +76,7 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
                 "mr-1.5 h-2 w-2 rounded-full", 
                 isActive ? "bg-green-500" : "bg-gray-400"
               )} />
-              <span className="capitalize">{client.status}</span>
+              <span className="capitalize"> {isActive ? "Active" : "Inactive"}</span>
             </Badge>
           </div>
         </div>

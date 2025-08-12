@@ -15,7 +15,7 @@ export default function ClientDetailPage() {
   const router = useRouter();
   const { id } = params;
   
-  // ✅ Sử dụng context thay vì mock data
+  // ✅ Sử dụng context để lấy selected client
   const { selectedClient, isDetailLoading, detailError } = useClientDetail();
   const { getClientDetails, clearSelectedClient } = useClientsActions();
   
@@ -89,10 +89,12 @@ export default function ClientDetailPage() {
     );
   }
 
-  // ✅ Render client details
+  // ✅ Render client details - TRUYỀN selectedClient VÀO HEADER
   return (
     <div className="flex flex-col h-full w-full space-y-4">
+      {/* ✅ Truyền selectedClient từ context vào ClientDetailHeader */}
       <ClientDetailHeader client={selectedClient} />
+      
       <div className="h-screen overflow-hidden flex flex-col">
         <ClientDetailTabs />
       </div>
